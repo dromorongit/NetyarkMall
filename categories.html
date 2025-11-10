@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - Netyark Mall | Shop by Category</title>
+    <meta name="description" content="Browse all product categories at Netyark Mall - Electronics, Fashion, Home & Kitchen, Health & Beauty and more.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Netyark Mall</h1>
+                    <p>Shop At Your Own Comfort</p>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link dropdown-toggle active">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#electronics">Consumer Electrics</a></li>
+                                <li><a href="#fashion">Clothing & Apparel</a></li>
+                                <li><a href="#home">Home & Kitchen</a></li>
+                                <li><a href="#beauty">Health & Beauty</a></li>
+                                <li><a href="#jewelry">Jewelry & Accessories</a></li>
+                                <li><a href="#decor">Home Decor & Essentials</a></li>
+                                <li><a href="#men">For Men</a></li>
+                                <li><a href="#women">For Women</a></li>
+                                <li><a href="#kids">For Kids</a></li>
+                                <li><a href="#office">Office Accessories</a></li>
+                                <li><a href="#sports">Sports & Outdoor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <section class="page-header">
+                <h1>Shop by Category</h1>
+                <p>Explore our wide range of product categories</p>
+            </section>
+
+            <!-- Categories Grid -->
+            <section class="categories-section">
+                <div class="category-filters">
+                    <button class="filter-btn active" data-category="all">All Categories</button>
+                    <button class="filter-btn" data-category="electronics">Electronics</button>
+                    <button class="filter-btn" data-category="fashion">Fashion</button>
+                    <button class="filter-btn" data-category="home">Home & Kitchen</button>
+                    <button class="filter-btn" data-category="beauty">Health & Beauty</button>
+                </div>
+
+                <div class="categories-grid" id="categoriesGrid">
+                    <!-- Electronics Category -->
+                    <div class="category-card" data-category="electronics" id="electronics">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Consumer Electrics">
+                        </div>
+                        <div class="category-content">
+                            <h3>Consumer Electrics</h3>
+                            <p>Latest technology and electronic devices</p>
+                            <span class="product-count">150+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- Fashion Category -->
+                    <div class="category-card" data-category="fashion" id="fashion">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Clothing & Apparel">
+                        </div>
+                        <div class="category-content">
+                            <h3>Clothing & Apparel</h3>
+                            <p>Trendy fashion for all occasions</p>
+                            <span class="product-count">200+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- Home & Kitchen Category -->
+                    <div class="category-card" data-category="home" id="home">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Home & Kitchen">
+                        </div>
+                        <div class="category-content">
+                            <h3>Home & Kitchen</h3>
+                            <p>Everything for your home and kitchen</p>
+                            <span class="product-count">120+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- Health & Beauty Category -->
+                    <div class="category-card" data-category="beauty" id="beauty">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Health & Beauty">
+                        </div>
+                        <div class="category-content">
+                            <h3>Health & Beauty</h3>
+                            <p>Premium beauty and wellness products</p>
+                            <span class="product-count">180+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- Jewelry & Accessories -->
+                    <div class="category-card" data-category="fashion" id="jewelry">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Jewelry & Accessories">
+                        </div>
+                        <div class="category-content">
+                            <h3>Jewelry & Accessories</h3>
+                            <p>Beautiful jewelry and fashion accessories</p>
+                            <span class="product-count">90+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- Home Decor -->
+                    <div class="category-card" data-category="home" id="decor">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Home Decor">
+                        </div>
+                        <div class="category-content">
+                            <h3>Home Decor & Essentials</h3>
+                            <p>Transform your space with style</p>
+                            <span class="product-count">75+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- For Men -->
+                    <div class="category-card" data-category="fashion" id="men">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="For Men">
+                        </div>
+                        <div class="category-content">
+                            <h3>For Men</h3>
+                            <p>Stylish clothing and accessories for men</p>
+                            <span class="product-count">110+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- For Women -->
+                    <div class="category-card" data-category="fashion" id="women">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="For Women">
+                        </div>
+                        <div class="category-content">
+                            <h3>For Women</h3>
+                            <p>Fashion-forward styles for women</p>
+                            <span class="product-count">140+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- For Kids -->
+                    <div class="category-card" data-category="fashion" id="kids">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1515488042361-ee00b0aa5b4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="For Kids">
+                        </div>
+                        <div class="category-content">
+                            <h3>For Kids</h3>
+                            <p>Fun and safe products for children</p>
+                            <span class="product-count">85+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- Office Accessories -->
+                    <div class="category-card" data-category="electronics" id="office">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Office Accessories">
+                        </div>
+                        <div class="category-content">
+                            <h3>Office Accessories</h3>
+                            <p>Professional office supplies and accessories</p>
+                            <span class="product-count">65+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+
+                    <!-- Sports & Outdoor -->
+                    <div class="category-card" data-category="fashion" id="sports">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Sports & Outdoor">
+                        </div>
+                        <div class="category-content">
+                            <h3>Sports & Outdoor</h3>
+                            <p>Active lifestyle and outdoor gear</p>
+                            <span class="product-count">95+ Products</span>
+                            <a href="#" class="btn btn-outline">Browse</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

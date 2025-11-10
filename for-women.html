@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Women - Netyark Mall | Women's Fashion & Lifestyle</title>
+    <meta name="description" content="Shop women's fashion at Netyark Mall. Clothing, accessories, beauty products, and lifestyle items for women in Accra, Ghana.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Netyark Mall</h1>
+                    <p>Shop At Your Own Comfort</p>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="categories.html" class="nav-link dropdown-toggle active">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="consumer-electrics.html">Consumer Electrics</a></li>
+                                <li><a href="clothing-apparel.html">Clothing & Apparel</a></li>
+                                <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+                                <li><a href="health-beauty.html">Health & Beauty</a></li>
+                                <li><a href="jewelry-accessories.html">Jewelry & Accessories</a></li>
+                                <li><a href="home-decor.html">Home Decor & Essentials</a></li>
+                                <li><a href="for-men.html">For Men</a></li>
+                                <li><a href="for-women.html">For Women</a></li>
+                                <li><a href="for-kids.html">For Kids</a></li>
+                                <li><a href="office-accessories.html">Office Accessories</a></li>
+                                <li><a href="sports-outdoor.html">Sports & Outdoor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header category-header">
+        <div class="container">
+            <h1>For Women</h1>
+            <p>Empowering women with stylish fashion, beauty, and lifestyle essentials</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Category Filters -->
+            <section class="category-filters">
+                <div class="filter-section">
+                    <h3>Filter Products</h3>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="priceRange">Price Range:</label>
+                            <select id="priceRange" class="filter-select">
+                                <option value="all">All Prices</option>
+                                <option value="0-200">₵0 - ₵200</option>
+                                <option value="200-500">₵200 - ₵500</option>
+                                <option value="500-1000">₵500 - ₵1,000</option>
+                                <option value="1000+">₵1,000+</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sortBy">Sort By:</label>
+                            <select id="sortBy" class="filter-select">
+                                <option value="default">Default</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="rating">Highest Rated</option>
+                                <option value="newest">Newest First</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sizeFilter">Size:</label>
+                            <select id="sizeFilter" class="filter-select">
+                                <option value="all">All Sizes</option>
+                                <option value="xs">XS</option>
+                                <option value="s">S</option>
+                                <option value="m">M</option>
+                                <option value="l">L</option>
+                                <option value="xl">XL</option>
+                                <option value="xxl">XXL</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Grid -->
+            <section class="products-section">
+                <div class="section-header">
+                    <h2>Women's Collection</h2>
+                    <p class="product-count">Showing <span id="productCount">0</span> products</p>
+                </div>
+                
+                <div class="product-grid" id="womensProducts">
+                    <!-- Products will be loaded by JavaScript -->
+                </div>
+
+                <!-- Load More Button -->
+                <div class="load-more-section" id="loadMoreSection" style="display: none;">
+                    <button class="btn btn-outline" id="loadMoreBtn">Load More Products</button>
+                </div>
+            </section>
+
+            <!-- Category Description -->
+            <section class="category-description">
+                <div class="description-content">
+                    <h2>Women's Fashion & Lifestyle at Netyark Mall</h2>
+                    <p>Celebrate your unique style with our comprehensive collection of women's fashion, beauty, and lifestyle products. From professional attire to casual wear, skincare essentials to accessories, we have everything you need to express your confidence and individuality.</p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-female"></i>
+                            <h4>Fashion & Clothing</h4>
+                            <p>Trendy outfits, dresses, tops, and professional wear for every occasion</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-spa"></i>
+                            <h4>Beauty & Skincare</h4>
+                            <p>Premium beauty products, skincare routines, and wellness essentials</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-handbag"></i>
+                            <h4>Accessories & Bags</h4>
+                            <p>Stylish handbags, jewelry, and accessories to complete your look</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-heart"></i>
+                            <h4>Lifestyle & Wellness</h4>
+                            <p>Self-care products, books, and lifestyle items for modern women</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    <script src="category-pages.js"></script>
+</body>
+</html>

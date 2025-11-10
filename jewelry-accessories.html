@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jewelry & Accessories - Netyark Mall | Fine Jewelry & Fashion Accessories</title>
+    <meta name="description" content="Shop beautiful jewelry and accessories at Netyark Mall. Fine jewelry, watches, bags, and fashion accessories in Accra, Ghana.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Netyark Mall</h1>
+                    <p>Shop At Your Own Comfort</p>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="categories.html" class="nav-link dropdown-toggle active">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="consumer-electrics.html">Consumer Electrics</a></li>
+                                <li><a href="clothing-apparel.html">Clothing & Apparel</a></li>
+                                <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+                                <li><a href="health-beauty.html">Health & Beauty</a></li>
+                                <li><a href="jewelry-accessories.html">Jewelry & Accessories</a></li>
+                                <li><a href="home-decor.html">Home Decor & Essentials</a></li>
+                                <li><a href="for-men.html">For Men</a></li>
+                                <li><a href="for-women.html">For Women</a></li>
+                                <li><a href="for-kids.html">For Kids</a></li>
+                                <li><a href="office-accessories.html">Office Accessories</a></li>
+                                <li><a href="sports-outdoor.html">Sports & Outdoor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header category-header">
+        <div class="container">
+            <h1>Jewelry & Accessories</h1>
+            <p>Exquisite jewelry and stylish accessories to complement your look</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Category Filters -->
+            <section class="category-filters">
+                <div class="filter-section">
+                    <h3>Filter Products</h3>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="priceRange">Price Range:</label>
+                            <select id="priceRange" class="filter-select">
+                                <option value="all">All Prices</option>
+                                <option value="0-200">₵0 - ₵200</option>
+                                <option value="200-500">₵200 - ₵500</option>
+                                <option value="500-1000">₵500 - ₵1,000</option>
+                                <option value="1000+">₵1,000+</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sortBy">Sort By:</label>
+                            <select id="sortBy" class="filter-select">
+                                <option value="default">Default</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="rating">Highest Rated</option>
+                                <option value="newest">Newest First</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="materialType">Material:</label>
+                            <select id="materialType" class="filter-select">
+                                <option value="all">All Materials</option>
+                                <option value="gold">Gold</option>
+                                <option value="silver">Silver</option>
+                                <option value="leather">Leather</option>
+                                <option value="fabric">Fabric</option>
+                                <option value="steel">Stainless Steel</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Grid -->
+            <section class="products-section">
+                <div class="section-header">
+                    <h2>Jewelry & Accessories</h2>
+                    <p class="product-count">Showing <span id="productCount">0</span> products</p>
+                </div>
+                
+                <div class="product-grid" id="jewelryProducts">
+                    <!-- Products will be loaded by JavaScript -->
+                </div>
+
+                <!-- Load More Button -->
+                <div class="load-more-section" id="loadMoreSection" style="display: none;">
+                    <button class="btn btn-outline" id="loadMoreBtn">Load More Products</button>
+                </div>
+            </section>
+
+            <!-- Category Description -->
+            <section class="category-description">
+                <div class="description-content">
+                    <h2>Fine Jewelry & Accessories at Netyark Mall</h2>
+                    <p>Discover our exquisite collection of jewelry and accessories designed to complement your personal style. From elegant necklaces and bracelets to stylish bags and watches, find the perfect pieces to express your unique personality.</p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-gem"></i>
+                            <h4>Fine Jewelry</h4>
+                            <p>Elegant necklaces, rings, earrings, and bracelets in gold and silver</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-clock"></i>
+                            <h4>Watches & Timepieces</h4>
+                            <p>Stylish watches for men and women with premium quality movements</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-handbag"></i>
+                            <h4>Fashion Accessories</h4>
+                            <p>Designer bags, belts, and accessories to complete your outfit</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-crown"></i>
+                            <h4>Statement Pieces</h4>
+                            <p>Bold and unique jewelry pieces that make a lasting impression</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    <script src="category-pages.js"></script>
+</body>
+</html>

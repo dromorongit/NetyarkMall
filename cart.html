@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Netyark Mall | Review Your Items</title>
+    <meta name="description" content="Review your shopping cart at Netyark Mall. Modify quantities, apply discounts, and proceed to secure checkout.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Netyark Mall</h1>
+                    <p>Shop At Your Own Comfort</p>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="categories.html" class="nav-link dropdown-toggle">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="categories.html">Consumer Electrics</a></li>
+                                <li><a href="categories.html">Clothing & Apparel</a></li>
+                                <li><a href="categories.html">Home & Kitchen</a></li>
+                                <li><a href="categories.html">Health & Beauty</a></li>
+                                <li><a href="categories.html">Jewelry & Accessories</a></li>
+                                <li><a href="categories.html">Home Decor & Essentials</a></li>
+                                <li><a href="categories.html">For Men</a></li>
+                                <li><a href="categories.html">For Women</a></li>
+                                <li><a href="categories.html">For Kids</a></li>
+                                <li><a href="categories.html">Office Accessories</a></li>
+                                <li><a href="categories.html">Sports & Outdoor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link active">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Shopping Cart</h1>
+            <p>Review your items and proceed to checkout</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="cart-container">
+                <!-- Cart Items Section -->
+                <div class="cart-items-section">
+                    <div class="cart-header">
+                        <h2>Your Items (<span id="cartItemCount">0</span>)</h2>
+                        <button class="clear-cart-btn" id="clearCartBtn">
+                            <i class="fas fa-trash"></i> Clear Cart
+                        </button>
+                    </div>
+
+                    <div class="cart-items" id="cartItems">
+                        <!-- Cart items will be populated by JavaScript -->
+                        <div class="empty-cart-message" id="emptyCartMessage" style="display: none;">
+                            <div class="empty-cart-content">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h3>Your cart is empty</h3>
+                                <p>Looks like you haven't added any items to your cart yet.</p>
+                                <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary Section -->
+                <div class="order-summary-section">
+                    <div class="order-summary">
+                        <h2>Order Summary</h2>
+                        
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">₵0.00</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Shipping:</span>
+                            <span id="shipping">₵50.00</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Tax (12%):</span>
+                            <span id="tax">₵0.00</span>
+                        </div>
+                        
+                        <div class="promo-section">
+                            <label for="promoCode">Promo Code:</label>
+                            <div class="promo-input-group">
+                                <input type="text" id="promoCode" placeholder="Enter promo code">
+                                <button id="applyPromoBtn" class="btn btn-outline">Apply</button>
+                            </div>
+                            <div class="promo-message" id="promoMessage"></div>
+                        </div>
+                        
+                        <div class="summary-row discount-row" id="discountRow" style="display: none;">
+                            <span>Discount:</span>
+                            <span id="discount">-₵0.00</span>
+                        </div>
+                        
+                        <div class="summary-total">
+                            <span>Total:</span>
+                            <span id="total">₵0.00</span>
+                        </div>
+                        
+                        <button class="checkout-btn" id="checkoutBtn">
+                            <i class="fas fa-lock"></i> Proceed to Checkout
+                        </button>
+                        
+                        <div class="continue-shopping">
+                            <a href="index.html" class="continue-link">
+                                <i class="fas fa-arrow-left"></i> Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Security & Trust Badges -->
+                    <div class="trust-badges">
+                        <h3>Secure Checkout</h3>
+                        <div class="trust-icons">
+                            <div class="trust-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>256-bit SSL</span>
+                            </div>
+                            <div class="trust-item">
+                                <i class="fas fa-lock"></i>
+                                <span>Secure Payment</span>
+                            </div>
+                            <div class="trust-item">
+                                <i class="fas fa-undo"></i>
+                                <span>30-day Returns</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accepted Payment Methods -->
+                    <div class="payment-methods">
+                        <h3>We Accept</h3>
+                        <div class="payment-icons">
+                            <i class="fab fa-cc-visa"></i>
+                            <i class="fab fa-cc-mastercard"></i>
+                            <i class="fab fa-cc-amex"></i>
+                            <i class="fas fa-money-bill-wave"></i>
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recently Viewed Products -->
+            <section class="recently-viewed">
+                <h2>You Might Also Like</h2>
+                <div class="suggested-products" id="suggestedProducts">
+                    <!-- Suggested products will be populated by JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

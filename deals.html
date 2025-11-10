@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deals of the Day - Netyark Mall | Daily Special Offers</title>
+    <meta name="description" content="Don't miss our daily deals and special offers at Netyark Mall. Up to 50% off on selected items - limited time only!">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Netyark Mall</h1>
+                    <p>Shop At Your Own Comfort</p>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="categories.html" class="nav-link dropdown-toggle">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="categories.html">Consumer Electrics</a></li>
+                                <li><a href="categories.html">Clothing & Apparel</a></li>
+                                <li><a href="categories.html">Home & Kitchen</a></li>
+                                <li><a href="categories.html">Health & Beauty</a></li>
+                                <li><a href="categories.html">Jewelry & Accessories</a></li>
+                                <li><a href="categories.html">Home Decor & Essentials</a></li>
+                                <li><a href="categories.html">For Men</a></li>
+                                <li><a href="categories.html">For Women</a></li>
+                                <li><a href="categories.html">For Kids</a></li>
+                                <li><a href="categories.html">Office Accessories</a></li>
+                                <li><a href="categories.html">Sports & Outdoor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link active">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header deals-header">
+        <div class="container">
+            <h1>Deals of the Day</h1>
+            <p>Limited time offers - Grab them before they're gone!</p>
+            <div class="countdown-timer" id="countdownTimer">
+                <div class="timer-item">
+                    <span id="hours" class="timer-number">00</span>
+                    <span class="timer-label">Hours</span>
+                </div>
+                <div class="timer-separator">:</div>
+                <div class="timer-item">
+                    <span id="minutes" class="timer-number">00</span>
+                    <span class="timer-label">Minutes</span>
+                </div>
+                <div class="timer-separator">:</div>
+                <div class="timer-item">
+                    <span id="seconds" class="timer-number">00</span>
+                    <span class="timer-label">Seconds</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Featured Deals -->
+            <section class="featured-deals">
+                <h2 class="section-title">🔥 Today's Featured Deals</h2>
+                <div class="deals-grid" id="featuredDeals">
+                    <!-- Deal cards will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- All Deals -->
+            <section class="all-deals">
+                <div class="deals-filters">
+                    <h2>All Today's Deals</h2>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-category="all">All Deals</button>
+                        <button class="filter-tab" data-category="electronics">Electronics</button>
+                        <button class="filter-tab" data-category="fashion">Fashion</button>
+                        <button class="filter-tab" data-category="home">Home & Kitchen</button>
+                        <button class="filter-tab" data-category="beauty">Health & Beauty</button>
+                    </div>
+                </div>
+
+                <div class="deals-container" id="allDeals">
+                    <!-- Electronics Deals -->
+                    <div class="deal-card" data-category="electronics">
+                        <div class="deal-badge">40% OFF</div>
+                        <div class="deal-image">
+                            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Smartphone">
+                            <div class="deal-overlay">
+                                <button class="quick-view-btn">Quick View</button>
+                            </div>
+                        </div>
+                        <div class="deal-content">
+                            <h3>Premium Smartphone</h3>
+                            <p>Latest model with advanced features</p>
+                            <div class="price-section">
+                                <span class="original-price">₵2,500</span>
+                                <span class="deal-price">₵1,500</span>
+                                <span class="savings">You save ₵1,000</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-product="smartphone-premium">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <div class="deal-timer">
+                                <i class="fas fa-clock"></i>
+                                <span class="time-left">2h 45m left</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="deal-card" data-category="electronics">
+                        <div class="deal-badge">50% OFF</div>
+                        <div class="deal-image">
+                            <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Laptop">
+                            <div class="deal-overlay">
+                                <button class="quick-view-btn">Quick View</button>
+                            </div>
+                        </div>
+                        <div class="deal-content">
+                            <h3>Gaming Laptop</h3>
+                            <p>High-performance laptop for work and gaming</p>
+                            <div class="price-section">
+                                <span class="original-price">₵8,000</span>
+                                <span class="deal-price">₵4,000</span>
+                                <span class="savings">You save ₵4,000</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-product="gaming-laptop">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <div class="deal-timer">
+                                <i class="fas fa-clock"></i>
+                                <span class="time-left">5h 20m left</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fashion Deals -->
+                    <div class="deal-card" data-category="fashion">
+                        <div class="deal-badge">30% OFF</div>
+                        <div class="deal-image">
+                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Designer Dress">
+                            <div class="deal-overlay">
+                                <button class="quick-view-btn">Quick View</button>
+                            </div>
+                        </div>
+                        <div class="deal-content">
+                            <h3>Designer Dress</h3>
+                            <p>Elegant dress perfect for special occasions</p>
+                            <div class="price-section">
+                                <span class="original-price">₵800</span>
+                                <span class="deal-price">₵560</span>
+                                <span class="savings">You save ₵240</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-product="designer-dress">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <div class="deal-timer">
+                                <i class="fas fa-clock"></i>
+                                <span class="time-left">1h 15m left</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="deal-card" data-category="fashion">
+                        <div class="deal-badge">25% OFF</div>
+                        <div class="deal-image">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Men's Jacket">
+                            <div class="deal-overlay">
+                                <button class="quick-view-btn">Quick View</button>
+                            </div>
+                        </div>
+                        <div class="deal-content">
+                            <h3>Men's Leather Jacket</h3>
+                            <p>Premium quality leather jacket for men</p>
+                            <div class="price-section">
+                                <span class="original-price">₵1,200</span>
+                                <span class="deal-price">₵900</span>
+                                <span class="savings">You save ₵300</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-product="mens-leather-jacket">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <div class="deal-timer">
+                                <i class="fas fa-clock"></i>
+                                <span class="time-left">3h 30m left</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Home & Kitchen Deals -->
+                    <div class="deal-card" data-category="home">
+                        <div class="deal-badge">35% OFF</div>
+                        <div class="deal-image">
+                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Kitchen Set">
+                            <div class="deal-overlay">
+                                <button class="quick-view-btn">Quick View</button>
+                            </div>
+                        </div>
+                        <div class="deal-content">
+                            <h3>Complete Kitchen Set</h3>
+                            <p>Professional-grade cookware and utensils</p>
+                            <div class="price-section">
+                                <span class="original-price">₵1,500</span>
+                                <span class="deal-price">₵975</span>
+                                <span class="savings">You save ₵525</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-product="kitchen-set">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <div class="deal-timer">
+                                <i class="fas fa-clock"></i>
+                                <span class="time-left">4h 10m left</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Health & Beauty Deals -->
+                    <div class="deal-card" data-category="beauty">
+                        <div class="deal-badge">45% OFF</div>
+                        <div class="deal-image">
+                            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Skincare Set">
+                            <div class="deal-overlay">
+                                <button class="quick-view-btn">Quick View</button>
+                            </div>
+                        </div>
+                        <div class="deal-content">
+                            <h3>Premium Skincare Set</h3>
+                            <p>Complete skincare routine for all skin types</p>
+                            <div class="price-section">
+                                <span class="original-price">₵600</span>
+                                <span class="deal-price">₵330</span>
+                                <span class="savings">You save ₵270</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-product="skincare-set">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <div class="deal-timer">
+                                <i class="fas fa-clock"></i>
+                                <span class="time-left">6h 45m left</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Newsletter Signup -->
+            <section class="deals-newsletter">
+                <div class="newsletter-content">
+                    <h2>Never Miss a Deal!</h2>
+                    <p>Get instant notifications when we add new deals and special offers.</p>
+                    <form class="deal-newsletter-form" id="dealNewsletterForm">
+                        <input type="email" placeholder="Enter your email address" required>
+                        <button type="submit" class="btn btn-primary">Subscribe Now</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

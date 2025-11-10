@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health & Beauty - Netyark Mall | Wellness & Self-Care</title>
+    <meta name="description" content="Shop health and beauty products at Netyark Mall. Skincare, cosmetics, wellness products, and personal care items in Accra, Ghana.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Netyark Mall</h1>
+                    <p>Shop At Your Own Comfort</p>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="categories.html" class="nav-link dropdown-toggle active">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="consumer-electrics.html">Consumer Electrics</a></li>
+                                <li><a href="clothing-apparel.html">Clothing & Apparel</a></li>
+                                <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+                                <li><a href="health-beauty.html">Health & Beauty</a></li>
+                                <li><a href="jewelry-accessories.html">Jewelry & Accessories</a></li>
+                                <li><a href="home-decor.html">Home Decor & Essentials</a></li>
+                                <li><a href="for-men.html">For Men</a></li>
+                                <li><a href="for-women.html">For Women</a></li>
+                                <li><a href="for-kids.html">For Kids</a></li>
+                                <li><a href="office-accessories.html">Office Accessories</a></li>
+                                <li><a href="sports-outdoor.html">Sports & Outdoor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header category-header">
+        <div class="container">
+            <h1>Health & Beauty</h1>
+            <p>Premium wellness and beauty products for your self-care routine</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Category Filters -->
+            <section class="category-filters">
+                <div class="filter-section">
+                    <h3>Filter Products</h3>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="priceRange">Price Range:</label>
+                            <select id="priceRange" class="filter-select">
+                                <option value="all">All Prices</option>
+                                <option value="0-200">₵0 - ₵200</option>
+                                <option value="200-400">₵200 - ₵400</option>
+                                <option value="400-800">₵400 - ₵800</option>
+                                <option value="800+">₵800+</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sortBy">Sort By:</label>
+                            <select id="sortBy" class="filter-select">
+                                <option value="default">Default</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="rating">Highest Rated</option>
+                                <option value="newest">Newest First</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="productType">Product Type:</label>
+                            <select id="productType" class="filter-select">
+                                <option value="all">All Types</option>
+                                <option value="skincare">Skincare</option>
+                                <option value="makeup">Makeup</option>
+                                <option value="wellness">Wellness</option>
+                                <option value="personal-care">Personal Care</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Grid -->
+            <section class="products-section">
+                <div class="section-header">
+                    <h2>Wellness & Beauty</h2>
+                    <p class="product-count">Showing <span id="productCount">0</span> products</p>
+                </div>
+                
+                <div class="product-grid" id="beautyProducts">
+                    <!-- Products will be loaded by JavaScript -->
+                </div>
+
+                <!-- Load More Button -->
+                <div class="load-more-section" id="loadMoreSection" style="display: none;">
+                    <button class="btn btn-outline" id="loadMoreBtn">Load More Products</button>
+                </div>
+            </section>
+
+            <!-- Category Description -->
+            <section class="category-description">
+                <div class="description-content">
+                    <h2>Health & Beauty Essentials at Netyark Mall</h2>
+                    <p>Nurture your natural beauty and prioritize your wellness with our carefully curated selection of health and beauty products. From premium skincare routines to makeup essentials, we have everything you need to look and feel your best.</p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-spa"></i>
+                            <h4>Skincare Solutions</h4>
+                            <p>Premium serums, moisturizers, and treatments for all skin types</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-palette"></i>
+                            <h4>Makeup & Cosmetics</h4>
+                            <p>Professional-grade makeup and beauty products for every look</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-heart"></i>
+                            <h4>Wellness Products</h4>
+                            <p>Vitamins, supplements, and health-focused wellness items</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-leaf"></i>
+                            <h4>Natural & Organic</h4>
+                            <p>Eco-friendly and organic beauty products for conscious consumers</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    <script src="category-pages.js"></script>
+</body>
+</html>
