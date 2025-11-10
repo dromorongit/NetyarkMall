@@ -173,6 +173,10 @@ a:hover {
     gap: 2rem;
 }
 
+.mobile-menu-btn {
+    display: none;
+}
+
 .nav-link {
     color: var(--dark-gray);
     font-weight: 500;
@@ -1651,32 +1655,76 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--dark-gray);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        transition: var(--transition);
+    }
+    
+    .mobile-menu-btn:hover {
+        color: var(--primary-green);
+    }
+    
     .header-content {
-        flex-direction: column;
+        flex-direction: row;
         gap: 1rem;
+        position: relative;
+    }
+    
+    .nav {
+        position: relative;
     }
     
     .nav-menu {
+        display: none;
         flex-direction: column;
         width: 100%;
         gap: 0;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--white);
+        box-shadow: var(--shadow);
+        z-index: 1000;
+    }
+    
+    .nav-menu.active {
+        display: flex;
     }
     
     .nav-link {
         width: 100%;
         padding: 1rem;
-        text-align: center;
+        text-align: left;
         border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     
     .dropdown-menu {
         position: static;
-        opacity: 1;
-        visibility: visible;
+        opacity: 0;
+        visibility: hidden;
         transform: none;
         box-shadow: none;
         background: var(--light-gray);
         border-radius: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .dropdown.active .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        max-height: 500px;
     }
     
     .page-header {

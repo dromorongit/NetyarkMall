@@ -8,7 +8,7 @@ let slideInterval;
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeCart();
-    initializeNavigation();
+    initializeNavigationEnhanced();
     initializeCarousel();
     initializePageSpecific();
     updateCartCount();
@@ -210,6 +210,91 @@ function initializeNavigation() {
             });
         }
     });
+// Enhanced Navigation with Mobile Support
+function initializeNavigationEnhanced() {
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    if (mobileMenuBtn && navMenu) {
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            navMenu.classList.toggle('active');
+            
+            // Change icon between hamburger and X
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.className = 'fas fa-times';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
+        });
+    }
+
+    // Dropdown menus
+    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            // Only prevent default on mobile devices
+            if (window.innerWidth <= 768) {
+                e.preventDefault();
+                e.stopPropagation();
+                const dropdown = this.closest('.dropdown');
+                dropdown.classList.toggle('active');
+                
+                // Rotate chevron icon
+                const chevron = this.querySelector('.fas.fa-chevron-down');
+                if (chevron) {
+                    if (dropdown.classList.contains('active')) {
+                        chevron.style.transform = 'rotate(180deg)';
+                    } else {
+                        chevron.style.transform = 'rotate(0deg)';
+                    }
+                }
+            }
+        });
+    });
+
+    // Close mobile menu when clicking on nav links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                if (navMenu) {
+                    navMenu.classList.remove('active');
+                    if (mobileMenuBtn) {
+                        const icon = mobileMenuBtn.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    }
+                }
+            }
+        });
+    });
+
+    // Close mobile menu and dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) {
+            if (!e.target.closest('.nav')) {
+                // Close mobile menu
+                if (navMenu) {
+                    navMenu.classList.remove('active');
+                    if (mobileMenuBtn) {
+                        const icon = mobileMenuBtn.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    }
+                }
+                // Close all dropdowns
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                    const chevron = dropdown.querySelector('.fas.fa-chevron-down');
+                    if (chevron) {
+                        chevron.style.transform = 'rotate(0deg)';
+                    }
+                });
+            }
+        }
+    });
+}
 }
 
 // Carousel functionality
