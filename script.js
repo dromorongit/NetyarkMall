@@ -8,7 +8,7 @@ let slideInterval;
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeCart();
-    initializeNavigationEnhanced();
+    initializeNavigation();
     initializeCarousel();
     initializePageSpecific();
     updateCartCount();
@@ -180,45 +180,20 @@ function updateCartDisplay() {
     }
 }
 
-// Navigation
+// Navigation with Mobile Support
 function initializeNavigation() {
     // Mobile menu toggle
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navMenu = document.querySelector('.nav-menu');
     
-    if (mobileMenuBtn && navMenu) {
-        mobileMenuBtn.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-        });
-    }
-
-    // Dropdown menus
-    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-    dropdownToggles.forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            const dropdown = this.closest('.dropdown');
-            dropdown.classList.toggle('active');
-        });
-    });
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.dropdown')) {
-            document.querySelectorAll('.dropdown').forEach(dropdown => {
-                dropdown.classList.remove('active');
-            });
-        }
-    });
-// Enhanced Navigation with Mobile Support
-function initializeNavigationEnhanced() {
-    // Mobile menu toggle
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navMenu = document.querySelector('.nav-menu');
+    console.log('Mobile menu button found:', !!mobileMenuBtn);
+    console.log('Nav menu found:', !!navMenu);
     
     if (mobileMenuBtn && navMenu) {
         mobileMenuBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             e.stopPropagation();
+            console.log('Mobile menu button clicked!');
             navMenu.classList.toggle('active');
             
             // Change icon between hamburger and X
@@ -229,6 +204,10 @@ function initializeNavigationEnhanced() {
                 icon.className = 'fas fa-bars';
             }
         });
+        
+        console.log('Mobile menu event listener added');
+    } else {
+        console.error('Mobile menu elements not found');
     }
 
     // Dropdown menus
@@ -294,7 +273,6 @@ function initializeNavigationEnhanced() {
             }
         }
     });
-}
 }
 
 // Carousel functionality
@@ -387,14 +365,8 @@ function resetCarousel() {
 }
 
 // Page-specific initializations
-// Page-specific initializations
 function initializeHomePage() {
     console.log('Initializing homepage...');
-    loadNewArrivals();
-    loadFastSellingItems();
-    loadCategoryHighlights();
-}
-function initializeHomePage() {
     loadNewArrivals();
     loadFastSellingItems();
     loadCategoryHighlights();
@@ -449,6 +421,12 @@ function initializeCartPage() {
     // Suggested products
     loadSuggestedProducts();
 }
+
+function initializeContactPage() {
+    setupContactForm();
+    setupFAQ();
+}
+
 // Product loading functions
 function loadNewArrivals() {
     console.log('Loading new arrivals...');
@@ -490,36 +468,6 @@ function loadCategoryHighlights() {
     console.log('Categories data:', categories);
     container.innerHTML = categories.map(category => createCategoryCard(category)).join('');
     console.log('Category highlights loaded successfully');
-}
-
-function initializeContactPage() {
-    setupContactForm();
-    setupFAQ();
-}
-
-// Product loading functions
-function loadNewArrivals() {
-    const container = document.getElementById('newArrivals');
-    if (!container) return;
-
-    const newArrivals = getNewArrivals().slice(0, 8);
-    container.innerHTML = newArrivals.map(product => createProductCard(product)).join('');
-}
-
-function loadFastSellingItems() {
-    const container = document.getElementById('fastSelling');
-    if (!container) return;
-
-    const fastSelling = getFastSellingItems().slice(0, 8);
-    container.innerHTML = fastSelling.map(product => createProductCard(product)).join('');
-}
-
-function loadCategoryHighlights() {
-    const container = document.getElementById('categoryGrid');
-    if (!container) return;
-
-    const categories = getCategoryData().slice(0, 6);
-    container.innerHTML = categories.map(category => createCategoryCard(category)).join('');
 }
 
 function loadFeaturedDeals() {
