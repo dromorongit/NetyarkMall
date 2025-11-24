@@ -4514,6 +4514,172 @@ a:hover {
     }
 }
 
+/* About Page Mobile Optimizations */
+@media (max-width: 768px) {
+    /* About section responsive layout */
+    .about-section .about-content {
+        flex-direction: column !important;
+        gap: 2rem;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .about-text,
+    .about-image {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .about-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+    }
+
+    /* Mission & Vision grid */
+    .mission-vision-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem;
+    }
+
+    .mission-card,
+    .vision-card {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    /* Values grid */
+    .values-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+
+    .value-item {
+        padding: 1.5rem 1rem;
+        text-align: center;
+    }
+
+    /* Features grid */
+    .features-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+
+    .feature-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+    }
+
+    .feature-icon {
+        align-self: center;
+    }
+
+    /* Stats container */
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        padding: 1rem;
+        text-align: center;
+    }
+}
+
+/* Contact Page Mobile Optimizations */
+@media (max-width: 768px) {
+    /* Contact container responsive layout */
+    .contact-container {
+        grid-template-columns: 1fr !important;
+        gap: 2rem;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .contact-info-section,
+    .contact-form-section {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Contact methods */
+    .contact-methods {
+        gap: 1.5rem;
+    }
+
+    .contact-method {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+    }
+
+    .method-icon {
+        align-self: center;
+    }
+
+    .method-content h3 {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Service hours */
+    .service-hours {
+        padding: 1.5rem 1rem;
+    }
+
+    .hours-table {
+        gap: 0.75rem;
+    }
+
+    .hours-row {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.25rem;
+        padding: 0.75rem 0;
+    }
+
+    .hours-row .day {
+        font-weight: 600;
+        color: var(--dark-gray);
+    }
+
+    .hours-row .time {
+        color: var(--primary-green);
+        font-weight: 500;
+    }
+
+    /* Contact form */
+    .contact-form-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+
+    /* FAQ section */
+    .faq-container {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .faq-item {
+        margin-bottom: 0.75rem;
+    }
+
+    .faq-question {
+        padding: 1rem 1.25rem;
+        font-size: 0.95rem;
+    }
+
+    .faq-answer {
+        padding: 1rem 1.25rem;
+    }
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
     * {
