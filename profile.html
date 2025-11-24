@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Netyark Mall</title>
+    <meta name="description" content="Manage your Netyark Mall account and view your orders">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="Netyark.jfif" alt="Netyark Mall Logo">
+                    <div class="logo-text">
+                        <h1>Netyark Mall</h1>
+                        <p>Shop At Your Own Comfort</p>
+                    </div>
+                </div>
+
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="categories.html" class="nav-link dropdown-toggle">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="consumer-electrics.html">Consumer Electrics</a></li>
+                                <li><a href="clothing-apparel.html">Clothing & Apparel</a></li>
+                                <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+                                <li><a href="health-beauty.html">Health & Beauty</a></li>
+                                <li><a href="jewelry-accessories.html">Jewelry & Accessories</a></li>
+                                <li><a href="home-decor.html">Home Decor & Essentials</a></li>
+                                <li><a href="for-men.html">For Men</a></li>
+                                <li><a href="for-women.html">For Women</a></li>
+                                <li><a href="for-kids.html">For Kids</a></li>
+                                <li><a href="office-accessories.html">Office Accessories</a></li>
+                                <li><a href="sports-outdoor.html">Sports & Outdoor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Profile Section -->
+    <main class="main-content">
+        <div class="container">
+            <div class="profile-container">
+                <!-- Profile Sidebar -->
+                <aside class="profile-sidebar">
+                    <div class="profile-avatar">
+                        <img src="https://via.placeholder.com/100x100?text=User" alt="Profile Picture" id="profileAvatar">
+                        <h3 id="userName">User Name</h3>
+                    </div>
+                    <ul class="profile-menu">
+                        <li><a href="#profile" class="active">Profile Information</a></li>
+                        <li><a href="#orders">My Orders</a></li>
+                        <li><a href="#wishlist">Wishlist</a></li>
+                        <li><a href="#reviews">My Reviews</a></li>
+                        <li><a href="#settings">Account Settings</a></li>
+                    </ul>
+                </aside>
+
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- Profile Information -->
+                    <section id="profile" class="profile-section">
+                        <h3>Profile Information</h3>
+                        <form id="profileForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" id="firstName" name="firstName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="text" id="lastName" name="lastName" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" required readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </section>
+
+                    <!-- Orders History -->
+                    <section id="orders" class="profile-section" style="display: none;">
+                        <h3>My Orders</h3>
+                        <div id="ordersList">
+                            <!-- Orders will be loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Wishlist -->
+                    <section id="wishlist" class="profile-section" style="display: none;">
+                        <h3>My Wishlist</h3>
+                        <div class="product-grid" id="wishlistGrid">
+                            <!-- Wishlist items will be loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Reviews -->
+                    <section id="reviews" class="profile-section" style="display: none;">
+                        <h3>My Reviews</h3>
+                        <div id="reviewsList">
+                            <!-- Reviews will be loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Account Settings -->
+                    <section id="settings" class="profile-section" style="display: none;">
+                        <h3>Account Settings</h3>
+                        <div class="settings-section">
+                            <h4>Change Password</h4>
+                            <form id="passwordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" name="newPassword" required minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmNewPassword">Confirm New Password</label>
+                                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                            </form>
+                        </div>
+                        <div class="settings-section">
+                            <h4>Delete Account</h4>
+                            <p>Once you delete your account, there is no going back. Please be certain.</p>
+                            <button class="btn btn-outline" style="color: var(--error); border-color: var(--error);" onclick="deleteAccount()">Delete Account</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+    <script src="profile.js"></script>
+</body>
+</html>

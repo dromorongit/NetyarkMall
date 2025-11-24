@@ -15,12 +15,24 @@
             <div class="header-content">
                 <!-- Logo -->
                 <div class="logo">
-                    <h1>Netyark Mall</h1>
-                    <p>Shop At Your Own Comfort</p>
+                    <img src="Netyark.jfif" alt="Netyark Mall Logo">
+                    <div class="logo-text">
+                        <h1>Netyark Mall</h1>
+                        <p>Shop At Your Own Comfort</p>
+                    </div>
                 </div>
                 
                 <!-- Navigation -->
                 <nav class="nav">
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <input type="text" id="globalSearch" placeholder="Search products...">
+                            <button class="search-btn" id="searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
                     <button class="mobile-menu-btn" aria-label="Toggle mobile menu">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -131,6 +143,17 @@
         </div>
     </main>
 
+    <!-- Product Comparison Bar -->
+    <div class="compare-container" id="compareContainer">
+        <div class="compare-bar">
+            <div class="compare-items" id="compareItems"></div>
+            <div class="compare-actions">
+                <button class="compare-btn" id="compareBtn">Compare</button>
+                <button class="clear-compare" id="clearCompareBtn">Clear All</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer Section -->
     <footer class="footer">
         <div class="container">
@@ -202,5 +225,6 @@
     <!-- Scripts -->
     <script src="products.js"></script>
     <script src="script.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html>

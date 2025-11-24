@@ -11,11 +11,18 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeNavigation();
     initializeCarousel();
     initializePageSpecific();
+    initializeSearch();
+    initializeComparison();
     updateCartCount();
-    
+
+    // Initialize authentication UI
+    if (typeof updateAuthUI === 'function') {
+        updateAuthUI();
+    }
+
     // Check which page we're on and initialize accordingly
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    
+
     switch(currentPage) {
         case 'index.html':
         case '':
@@ -45,13 +52,32 @@ function addToCart(productId, quantity = 1) {
     const product = getProductById(productId);
     if (!product) {
         console.error('Product not found:', productId);
+        showNotification('Product not found.', 'error');
+        return;
+    }
+
+    // Check inventory
+    const inventoryCheck = typeof checkInventory === 'function' ?
+        checkInventory(productId, quantity) : { available: product.inStock };
+
+    if (!inventoryCheck.available) {
+        showNotification(inventoryCheck.reason || 'Product is out of stock.', 'error');
         return;
     }
 
     const existingItem = cart.find(item => item.id === productId);
-    
+
     if (existingItem) {
-        existingItem.quantity += quantity;
+        const newQuantity = existingItem.quantity + quantity;
+        // Check if new total exceeds available stock
+        const stockCheck = typeof checkInventory === 'function' ?
+            checkInventory(productId, newQuantity) : { available: true };
+
+        if (!stockCheck.available) {
+            showNotification('Cannot add more items. Insufficient stock.', 'error');
+            return;
+        }
+        existingItem.quantity = newQuantity;
     } else {
         cart.push({
             id: productId,
@@ -64,6 +90,7 @@ function addToCart(productId, quantity = 1) {
 
     saveCart();
     updateCartCount();
+    updateCartDisplay(); // Update cart display to show shipping
     showNotification(`${product.name} added to cart!`, 'success');
 }
 
@@ -119,9 +146,11 @@ function updateCartDisplay() {
     const cartItemCountElement = document.getElementById('cartItemCount');
     const emptyCartMessage = document.getElementById('emptyCartMessage');
     const subtotalElement = document.getElementById('subtotal');
+    const shippingElement = document.getElementById('shipping');
     const taxElement = document.getElementById('tax');
     const totalElement = document.getElementById('total');
-    
+    const shippingCalculator = document.getElementById('shippingCalculator');
+
     if (cartItemsContainer) {
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = `
@@ -136,8 +165,10 @@ function updateCartDisplay() {
             `;
             if (cartItemCountElement) cartItemCountElement.textContent = '0';
             if (subtotalElement) subtotalElement.textContent = '₵0.00';
+            if (shippingElement) shippingElement.textContent = '₵0.00';
             if (taxElement) taxElement.textContent = '₵0.00';
-            if (totalElement) totalElement.textContent = '₵50.00';
+            if (totalElement) totalElement.textContent = '₵0.00';
+            if (shippingCalculator) shippingCalculator.style.display = 'none';
         } else {
             let cartHTML = '';
             cart.forEach(item => {
@@ -165,17 +196,28 @@ function updateCartDisplay() {
                 `;
             });
             cartItemsContainer.innerHTML = cartHTML;
-            
+
             if (cartItemCountElement) cartItemCountElement.textContent = cart.length;
-            
-            // Update pricing
+
+            // Update pricing with shipping calculation
             const subtotal = getCartTotal();
+            const selectedShipping = document.querySelector('input[name="shipping"]:checked');
+            const shippingMethod = selectedShipping ? selectedShipping.value : 'standard';
+            const shippingCost = typeof calculateShipping === 'function' ?
+                calculateShipping(cart, 'accra', shippingMethod) : 50; // Default shipping
             const tax = subtotal * 0.12; // 12% tax
-            const total = subtotal + tax + 50; // + shipping
-            
+            const total = subtotal + shippingCost + tax;
+
             if (subtotalElement) subtotalElement.textContent = `₵${subtotal.toLocaleString()}`;
+            if (shippingElement) shippingElement.textContent = `₵${shippingCost.toLocaleString()}`;
             if (taxElement) taxElement.textContent = `₵${tax.toLocaleString()}`;
             if (totalElement) totalElement.textContent = `₵${total.toLocaleString()}`;
+
+            // Show shipping calculator
+            if (shippingCalculator) {
+                shippingCalculator.style.display = 'block';
+                updateShippingOptions();
+            }
         }
     }
 }
@@ -492,19 +534,32 @@ function loadSuggestedProducts() {
 
 // Create HTML elements
 function createProductCard(product) {
-    const discount = product.originalPrice > product.price ? 
+    const discount = product.originalPrice > product.price ?
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
-    
+
+    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(product.id);
+
+    // Check inventory status
+    const inventoryStatus = typeof checkInventory === 'function' ?
+        checkInventory(product.id) : { available: product.inStock, stockCount: product.stockCount };
+
+    const stockStatus = !inventoryStatus.available ? 'out-of-stock' :
+                       inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
+
+    const stockText = !inventoryStatus.available ? 'Out of Stock' :
+                     inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : 'In Stock';
+
     return `
-        <div class="product-card" data-product-id="${product.id}">
+        <div class="product-card ${stockStatus}" data-product-id="${product.id}">
             ${product.isNew ? '<div class="product-badge new">New</div>' : ''}
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
+            <div class="stock-indicator ${stockStatus}">${stockText}</div>
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="quickView('${product.id}')">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
-                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                 </div>
             </div>
@@ -519,8 +574,16 @@ function createProductCard(product) {
                 </div>
                 <div class="product-price">
                     <span class="current-price">₵${product.price.toLocaleString()}</span>
-                    ${product.originalPrice > product.price ? 
+                    ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                </div>
+                <div class="product-actions">
+                    <button class="action-btn compare-btn" onclick="addToCompare('${product.id}')" title="Compare">
+                        <i class="fas fa-balance-scale"></i>
+                    </button>
+                    <button class="action-btn wishlist-btn ${isInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${product.id}')" title="Wishlist">
+                        <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -621,9 +684,129 @@ function navigateToCategory(categoryId) {
 
 function quickView(productId) {
     const product = getProductById(productId);
-    if (product) {
-        alert(`Quick View: ${product.name}\n\n${product.description}\n\nPrice: ₵${product.price.toLocaleString()}`);
+    if (!product) return;
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'zoom-modal';
+    modal.style.background = 'rgba(0, 0, 0, 0.8)';
+    modal.innerHTML = `
+        <div style="background: white; margin: 5% auto; max-width: 800px; border-radius: 8px; overflow: hidden; position: relative;">
+            <div style="display: flex; padding: 2rem;">
+                <div style="flex: 1; margin-right: 2rem;">
+                    <div class="product-gallery">
+                        <div class="gallery-thumbnails">
+                            ${(product.images || [product.image]).map((img, index) =>
+                                `<img src="${img}" alt="Product image ${index + 1}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">`
+                            ).join('')}
+                        </div>
+                        <div class="main-image-container">
+                            <img src="${product.images ? product.images[0] : product.image}" alt="${product.name}" class="main-image" id="mainImage">
+                            <button class="image-zoom" onclick="toggleZoom('${product.images ? product.images[0] : product.image}')">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1;">
+                    <h2 style="margin-bottom: 1rem; color: var(--dark-gray);">${product.name}</h2>
+                    <p style="color: var(--medium-gray); margin-bottom: 1rem;">${product.description}</p>
+
+                    <div class="product-rating" style="margin-bottom: 1rem;">
+                        <div class="stars">${generateStarRating(product.rating)}</div>
+                        <span class="rating-text">${product.rating} (${product.reviews} reviews)</span>
+                    </div>
+
+                    <div class="product-price" style="margin-bottom: 1.5rem;">
+                        <span class="current-price">₵${product.price.toLocaleString()}</span>
+                        ${product.originalPrice > product.price ?
+                            `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                    </div>
+
+                    ${product.variants ? `
+                        <div class="variant-selector">
+                            ${product.variants.colors ? `
+                                <div class="variant-group">
+                                    <label class="variant-label">Color:</label>
+                                    <div class="variant-options">
+                                        ${product.variants.colors.map(color =>
+                                            `<button class="variant-option" onclick="selectVariant(this, 'color', '${color}')">${color}</button>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${product.variants.storage ? `
+                                <div class="variant-group">
+                                    <label class="variant-label">Storage:</label>
+                                    <div class="variant-options">
+                                        ${product.variants.storage.map(storage =>
+                                            `<button class="variant-option" onclick="selectVariant(this, 'storage', '${storage}')">${storage}</button>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+
+                    <div style="margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="addToCart('${product.id}'); this.closest('.zoom-modal').remove();">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button class="btn btn-outline" onclick="addToCompare('${product.id}'); this.closest('.zoom-modal').remove();">
+                            <i class="fas fa-balance-scale"></i> Compare
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button onclick="this.closest('.zoom-modal').remove()" style="position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+function changeMainImage(thumbnail, imageSrc) {
+    const mainImage = document.getElementById('mainImage');
+    if (mainImage) {
+        mainImage.src = imageSrc;
     }
+
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+    thumbnail.classList.add('active');
+}
+
+function toggleZoom(imageSrc) {
+    const existingZoom = document.querySelector('.zoom-modal img[style*="max-width"]');
+    if (existingZoom) {
+        existingZoom.closest('.zoom-modal').remove();
+        return;
+    }
+
+    const zoomModal = document.createElement('div');
+    zoomModal.className = 'zoom-modal';
+    zoomModal.innerHTML = `<img src="${imageSrc}" style="max-width: 90%; max-height: 90%;">`;
+    document.body.appendChild(zoomModal);
+
+    zoomModal.addEventListener('click', function() {
+        zoomModal.remove();
+    });
+}
+
+function selectVariant(button, type, value) {
+    // Remove selected class from siblings
+    const siblings = button.parentElement.querySelectorAll('.variant-option');
+    siblings.forEach(sib => sib.classList.remove('selected'));
+
+    // Add selected class to clicked button
+    button.classList.add('selected');
 }
 
 // Event handlers for add to cart buttons
@@ -815,6 +998,293 @@ function hideLoading() {
     }
 }
 
+// Search functionality
+function initializeSearch() {
+    const searchInput = document.getElementById('globalSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchResults = document.getElementById('searchResults');
+
+    if (!searchInput || !searchBtn || !searchResults) return;
+
+    // Search button click
+    searchBtn.addEventListener('click', performSearch);
+
+    // Search input enter key
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+
+    // Live search as user types
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            performLiveSearch(query);
+        }, 300);
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-container')) {
+            searchResults.style.display = 'none';
+        }
+    });
+}
+
+function performSearch() {
+    const query = document.getElementById('globalSearch').value.trim();
+    if (query) {
+        // Redirect to search results page or show results on current page
+        window.location.href = `categories.html?search=${encodeURIComponent(query)}`;
+    }
+}
+
+function performLiveSearch(query) {
+    const results = searchProducts(query).slice(0, 5); // Limit to 5 results
+    const searchResults = document.getElementById('searchResults');
+
+    if (results.length === 0) {
+        searchResults.style.display = 'none';
+        return;
+    }
+
+    let html = '';
+    results.forEach(product => {
+        const discount = product.originalPrice > product.price ?
+            Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
+        html += `
+            <div class="search-result-item" onclick="viewProduct('${product.id}')">
+                <div class="search-result-image">
+                    <img src="${product.image}" alt="${product.name}">
+                </div>
+                <div class="search-result-info">
+                    <h4>${product.name}</h4>
+                    <div class="search-result-price">
+                        ₵${product.price.toLocaleString()}
+                        ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    // Add "View all results" link
+    html += `
+        <div class="search-result-item view-all" onclick="performSearch()">
+            <div class="search-result-info">
+                <h4>View all results for "${query}"</h4>
+            </div>
+        </div>
+    `;
+
+    searchResults.innerHTML = html;
+    searchResults.style.display = 'block';
+}
+
+function viewProduct(productId) {
+    // For now, redirect to categories page with product filter
+    // In a real implementation, this would go to a product detail page
+    window.location.href = `categories.html?product=${productId}`;
+}
+
+// Toggle wishlist function
+function toggleWishlist(productId) {
+    if (typeof addToWishlist === 'function' && typeof removeFromWishlist === 'function') {
+        const isInWishlist = isInWishlist(productId);
+
+        if (isInWishlist) {
+            removeFromWishlist(productId);
+        } else {
+            addToWishlist(productId);
+        }
+
+        // Update UI
+        updateWishlistButtons();
+    }
+}
+
+function updateWishlistButtons() {
+    const wishlistBtns = document.querySelectorAll('.wishlist-btn');
+    wishlistBtns.forEach(btn => {
+        const productId = btn.closest('[data-product-id]').getAttribute('data-product-id');
+        const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(productId);
+
+        btn.classList.toggle('in-wishlist', isInWishlist);
+        const icon = btn.querySelector('i');
+        if (icon) {
+            icon.className = isInWishlist ? 'fas fa-heart' : 'far fa-heart';
+        }
+    });
+}
+
+// Product comparison functionality
+let compareList = JSON.parse(localStorage.getItem('compare_list') || '[]');
+
+function initializeComparison() {
+    updateCompareDisplay();
+
+    // Compare button event
+    const compareBtn = document.getElementById('compareBtn');
+    if (compareBtn) {
+        compareBtn.addEventListener('click', showCompareModal);
+    }
+
+    // Clear compare button
+    const clearCompareBtn = document.getElementById('clearCompareBtn');
+    if (clearCompareBtn) {
+        clearCompareBtn.addEventListener('click', clearCompareList);
+    }
+}
+
+function addToCompare(productId) {
+    if (compareList.length >= 3) {
+        showNotification('You can compare up to 3 products at a time.', 'warning');
+        return;
+    }
+
+    if (!compareList.includes(productId)) {
+        compareList.push(productId);
+        saveCompareList();
+        updateCompareDisplay();
+        showNotification('Product added to comparison.', 'success');
+    } else {
+        showNotification('Product already in comparison.', 'info');
+    }
+}
+
+function removeFromCompare(productId) {
+    const index = compareList.indexOf(productId);
+    if (index > -1) {
+        compareList.splice(index, 1);
+        saveCompareList();
+        updateCompareDisplay();
+        showNotification('Product removed from comparison.', 'info');
+    }
+}
+
+function clearCompareList() {
+    compareList = [];
+    saveCompareList();
+    updateCompareDisplay();
+    showNotification('Comparison list cleared.', 'info');
+}
+
+function saveCompareList() {
+    localStorage.setItem('compare_list', JSON.stringify(compareList));
+}
+
+function updateCompareDisplay() {
+    const compareContainer = document.getElementById('compareContainer');
+    const compareItems = document.getElementById('compareItems');
+
+    if (!compareContainer || !compareItems) return;
+
+    if (compareList.length === 0) {
+        compareContainer.style.display = 'none';
+        return;
+    }
+
+    compareContainer.style.display = 'block';
+    let html = '';
+
+    compareList.forEach(productId => {
+        const product = getProductById(productId);
+        if (product) {
+            html += `
+                <div class="compare-item">
+                    <img src="${product.image}" alt="${product.name}">
+                    <span>${product.name}</span>
+                    <button onclick="removeFromCompare('${productId}')" title="Remove">&times;</button>
+                </div>
+            `;
+        }
+    });
+
+    compareItems.innerHTML = html;
+}
+
+function showCompareModal() {
+    if (compareList.length < 2) {
+        showNotification('Please add at least 2 products to compare.', 'warning');
+        return;
+    }
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'compare-modal';
+    modal.innerHTML = `
+        <div class="compare-modal-content">
+            <div class="compare-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            ${compareList.map(id => {
+                                const product = getProductById(id);
+                                return `<th>${product ? product.name : 'Unknown'}</th>`;
+                            }).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Image</td>
+                            ${compareList.map(id => {
+                                const product = getProductById(id);
+                                return `<td><img src="${product ? product.image : ''}" alt="Product" style="width: 100px; height: 100px; object-fit: cover;"></td>`;
+                            }).join('')}
+                        </tr>
+                        <tr>
+                            <td>Price</td>
+                            ${compareList.map(id => {
+                                const product = getProductById(id);
+                                return `<td>₵${product ? product.price.toLocaleString() : 'N/A'}</td>`;
+                            }).join('')}
+                        </tr>
+                        <tr>
+                            <td>Rating</td>
+                            ${compareList.map(id => {
+                                const product = getProductById(id);
+                                return `<td>${product ? generateStarRating(product.rating) : 'N/A'}</td>`;
+                            }).join('')}
+                        </tr>
+                        <tr>
+                            <td>Category</td>
+                            ${compareList.map(id => {
+                                const product = getProductById(id);
+                                return `<td>${product ? product.category : 'N/A'}</td>`;
+                            }).join('')}
+                        </tr>
+                        <tr>
+                            <td>Action</td>
+                            ${compareList.map(id => `<td><button class="compare-remove" onclick="removeFromCompare('${id}'); showCompareModal();">Remove</button></td>`).join('')}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="this.closest('.compare-modal').remove()" style="position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; padding: 5px 10px; cursor: pointer;">Close</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
 // Export functions for use in HTML
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
@@ -822,3 +1292,290 @@ window.updateCartQuantity = updateCartQuantity;
 window.clearCart = clearCart;
 window.navigateToCategory = navigateToCategory;
 window.quickView = quickView;
+window.toggleWishlist = toggleWishlist;
+window.viewProduct = viewProduct;
+window.addToCompare = addToCompare;
+window.removeFromCompare = removeFromCompare;
+window.clearCompareList = clearCompareList;
+window.showCompareModal = showCompareModal;
+
+// Shipping Calculator Functions
+function updateShippingOptions() {
+    const shippingZone = document.getElementById('shippingZone');
+    const shippingOptions = document.getElementById('shippingOptions');
+
+    if (!shippingZone || !shippingOptions) return;
+
+    const zone = shippingZone.value;
+    const options = typeof getShippingOptions === 'function' ?
+        getShippingOptions(zone) : getDefaultShippingOptions();
+
+    let html = '';
+    options.forEach(option => {
+        html += `
+            <div class="shipping-option">
+                <label class="shipping-label">
+                    <input type="radio" name="shipping" value="${option.method}" ${option.method === 'standard' ? 'checked' : ''}>
+                    <div class="shipping-details">
+                        <div class="shipping-name">${option.name}</div>
+                        <div class="shipping-meta">
+                            <span class="shipping-cost">₵${option.cost.toLocaleString()}</span>
+                            <span class="shipping-time">${option.description}</span>
+                            <span class="shipping-date">Est. delivery: ${option.estimatedDelivery}</span>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        `;
+    });
+
+    shippingOptions.innerHTML = html;
+
+    // Add event listeners for shipping changes
+    const shippingInputs = shippingOptions.querySelectorAll('input[name="shipping"]');
+    shippingInputs.forEach(input => {
+        input.addEventListener('change', updateCartDisplay);
+    });
+}
+
+function getDefaultShippingOptions() {
+    return [
+        {
+            method: 'standard',
+            name: 'Standard Delivery',
+            cost: 50,
+            description: '3-5 business days',
+            estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            available: true
+        },
+        {
+            method: 'express',
+            name: 'Express Delivery',
+            cost: 125,
+            description: '1-2 business days',
+            estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            available: true
+        }
+    ];
+}
+
+// Initialize shipping calculator
+function initializeShippingCalculator() {
+    const shippingZone = document.getElementById('shippingZone');
+    if (shippingZone) {
+        shippingZone.addEventListener('change', updateShippingOptions);
+    }
+}
+
+// Add to cart page initialization
+function initializeCartPage() {
+    updateCartDisplay();
+
+    // Initialize shipping calculator
+    initializeShippingCalculator();
+
+    // Clear cart button
+    const clearCartBtn = document.getElementById('clearCartBtn');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear your cart?')) {
+                clearCart();
+            }
+        });
+    }
+
+    // Checkout button
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function() {
+            if (cart.length === 0) {
+                showNotification('Your cart is empty!', 'error');
+                return;
+            }
+            initiateCheckout();
+        });
+    }
+
+    // Suggested products
+    loadSuggestedProducts();
+}
+
+function initiateCheckout() {
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+        showNotification('Please log in to proceed with checkout.', 'warning');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+        return;
+    }
+
+    // Create checkout modal
+    showCheckoutModal();
+}
+
+function showCheckoutModal() {
+    const selectedShipping = document.querySelector('input[name="shipping"]:checked');
+    const shippingZone = document.getElementById('shippingZone')?.value || 'accra';
+    const shippingMethod = selectedShipping ? selectedShipping.value : 'standard';
+
+    const subtotal = getCartTotal();
+    const shippingCost = typeof calculateShipping === 'function' ?
+        calculateShipping(cart, shippingZone, shippingMethod) : 50;
+    const tax = subtotal * 0.12;
+    const total = subtotal + shippingCost + tax;
+
+    const modal = document.createElement('div');
+    modal.className = 'checkout-modal';
+    modal.innerHTML = `
+        <div class="checkout-modal-content">
+            <h2>Complete Your Order</h2>
+
+            <div class="checkout-sections">
+                <!-- Order Summary -->
+                <div class="checkout-section">
+                    <h3>Order Summary</h3>
+                    <div class="checkout-items">
+                        ${cart.map(item => `
+                            <div class="checkout-item">
+                                <img src="${item.image}" alt="${item.name}">
+                                <div class="checkout-item-details">
+                                    <h4>${item.name}</h4>
+                                    <p>Quantity: ${item.quantity}</p>
+                                    <p>₵${item.price.toLocaleString()} each</p>
+                                </div>
+                                <div class="checkout-item-total">₵${(item.price * item.quantity).toLocaleString()}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="checkout-totals">
+                        <div class="checkout-row"><span>Subtotal:</span><span>₵${subtotal.toLocaleString()}</span></div>
+                        <div class="checkout-row"><span>Shipping:</span><span>₵${shippingCost.toLocaleString()}</span></div>
+                        <div class="checkout-row"><span>Tax (12%):</span><span>₵${tax.toLocaleString()}</span></div>
+                        <div class="checkout-row total"><span>Total:</span><span>₵${total.toLocaleString()}</span></div>
+                    </div>
+                </div>
+
+                <!-- Shipping & Billing -->
+                <div class="checkout-section">
+                    <h3>Shipping & Billing Information</h3>
+                    <form id="checkoutForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Delivery Address *</label>
+                            <textarea id="address" rows="3" required placeholder="Enter your full delivery address"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City *</label>
+                                <input type="text" id="city" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="region">Region *</label>
+                                <select id="region" required>
+                                    <option value="">Select Region</option>
+                                    <option value="greater-accra">Greater Accra</option>
+                                    <option value="central">Central</option>
+                                    <option value="western">Western</option>
+                                    <option value="eastern">Eastern</option>
+                                    <option value="volta">Volta</option>
+                                    <option value="northern">Northern</option>
+                                    <option value="upper-east">Upper East</option>
+                                    <option value="upper-west">Upper West</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment Method *</label>
+                            <select id="paymentMethod" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="card">Credit/Debit Card</option>
+                                <option value="mobile-money">Mobile Money</option>
+                                <option value="cash">Cash on Delivery</option>
+                            </select>
+                        </div>
+
+                        <div class="checkout-actions">
+                            <button type="button" class="btn btn-outline" onclick="this.closest('.checkout-modal').remove()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Place Order</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <button onclick="this.closest('.checkout-modal').remove()" class="modal-close">&times;</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Handle form submission
+    const checkoutForm = modal.querySelector('#checkoutForm');
+    checkoutForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        processCheckout(this);
+    });
+}
+
+function processCheckout(form) {
+    const formData = new FormData(form);
+    const orderData = {
+        customer: {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            city: formData.get('city'),
+            region: formData.get('region')
+        },
+        items: cart,
+        paymentMethod: formData.get('paymentMethod'),
+        shipping: {
+            zone: document.getElementById('shippingZone')?.value || 'accra',
+            method: document.querySelector('input[name="shipping"]:checked')?.value || 'standard'
+        }
+    };
+
+    // Process order
+    if (typeof processOrder === 'function') {
+        const order = processOrder(orderData);
+
+        if (order) {
+            // Clear cart
+            clearCart();
+
+            // Show success message and redirect
+            showNotification('Order placed successfully!', 'success');
+
+            setTimeout(() => {
+                window.location.href = `profile.html#orders`;
+            }, 2000);
+        }
+    }
+
+    // Close modal
+    form.closest('.checkout-modal').remove();
+}

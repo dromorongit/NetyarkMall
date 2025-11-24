@@ -1,7 +1,7 @@
 // Product data for Netyark Mall E-commerce Website
 // All prices in Ghana Cedis (₵)
 
-// Sample product database
+// Sample product database with enhanced inventory
 const productDatabase = {
     // Electronics
     smartphones: [
@@ -17,7 +17,15 @@ const productDatabase = {
             reviews: 128,
             isNew: true,
             inStock: true,
-            stockCount: 25
+            stockCount: 25,
+            variants: {
+                colors: ['Black', 'White', 'Blue'],
+                storage: ['128GB', '256GB', '512GB']
+            },
+            images: [
+                'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'
+            ]
         },
         {
             id: 'smartphone-mid-range',
@@ -359,6 +367,47 @@ window.formatPrice = formatPrice;
 window.calculateDiscount = calculateDiscount;
 
 
+// Product reviews management
+function addProductReview(review) {
+    // In a real implementation, this would be stored in a database
+    // For now, we'll store in localStorage
+    const reviews = JSON.parse(localStorage.getItem('product_reviews') || '[]');
+    reviews.push(review);
+    localStorage.setItem('product_reviews', JSON.stringify(reviews));
+}
+
+function getProductReviews(productId) {
+    const reviews = JSON.parse(localStorage.getItem('product_reviews') || '[]');
+    return reviews.filter(review => review.productId === productId);
+}
+
+function getProductRating(productId) {
+    const reviews = getProductReviews(productId);
+    if (reviews.length === 0) return 0;
+
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    return totalRating / reviews.length;
+}
+
+function getProductReviewCount(productId) {
+    return getProductReviews(productId).length;
+}
+
+// Update product ratings in database (this would be done server-side in real app)
+function updateProductRating(productId) {
+    const rating = getProductRating(productId);
+    const reviewCount = getProductReviewCount(productId);
+
+    // Update the product in our database
+    const allProducts = getAllProducts();
+    const product = allProducts.find(p => p.id === productId);
+    if (product) {
+        product.rating = rating;
+        product.reviews = reviewCount;
+        // In a real app, this would update the database
+    }
+}
+
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -372,6 +421,208 @@ if (typeof module !== 'undefined' && module.exports) {
         searchProducts,
         getSuggestedProducts,
         formatPrice,
-        calculateDiscount
+        calculateDiscount,
+        addProductReview,
+        getProductReviews,
+        getProductRating,
+        getProductReviewCount,
+        updateProductRating
     };
 }
+
+// Inventory Management
+function checkInventory(productId, requestedQuantity = 1) {
+    // Mock inventory check - in real app, this would call API
+    const product = getProductById(productId);
+    if (!product) return { available: false, reason: 'Product not found' };
+
+    if (!product.inStock) return { available: false, reason: 'Out of stock' };
+
+    if (product.stockCount < requestedQuantity) {
+        return { available: false, reason: 'Insufficient stock' };
+    }
+
+    return {
+        available: true,
+        stockCount: product.stockCount,
+        lowStock: product.stockCount <= 5 // Low stock threshold
+    };
+}
+
+function updateInventory(productId, quantityChange) {
+    // Mock inventory update - in real app, this would call API
+    const product = getProductById(productId);
+    if (product) {
+        product.stockCount = Math.max(0, product.stockCount + quantityChange);
+        product.inStock = product.stockCount > 0;
+        // In real app, this would persist to database
+    }
+}
+
+function getLowStockProducts() {
+    // Mock low stock check - in real app, this would call API
+    return getAllProducts().filter(product =>
+        product.stockCount <= 5 && product.stockCount > 0
+    );
+}
+
+// Shipping Calculator
+const shippingZones = {
+    'accra': { name: 'Accra Metropolitan', baseCost: 50, multiplier: 1.0 },
+    'greater-accra': { name: 'Greater Accra', baseCost: 75, multiplier: 1.2 },
+    'eastern': { name: 'Eastern Region', baseCost: 100, multiplier: 1.5 },
+    'central': { name: 'Central Region', baseCost: 120, multiplier: 1.7 },
+    'western': { name: 'Western Region', baseCost: 150, multiplier: 2.0 },
+    'volta': { name: 'Volta Region', baseCost: 180, multiplier: 2.2 },
+    'northern': { name: 'Northern Region', baseCost: 250, multiplier: 2.8 },
+    'upper-east': { name: 'Upper East Region', baseCost: 300, multiplier: 3.2 },
+    'upper-west': { name: 'Upper West Region', baseCost: 320, multiplier: 3.4 },
+    'international': { name: 'International', baseCost: 500, multiplier: 5.0 }
+};
+
+const shippingMethods = {
+    standard: {
+        name: 'Standard Delivery',
+        baseDays: 3,
+        costMultiplier: 1.0,
+        description: '3-5 business days'
+    },
+    express: {
+        name: 'Express Delivery',
+        baseDays: 1,
+        costMultiplier: 2.5,
+        description: '1-2 business days'
+    },
+    overnight: {
+        name: 'Overnight Delivery',
+        baseDays: 1,
+        costMultiplier: 4.0,
+        description: 'Next business day'
+    }
+};
+
+function calculateShipping(cartItems, destination, method = 'standard') {
+    // Mock shipping calculation - in real app, this would call API
+    if (!cartItems || cartItems.length === 0) return 0;
+
+    const zone = shippingZones[destination] || shippingZones['international'];
+    const shippingMethod = shippingMethods[method] || shippingMethods['standard'];
+
+    // Calculate base cost
+    let totalCost = zone.baseCost * zone.multiplier * shippingMethod.costMultiplier;
+
+    // Weight-based calculation (mock)
+    const totalWeight = cartItems.reduce((weight, item) => {
+        // Mock weight calculation - in real app, products would have weight property
+        return weight + (item.quantity * 0.5); // Assume 0.5kg per item
+    }, 0);
+
+    if (totalWeight > 5) {
+        totalCost += (totalWeight - 5) * 20; // Extra charge for heavy items
+    }
+
+    // Free shipping threshold
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    if (subtotal >= 500 && method === 'standard') {
+        totalCost = 0; // Free shipping on orders over ₵500
+    }
+
+    return Math.round(totalCost);
+}
+
+function getShippingOptions(destination) {
+    // Mock shipping options - in real app, this would call API
+    const zone = shippingZones[destination] || shippingZones['accra'];
+
+    return Object.keys(shippingMethods).map(methodKey => {
+        const method = shippingMethods[methodKey];
+        const cost = zone.baseCost * zone.multiplier * method.costMultiplier;
+
+        // Calculate estimated delivery date
+        const today = new Date();
+        const deliveryDate = new Date(today);
+        deliveryDate.setDate(today.getDate() + method.baseDays + (zone.multiplier > 2 ? 2 : 0));
+
+        return {
+            method: methodKey,
+            name: method.name,
+            cost: Math.round(cost),
+            description: method.description,
+            estimatedDelivery: deliveryDate.toLocaleDateString(),
+            available: true
+        };
+    });
+}
+
+function getShippingZones() {
+    // Mock shipping zones - in real app, this would call API
+    return Object.keys(shippingZones).map(key => ({
+        id: key,
+        name: shippingZones[key].name,
+        baseCost: shippingZones[key].baseCost
+    }));
+}
+
+// Order Processing
+function processOrder(orderData) {
+    // Mock order processing - in real app, this would call API
+    const order = {
+        id: 'order_' + Date.now(),
+        ...orderData,
+        status: 'processing',
+        createdAt: new Date().toISOString(),
+        trackingNumber: 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase()
+    };
+
+    // Update inventory
+    orderData.items.forEach(item => {
+        updateInventory(item.id, -item.quantity);
+    });
+
+    // Add to user's order history if logged in
+    if (typeof addOrder === 'function') {
+        addOrder(order);
+    }
+
+    return order;
+}
+
+function getOrderStatus(orderId) {
+    // Mock order status - in real app, this would call API
+    const statuses = ['processing', 'shipped', 'delivered', 'cancelled'];
+    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+
+    return {
+        id: orderId,
+        status: randomStatus,
+        trackingNumber: 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        updates: [
+            {
+                status: 'processing',
+                timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                message: 'Order received and being processed'
+            },
+            {
+                status: 'shipped',
+                timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                message: 'Order shipped from warehouse'
+            }
+        ]
+    };
+}
+
+// Export for browser use
+window.addProductReview = addProductReview;
+window.getProductReviews = getProductReviews;
+window.getProductRating = getProductRating;
+window.getProductReviewCount = getProductReviewCount;
+window.updateProductRating = updateProductRating;
+window.checkInventory = checkInventory;
+window.updateInventory = updateInventory;
+window.getLowStockProducts = getLowStockProducts;
+window.calculateShipping = calculateShipping;
+window.getShippingOptions = getShippingOptions;
+window.getShippingZones = getShippingZones;
+window.processOrder = processOrder;
+window.getOrderStatus = getOrderStatus;

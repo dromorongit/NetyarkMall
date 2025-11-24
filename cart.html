@@ -14,8 +14,11 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1>Netyark Mall</h1>
-                    <p>Shop At Your Own Comfort</p>
+                    <img src="Netyark.jfif" alt="Netyark Mall Logo">
+                    <div class="logo-text">
+                        <h1>Netyark Mall</h1>
+                        <p>Shop At Your Own Comfort</p>
+                    </div>
                 </div>
                 
                 <nav class="nav">
@@ -79,6 +82,30 @@
                                 <h3>Your cart is empty</h3>
                                 <p>Looks like you haven't added any items to your cart yet.</p>
                                 <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Calculator -->
+                    <div class="shipping-calculator" id="shippingCalculator" style="display: none;">
+                        <h3>Shipping Options</h3>
+                        <div class="shipping-form">
+                            <div class="form-group">
+                                <label for="shippingZone">Delivery Location:</label>
+                                <select id="shippingZone" class="filter-select">
+                                    <option value="accra">Accra Metropolitan</option>
+                                    <option value="greater-accra">Greater Accra</option>
+                                    <option value="eastern">Eastern Region</option>
+                                    <option value="central">Central Region</option>
+                                    <option value="western">Western Region</option>
+                                    <option value="volta">Volta Region</option>
+                                    <option value="northern">Northern Region</option>
+                                    <option value="upper-east">Upper East Region</option>
+                                    <option value="upper-west">Upper West Region</option>
+                                </select>
+                            </div>
+                            <div class="shipping-options" id="shippingOptions">
+                                <!-- Shipping options will be populated by JavaScript -->
                             </div>
                         </div>
                     </div>
