@@ -139,6 +139,18 @@ function updateCartCount() {
     cartCountElements.forEach(element => {
         element.textContent = getCartItemCount();
     });
+
+    // Update mobile tab badge
+    const cartTabBadge = document.getElementById('cartTabBadge');
+    const itemCount = getCartItemCount();
+    if (cartTabBadge) {
+        if (itemCount > 0) {
+            cartTabBadge.textContent = itemCount > 99 ? '99+' : itemCount;
+            cartTabBadge.style.display = 'flex';
+        } else {
+            cartTabBadge.style.display = 'none';
+        }
+    }
 }
 
 function updateCartDisplay() {
@@ -1284,6 +1296,117 @@ function showCompareModal() {
         }
     });
 }
+
+// Mobile Navigation Handling
+function initializeMobileNavigation() {
+    const tabItems = document.querySelectorAll('.tab-item');
+
+    tabItems.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            // Remove active class from all tabs
+            tabItems.forEach(t => t.classList.remove('active'));
+
+            // Add active class to clicked tab
+            this.classList.add('active');
+
+            // Add ripple effect
+            createRippleEffect(e, this);
+        });
+    });
+
+    // Handle swipe gestures for carousel
+    initializeSwipeGestures();
+}
+
+function createRippleEffect(event, element) {
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple-effect';
+
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+
+    element.appendChild(ripple);
+
+    setTimeout(() => {
+        ripple.remove();
+    }, 600);
+}
+
+// Swipe Gesture Handling
+function initializeSwipeGestures() {
+    let startX, startY, endX, endY;
+
+    const carousel = document.querySelector('.carousel-container');
+    if (!carousel) return;
+
+    carousel.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    });
+
+    carousel.addEventListener('touchend', function(e) {
+        endX = e.changedTouches[0].clientX;
+        endY = e.changedTouches[0].clientY;
+
+        handleSwipe(startX, startY, endX, endY);
+    });
+}
+
+function handleSwipe(startX, startY, endX, endY) {
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+
+    // Check if it's a horizontal swipe (more horizontal than vertical)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+        if (deltaX > 0) {
+            // Swipe right - previous slide
+            previousSlide();
+        } else {
+            // Swipe left - next slide
+            nextSlide();
+        }
+        resetCarousel();
+    }
+}
+
+// Mobile Performance Optimizations
+function initializeMobileOptimizations() {
+    // Lazy load images
+    const images = document.querySelectorAll('img[data-src]');
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.remove('lazy');
+                observer.unobserve(img);
+            }
+        });
+    });
+
+    images.forEach(img => imageObserver.observe(img));
+
+    // Add passive event listeners for better scroll performance
+    document.addEventListener('touchstart', () => {}, { passive: true });
+    document.addEventListener('touchmove', () => {}, { passive: true });
+}
+
+// Initialize mobile features
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+
+    // Initialize mobile navigation
+    initializeMobileNavigation();
+
+    // Initialize mobile optimizations
+    initializeMobileOptimizations();
+});
 
 // Export functions for use in HTML
 window.addToCart = addToCart;
