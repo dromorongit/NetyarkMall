@@ -22,6 +22,21 @@
                 </div>
 
                 <nav class="nav">
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <input type="text" id="globalSearch" placeholder="Search products...">
+                            <button class="search-btn" id="searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                    <button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="mobile-menu-btn" aria-label="Toggle mobile menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
                     <ul class="nav-menu">
                         <li><a href="index.html" class="nav-link">Home</a></li>
                         <li class="dropdown">
@@ -51,7 +66,18 @@
                 </nav>
             </div>
         </div>
-    </header>
+
+        <!-- Mobile Search Bar (expandable) -->
+        <div class="mobile-search-container" id="mobileSearchContainer">
+            <div class="mobile-search-input-group">
+                <input type="text" id="mobileGlobalSearch" placeholder="Search products, brands, categories...">
+                <button class="mobile-search-close" id="mobileSearchClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-search-results" id="mobileSearchResults"></div>
+        </div>
+    </div></header>
 
     <!-- Profile Section -->
     <main class="main-content">
@@ -251,3 +277,4 @@
     <script src="profile.js"></script>
 </body>
 </html>
+
