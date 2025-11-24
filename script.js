@@ -135,7 +135,7 @@ function getCartItemCount() {
 }
 
 function updateCartCount() {
-    const cartCountElements = document.querySelectorAll('#cartCount');
+    const cartCountElements = document.querySelectorAll('#cartCount, #mobileCartCount');
     cartCountElements.forEach(element => {
         element.textContent = getCartItemCount();
     });
@@ -1397,12 +1397,135 @@ function initializeMobileOptimizations() {
     document.addEventListener('touchmove', () => {}, { passive: true });
 }
 
+// Mobile Search Functionality
+function initializeMobileSearch() {
+    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+    const mobileSearchClose = document.getElementById('mobileSearchClose');
+    const mobileSearchContainer = document.getElementById('mobileSearchContainer');
+    const mobileSearchInput = document.getElementById('mobileGlobalSearch');
+    const mobileSearchResults = document.getElementById('mobileSearchResults');
+
+    if (!mobileSearchBtn || !mobileSearchContainer) return;
+
+    // Open mobile search
+    mobileSearchBtn.addEventListener('click', function() {
+        mobileSearchContainer.classList.add('active');
+        if (mobileSearchInput) {
+            mobileSearchInput.focus();
+        }
+    });
+
+    // Close mobile search
+    if (mobileSearchClose) {
+        mobileSearchClose.addEventListener('click', function() {
+            mobileSearchContainer.classList.remove('active');
+            if (mobileSearchInput) {
+                mobileSearchInput.value = '';
+                mobileSearchInput.blur();
+            }
+            if (mobileSearchResults) {
+                mobileSearchResults.innerHTML = '';
+            }
+        });
+    }
+
+    // Mobile search input handling
+    if (mobileSearchInput) {
+        let mobileSearchTimeout;
+
+        mobileSearchInput.addEventListener('input', function() {
+            clearTimeout(mobileSearchTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                if (mobileSearchResults) {
+                    mobileSearchResults.style.display = 'none';
+                }
+                return;
+            }
+
+            mobileSearchTimeout = setTimeout(() => {
+                performMobileLiveSearch(query);
+            }, 300);
+        });
+
+        mobileSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    window.location.href = `categories.html?search=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+    }
+
+    // Close search when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!mobileSearchContainer.contains(e.target) && !mobileSearchBtn.contains(e.target)) {
+            mobileSearchContainer.classList.remove('active');
+            if (mobileSearchInput) {
+                mobileSearchInput.value = '';
+            }
+            if (mobileSearchResults) {
+                mobileSearchResults.innerHTML = '';
+                mobileSearchResults.style.display = 'none';
+            }
+        }
+    });
+}
+
+function performMobileLiveSearch(query) {
+    const results = searchProducts(query).slice(0, 5);
+    const mobileSearchResults = document.getElementById('mobileSearchResults');
+
+    if (!mobileSearchResults) return;
+
+    if (results.length === 0) {
+        mobileSearchResults.style.display = 'none';
+        return;
+    }
+
+    let html = '';
+    results.forEach(product => {
+        const discount = product.originalPrice > product.price ?
+            Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
+        html += `
+            <div class="mobile-search-result-item" onclick="viewProduct('${product.id}')">
+                <img src="${product.image}" alt="${product.name}">
+                <div class="mobile-search-result-info">
+                    <h4>${product.name}</h4>
+                    <div class="mobile-search-result-price">
+                        ₵${product.price.toLocaleString()}
+                        ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    // Add "View all results" option
+    html += `
+        <div class="mobile-search-result-item view-all" onclick="window.location.href='categories.html?search=${encodeURIComponent(query)}'">
+            <div class="mobile-search-result-info">
+                <h4>View all results for "${query}"</h4>
+            </div>
+        </div>
+    `;
+
+    mobileSearchResults.innerHTML = html;
+    mobileSearchResults.style.display = 'block';
+}
+
 // Initialize mobile features
 document.addEventListener('DOMContentLoaded', function() {
     // ... existing code ...
 
     // Initialize mobile navigation
     initializeMobileNavigation();
+
+    // Initialize mobile search
+    initializeMobileSearch();
 
     // Initialize mobile optimizations
     initializeMobileOptimizations();
