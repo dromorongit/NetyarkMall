@@ -3721,6 +3721,30 @@ a:hover {
         display: flex !important;
     }
 
+    /* Mobile filter tabs - horizontally scrollable */
+    .filter-tabs {
+        display: flex !important;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+    }
+
+    .filter-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-tab {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        min-width: fit-content;
+    }
+
     /* App-like layout */
     body {
         background: var(--app-bg);
