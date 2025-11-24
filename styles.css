@@ -10,6 +10,7 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden; /* Prevent horizontal scrolling at root level */
 }
 
 body {
@@ -21,6 +22,9 @@ body {
     padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    width: 100%;
+    max-width: 100vw;
 }
 
 /* Mobile App Layout */
@@ -2196,48 +2200,93 @@ a:hover {
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 10px;
+        padding: 0 8px;
+        width: 100%;
+        max-width: 100%;
     }
-    
+
     .product-grid {
         grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
-    
+
     .section-title {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
+        padding: 0 0.5rem;
     }
-    
+
     .mission-vision-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .values-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .features-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .stats-container {
         grid-template-columns: 1fr;
     }
-    
+
     .notification {
-        right: 10px;
-        left: 10px;
+        right: 8px;
+        left: 8px;
         max-width: none;
+        width: calc(100vw - 16px);
     }
-    
+
     .carousel-controls {
-        padding: 0 1rem;
+        padding: 0 0.5rem;
     }
-    
+
     .carousel-prev,
     .carousel-next {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    /* Extra small screen optimizations */
+    .main-content {
+        padding: calc(var(--mobile-header-height, var(--header-height)) + 0.5rem) 0.5rem 1rem;
+    }
+
+    .app-card,
+    .product-card {
+        margin-bottom: 0.75rem;
+        border-radius: 12px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        min-height: 44px;
+    }
+
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+
+    /* Ensure text doesn't overflow */
+    .product-title,
+    .category-content h3 {
+        font-size: 1rem;
+        line-height: 1.3;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Fix any remaining overflow issues */
+    .page-header {
+        padding: 80px 0 30px 0;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+        padding: 0 1rem;
     }
 }
 
@@ -3921,10 +3970,17 @@ a:hover {
 
 /* Mobile App Enhancements */
 @media (max-width: 768px) {
+    /* Prevent horizontal overflow */
+    * {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
     /* App-like body styling */
     body {
         background: var(--app-bg);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
     }
 
     /* Enhanced card styling */
@@ -3936,6 +3992,8 @@ a:hover {
         margin-bottom: 1rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         transform: translateZ(0); /* Hardware acceleration */
+        width: 100%;
+        max-width: 100%;
     }
 
     .app-card:hover,
@@ -3952,6 +4010,8 @@ a:hover {
         min-height: 48px;
         position: relative;
         overflow: hidden;
+        width: 100%;
+        max-width: 100%;
     }
 
     /* Better typography for mobile */
@@ -3959,6 +4019,8 @@ a:hover {
         font-weight: 700;
         letter-spacing: -0.025em;
         line-height: 1.2;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     h1 { font-size: 2rem; }
@@ -3968,10 +4030,15 @@ a:hover {
     /* Mobile-optimized spacing */
     .main-content {
         padding: calc(var(--mobile-header-height, var(--header-height)) + 1rem) 1rem 2rem;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .section {
         margin-bottom: 2rem;
+        width: 100%;
+        max-width: 100%;
     }
 
     /* Enhanced mobile modals */
@@ -3982,12 +4049,16 @@ a:hover {
         border-radius: 20px;
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
+        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
     }
 
     /* Swipe-friendly carousel */
     .carousel-slide {
         border-radius: 16px;
         overflow: hidden;
+        width: 100%;
+        max-width: 100%;
     }
 
     .carousel-overlay {
@@ -4004,6 +4075,9 @@ a:hover {
         border-radius: 12px;
         border: 1px solid #e0e0e0;
         background: var(--card-bg);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .form-group input:focus,
@@ -4020,6 +4094,29 @@ a:hover {
         margin-bottom: 1rem;
         background: var(--card-bg);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Ensure images don't overflow */
+    img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* Responsive grids */
+    .product-grid,
+    .category-grid {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Fix search input width */
+    .search-input-group input {
+        width: 100%;
+        max-width: 100%;
     }
 
     /* Mobile Header Improvements */
