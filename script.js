@@ -1303,6 +1303,16 @@ function initializeMobileNavigation() {
 
     tabItems.forEach(tab => {
         tab.addEventListener('click', function(e) {
+            // Check if profile tab and user not logged in
+            if (this.getAttribute('data-tab') === 'profile' && typeof isLoggedIn === 'function' && !isLoggedIn()) {
+                e.preventDefault();
+                showNotification('Please log in to access your profile.', 'info');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+                return;
+            }
+
             // Remove active class from all tabs
             tabItems.forEach(t => t.classList.remove('active'));
 
