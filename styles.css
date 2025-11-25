@@ -187,11 +187,15 @@ a:hover {
     -webkit-backdrop-filter: blur(10px);
 }
 
+.header .container {
+    padding-left: 0;
+}
+
 .header-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 1rem;
+    padding: 0 1rem 0 0;
     height: var(--mobile-header-height, var(--header-height));
 }
 
@@ -4165,12 +4169,16 @@ a:hover {
             height: var(--mobile-header-height, 70px);
             padding-top: max(0px, var(--safe-area-top));
         }
+
+        .header .container {
+            padding-left: 0;
+        }
     
         .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1rem;
+            padding: 0 1rem 0 0;
             height: var(--mobile-header-height, 70px);
             max-width: 1200px;
             margin: 0 auto;
