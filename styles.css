@@ -3202,6 +3202,9 @@ a:hover {
 .search-container {
     position: relative;
     margin-right: 1rem;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .search-input-group {
@@ -3219,6 +3222,8 @@ a:hover {
     width: 250px;
     font-size: 0.9rem;
     outline: none;
+    line-height: 1.4;
+    vertical-align: middle;
 }
 
 .search-btn {
