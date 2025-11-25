@@ -447,13 +447,15 @@ a:hover {
     gap: 1rem;
 }
 
-/* Desktop search bar positioning */
-.nav .search-container {
-    order: 1;
+/* Desktop header layout */
+.nav {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
 }
 
-.nav-menu {
-    order: -1;
+.nav .search-container {
+    margin-bottom: 0.5rem;
 }
 
 .nav-menu {
@@ -2091,6 +2093,10 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+    .nav {
+        flex-direction: row;
+    }
+
     .mobile-menu-btn {
         display: block;
         background: none;
