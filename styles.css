@@ -557,7 +557,7 @@ a:hover {
     height: var(--tab-bar-height);
     background: var(--card-bg);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    display: flex;
+    display: none; /* Hidden by default on desktop */
     align-items: center;
     justify-content: space-around;
     padding: 0 1rem;
