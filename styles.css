@@ -451,11 +451,12 @@ a:hover {
 .nav {
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.5rem;
+    gap: 1rem;
+    margin-top: 0.5rem;
 }
 
 .nav .search-container {
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .nav-menu {
