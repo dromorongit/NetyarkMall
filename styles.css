@@ -439,6 +439,14 @@ a:hover {
 }
 
 /* Navigation */
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 1rem;
+}
+
 .nav-menu {
     display: flex;
     list-style: none;
