@@ -450,7 +450,13 @@ a:hover {
 /* Desktop header layout */
 @media (min-width: 769px) {
     .header-content {
-        flex-direction: column;
+        position: relative;
+    }
+
+    .logo {
+        position: absolute;
+        left: 0;
+        top: 0;
     }
 
     .nav {
@@ -460,7 +466,10 @@ a:hover {
     }
 
     .nav-menu {
-        margin-top: auto;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
         justify-content: center;
         font-size: 0.85rem;
     }
