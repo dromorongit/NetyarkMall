@@ -449,8 +449,11 @@ a:hover {
 
 /* Desktop search bar positioning */
 .nav .search-container {
-    margin-left: auto;
-    margin-top: 0.5rem;
+    order: 1;
+}
+
+.nav-menu {
+    order: -1;
 }
 
 .nav-menu {
