@@ -447,6 +447,12 @@ a:hover {
     gap: 1rem;
 }
 
+/* Desktop search bar positioning */
+.nav .search-container {
+    margin-left: auto;
+    margin-top: 0.5rem;
+}
+
 .nav-menu {
     display: flex;
     list-style: none;
