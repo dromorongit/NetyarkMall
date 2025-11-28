@@ -4026,6 +4026,13 @@ a:hover {
     }
 }
 
+/* Desktop Layout Adjustments */
+@media (min-width: 769px) {
+    .search-btn {
+        display: none;
+    }
+}
+
 /* Mobile App Enhancements */
 @media (max-width: 768px) {
     /* Prevent horizontal overflow */
