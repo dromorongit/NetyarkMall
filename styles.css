@@ -573,12 +573,12 @@ a:hover {
     background: var(--card-bg);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     display: none; /* Hidden by default on desktop */
-    align-items: center;
-    justify-content: space-around;
-    padding: 0 1rem;
+    align-items: stretch;
+    padding: 0;
     z-index: 1000;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .tab-item {
@@ -586,25 +586,28 @@ a:hover {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem;
-    border-radius: 12px;
-    transition: all 0.3s ease;
+    padding: 0.5rem 0.25rem;
+    border-radius: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    min-width: 60px;
+    flex: 1;
     text-decoration: none;
     color: var(--medium-gray);
+    min-height: 60px;
+    max-width: 20%;
 }
 
 .tab-item:hover,
 .tab-item.active {
     color: var(--primary-green);
-    background: rgba(0, 128, 0, 0.1);
+    background: rgba(0, 128, 0, 0.08);
+    transform: translateY(-1px);
 }
 
 .tab-item i {
-    font-size: 1.5rem;
-    margin-bottom: 0.25rem;
-    transition: transform 0.3s ease;
+    font-size: 1.4rem;
+    margin-bottom: 0.2rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tab-item.active i {
@@ -612,15 +615,18 @@ a:hover {
 }
 
 .tab-item span {
-    font-size: 0.7rem;
-    font-weight: 500;
+    font-size: 0.65rem;
+    font-weight: 600;
     text-align: center;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
 }
 
 .tab-badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 4px;
+    right: 50%;
+    transform: translateX(50%);
     background: var(--error);
     color: var(--white);
     border-radius: 50%;
@@ -630,7 +636,9 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 700;
+    border: 2px solid var(--card-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Page Header */
@@ -4494,25 +4502,45 @@ a:hover {
     /* Mobile navigation improvements */
     .bottom-nav {
         background: var(--card-bg);
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         padding-bottom: max(0px, var(--safe-area-bottom));
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
     }
 
     .tab-item {
-        padding: 0.75rem 0.5rem;
+        padding: 0.6rem 0.25rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-height: 65px;
     }
 
+    .tab-item:hover,
     .tab-item.active {
         color: var(--primary-green);
-        background: rgba(0, 128, 0, 0.1);
+        background: rgba(0, 128, 0, 0.08);
+        transform: translateY(-2px);
     }
 
     .tab-item i {
-        font-size: 1.25rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.3rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .tab-item span {
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    .tab-badge {
+        top: 6px;
+        right: 50%;
+        transform: translateX(50%);
+        width: 20px;
+        height: 20px;
+        font-size: 0.65rem;
+        border: 2px solid var(--card-bg);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
     /* Performance optimizations */
