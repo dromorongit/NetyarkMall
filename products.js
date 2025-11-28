@@ -393,53 +393,53 @@ function getProductById(id) {
 function getCategoryData() {
     return [
         {
-            name: 'Consumer Electrics',
-            id: 'electronics',
-            image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: getProductsByCategory('electronics').length,
-            color: '#008000'
-        },
-        {
-            name: 'Clothing & Apparel',
-            id: 'fashion',
-            image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: getProductsByCategory('fashion').length,
-            color: '#FFA500'
-        },
-        {
-            name: 'Home & Kitchen',
-            id: 'home',
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+            name: 'Kitchen Appliances',
+            id: 'kitchen-appliances',
+            image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
             productCount: getProductsByCategory('home').length,
             color: '#008000'
         },
         {
-            name: 'Health & Beauty',
-            id: 'beauty',
+            name: 'Beauty & Personal Care',
+            id: 'beauty-personal-care',
             image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
             productCount: getProductsByCategory('beauty').length,
             color: '#FFA500'
         },
         {
-            name: 'Jewelry & Accessories',
-            id: 'jewelry',
-            image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: 0, // Combined with fashion
+            name: 'Photography & Content Creation Tools',
+            id: 'photography-tools',
+            image: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+            productCount: getProductsByCategory('electronics').length,
             color: '#008000'
         },
         {
-            name: 'Sports & Outdoor',
-            id: 'sports',
-            image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+            name: 'Nail Supplies',
+            id: 'nail-supplies',
+            image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
             productCount: 0,
             color: '#FFA500'
         },
         {
-            name: 'Wholesale',
-            id: 'wholesale',
-            image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: getWholesaleProducts().length,
-            color: '#FF6B35'
+            name: 'Kids & Babies',
+            id: 'kids-babies',
+            image: 'https://images.unsplash.com/photo-1515488042361-ee00b0aa5b4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+            productCount: 0,
+            color: '#008000'
+        },
+        {
+            name: 'Home Essentials',
+            id: 'home-essentials',
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+            productCount: getProductsByCategory('home').length,
+            color: '#FFA500'
+        },
+        {
+            name: 'Lighting & Home Decor',
+            id: 'lighting-home-decor',
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+            productCount: 0,
+            color: '#008000'
         }
     ];
 }

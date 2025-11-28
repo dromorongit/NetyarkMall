@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clothing & Apparel - Netyark Mall | Fashion & Style</title>
-    <meta name="description" content="Shop trendy clothing and apparel at Netyark Mall. Fashion for men, women, and kids in Accra, Ghana.">
+    <title>Home Decor & Essentials - Netyark Mall | Interior Design & Home Furnishing</title>
+    <meta name="description" content="Shop home decor and interior design items at Netyark Mall. Furniture, lighting, art, and home furnishing in Accra, Ghana.">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -21,23 +21,7 @@
                     </div>
                 </div>
                 
-                <nav class="nav">
-                    <div class="search-container">
-                        <div class="search-input-group">
-                            <input type="text" id="globalSearch" placeholder="Search products...">
-                            <button class="search-btn" id="searchBtn">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                        <div class="search-results" id="searchResults"></div>
-                    </div>
-                    <button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Search">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <button class="mobile-menu-btn" aria-label="Toggle mobile menu">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <ul class="nav-menu">
+                <nav class="nav"><button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Search"><i class="fas fa-search"></i></button><button class="mobile-menu-btn" aria-label="Toggle mobile menu"><i class="fas fa-bars"></i></button><ul class="nav-menu">
                         <li><a href="index.html" class="nav-link">Home</a></li>
                         <li class="dropdown">
                             <a href="categories.html" class="nav-link dropdown-toggle active">Categories <i class="fas fa-chevron-down"></i></a>
@@ -68,24 +52,13 @@
                 </nav>
             </div>
         </div>
-
-        <!-- Mobile Search Bar (expandable) -->
-        <div class="mobile-search-container" id="mobileSearchContainer">
-            <div class="mobile-search-input-group">
-                <input type="text" id="mobileGlobalSearch" placeholder="Search products, brands, categories...">
-                <button class="mobile-search-close" id="mobileSearchClose">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="mobile-search-results" id="mobileSearchResults"></div>
-        </div>
     </div></header>
 
     <!-- Page Header -->
     <section class="page-header category-header">
         <div class="container">
-            <h1>Clothing & Apparel</h1>
-            <p>Discover the latest fashion trends and stylish apparel</p>
+            <h1>Home Decor & Essentials</h1>
+            <p>Transform your space with beautiful and functional home decor items</p>
         </div>
     </section>
 
@@ -101,10 +74,11 @@
                             <label for="priceRange">Price Range:</label>
                             <select id="priceRange" class="filter-select">
                                 <option value="all">All Prices</option>
-                                <option value="0-100">₵0 - ₵100</option>
-                                <option value="100-500">₵100 - ₵500</option>
+                                <option value="0-200">₵0 - ₵200</option>
+                                <option value="200-500">₵200 - ₵500</option>
                                 <option value="500-1000">₵500 - ₵1,000</option>
-                                <option value="1000+">₵1,000+</option>
+                                <option value="1000-3000">₵1,000 - ₵3,000</option>
+                                <option value="3000+">₵3,000+</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -118,13 +92,14 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="productType">Product Type:</label>
-                            <select id="productType" class="filter-select">
-                                <option value="all">All Types</option>
-                                <option value="mens-fashion">Men's Fashion</option>
-                                <option value="womens-fashion">Women's Fashion</option>
-                                <option value="kids-clothing">Kids' Clothing</option>
-                                <option value="accessories">Accessories</option>
+                            <label for="roomType">Room Type:</label>
+                            <select id="roomType" class="filter-select">
+                                <option value="all">All Rooms</option>
+                                <option value="living">Living Room</option>
+                                <option value="bedroom">Bedroom</option>
+                                <option value="bathroom">Bathroom</option>
+                                <option value="kitchen">Kitchen</option>
+                                <option value="office">Office</option>
                             </select>
                         </div>
                     </div>
@@ -134,11 +109,11 @@
             <!-- Product Grid -->
             <section class="products-section">
                 <div class="section-header">
-                    <h2>Clothing & Fashion</h2>
+                    <h2>Home Decor & Essentials</h2>
                     <p class="product-count">Showing <span id="productCount">0</span> products</p>
                 </div>
                 
-                <div class="product-grid" id="clothingProducts">
+                <div class="product-grid" id="decorProducts">
                     <!-- Products will be loaded by JavaScript -->
                 </div>
 
@@ -151,29 +126,29 @@
             <!-- Category Description -->
             <section class="category-description">
                 <div class="description-content">
-                    <h2>Clothing & Apparel at Netyark Mall</h2>
-                    <p>Express your style with our extensive collection of clothing and apparel. From casual wear to formal attire, we offer trendy fashion for men, women, and children from top brands and designers.</p>
+                    <h2>Home Decor & Essentials at Netyark Mall</h2>
+                    <p>Create the perfect ambiance in your home with our carefully curated collection of decor and essential items. From statement furniture pieces to subtle decorative accents, we have everything you need to turn your house into a beautiful home.</p>
                     
                     <div class="features-grid">
                         <div class="feature-item">
-                            <i class="fas fa-tshirt"></i>
-                            <h4>Men's Fashion</h4>
-                            <p>Discover premium men's clothing including stylish shirts, tailored pants, casual wear, and sophisticated accessories designed for the modern gentleman</p>
+                            <i class="fas fa-couch"></i>
+                            <h4>Furniture & Seating</h4>
+                            <p>Comfortable and stylish furniture for every room in your home</p>
                         </div>
                         <div class="feature-item">
-                            <i class="fas fa-female"></i>
-                            <h4>Women's Fashion</h4>
-                            <p>Explore elegant dresses, trendy tops, fashionable skirts, and chic accessories that blend style, comfort, and contemporary fashion trends for women</p>
+                            <i class="fas fa-lightbulb"></i>
+                            <h4>Lighting Solutions</h4>
+                            <p>Beautiful lamps, chandeliers, and lighting fixtures to brighten your space</p>
                         </div>
                         <div class="feature-item">
-                            <i class="fas fa-child"></i>
-                            <h4>Kids' Clothing</h4>
-                            <p>Comfortable, durable, and fun clothing for children featuring playful designs, soft fabrics, and age-appropriate styles for active kids and special occasions</p>
+                            <i class="fas fa-paint-brush"></i>
+                            <h4>Art & Wall Decor</h4>
+                            <p>Inspirational artwork, mirrors, and decorative wall pieces</p>
                         </div>
                         <div class="feature-item">
-                            <i class="fas fa-shoe-prints"></i>
-                            <h4>Footwear & Accessories</h4>
-                            <p>Complete your outfit with our curated collection of shoes, sandals, bags, jewelry, and fashion accessories that add the perfect finishing touch</p>
+                            <i class="fas fa-leaf"></i>
+                            <h4>Natural Elements</h4>
+                            <p>Plants, natural materials, and organic decor for a calming atmosphere</p>
                         </div>
                     </div>
                 </div>
@@ -275,3 +250,5 @@
     <script src="category-pages.js"></script>
 </body>
 </html>
+
+
