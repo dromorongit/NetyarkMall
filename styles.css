@@ -4028,9 +4028,6 @@ a:hover {
 
 /* Desktop Layout Adjustments */
 @media (min-width: 769px) {
-    .search-btn {
-        display: none;
-    }
     .mobile-search-btn {
         display: none;
     }
