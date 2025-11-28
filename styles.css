@@ -4922,3 +4922,10 @@ a:hover {
         padding: 0.75rem;
     }
 }
+
+/* Hide bottom nav on desktop to prevent duplicate navigation buttons */
+@media (min-width: 769px) {
+    .bottom-nav {
+        display: none !important;
+    }
+}

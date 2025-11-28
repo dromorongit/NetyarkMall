@@ -170,9 +170,9 @@ function updateAuthUI() {
     // Update navigation
     const navMenus = document.querySelectorAll('.nav-menu');
     navMenus.forEach(navMenu => {
-        // Remove existing auth links
-        const existingAuthLinks = navMenu.querySelectorAll('.auth-link');
-        existingAuthLinks.forEach(link => link.remove());
+        // Remove existing login/register links
+        const existingAuthLinks = navMenu.querySelectorAll('li a[href*="login.html"], li a[href*="register.html"]');
+        existingAuthLinks.forEach(link => link.parentElement.remove());
 
         if (currentUser) {
             // Add user menu
