@@ -4031,6 +4031,9 @@ a:hover {
     .search-btn {
         display: none;
     }
+    .mobile-search-btn {
+        display: none;
+    }
 }
 
 /* Mobile App Enhancements */
