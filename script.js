@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
         case 'categories.html':
             initializeCategoriesPage();
             break;
+        case 'wholesale.html':
+            initializeWholesalePage();
+            break;
         case 'deals.html':
             initializeDealsPage();
             break;
@@ -84,7 +87,9 @@ function addToCart(productId, quantity = 1) {
             name: product.name,
             price: product.price,
             image: product.image,
-            quantity: quantity
+            quantity: quantity,
+            isWholesale: product.isWholesale || false,
+            moq: product.moq || 1
         });
     }
 
@@ -92,6 +97,62 @@ function addToCart(productId, quantity = 1) {
     updateCartCount();
     updateCartDisplay(); // Update cart display to show shipping
     showNotification(`${product.name} added to cart!`, 'success');
+}
+
+function addWholesaleToCart(productId) {
+    const product = getProductById(productId);
+    if (!product || !product.isWholesale) {
+        showNotification('Product not found or not a wholesale item.', 'error');
+        return;
+    }
+
+    const existingItem = cart.find(item => item.id === productId);
+
+    if (existingItem) {
+        // For wholesale, allow adding more but check MOQ increments
+        const moq = product.moq || 1;
+        const newQuantity = existingItem.quantity + moq;
+
+        // Check inventory
+        const inventoryCheck = typeof checkInventory === 'function' ?
+            checkInventory(productId, newQuantity) : { available: product.inStock };
+
+        if (!inventoryCheck.available) {
+            showNotification(inventoryCheck.reason || 'Cannot add more items. Insufficient stock.', 'error');
+            return;
+        }
+
+        existingItem.quantity = newQuantity;
+        showNotification(`Added ${moq} more ${product.name} to cart!`, 'success');
+    } else {
+        // First time adding wholesale item - set to MOQ
+        const moq = product.moq || 1;
+
+        // Check inventory for MOQ
+        const inventoryCheck = typeof checkInventory === 'function' ?
+            checkInventory(productId, moq) : { available: product.inStock };
+
+        if (!inventoryCheck.available) {
+            showNotification(inventoryCheck.reason || 'Cannot add item. Insufficient stock.', 'error');
+            return;
+        }
+
+        cart.push({
+            id: productId,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            quantity: moq,
+            isWholesale: true,
+            moq: moq
+        });
+
+        showNotification(`${product.name} added to cart with MOQ of ${moq}!`, 'success');
+    }
+
+    saveCart();
+    updateCartCount();
+    updateCartDisplay();
 }
 
 function removeFromCart(productId) {
@@ -107,6 +168,11 @@ function updateCartQuantity(productId, quantity) {
         if (quantity <= 0) {
             removeFromCart(productId);
         } else {
+            // For wholesale items, prevent reducing below MOQ
+            if (item.isWholesale && quantity < item.moq) {
+                showNotification(`Cannot reduce quantity below MOQ of ${item.moq} for wholesale items.`, 'warning');
+                return;
+            }
             item.quantity = quantity;
             saveCart();
             updateCartCount();
@@ -184,17 +250,22 @@ function updateCartDisplay() {
         } else {
             let cartHTML = '';
             cart.forEach(item => {
+                const isWholesale = item.isWholesale;
+                const moq = item.moq || 1;
+                const canDecrease = !isWholesale || item.quantity > moq;
+
                 cartHTML += `
-                    <div class="cart-item" data-product-id="${item.id}">
+                    <div class="cart-item ${isWholesale ? 'wholesale-item' : ''}" data-product-id="${item.id}">
                         <div class="item-image">
                             <img src="${item.image}" alt="${item.name}">
                         </div>
                         <div class="item-details">
                             <h3>${item.name}</h3>
+                            ${isWholesale ? `<small class="wholesale-indicator">Wholesale - MOQ: ${moq}</small>` : ''}
                             <p class="item-price">₵${item.price.toLocaleString()}</p>
                         </div>
                         <div class="item-quantity">
-                            <button class="quantity-btn decrease" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})">-</button>
+                            <button class="quantity-btn decrease" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})" ${!canDecrease ? 'disabled' : ''}>-</button>
                             <span class="quantity">${item.quantity}</span>
                             <button class="quantity-btn increase" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})">+</button>
                         </div>
@@ -441,6 +512,10 @@ function initializeCategoriesPage() {
     });
 }
 
+function initializeWholesalePage() {
+    loadWholesaleProducts();
+}
+
 function initializeDealsPage() {
     loadFeaturedDeals();
     setupDealFilters();
@@ -535,6 +610,14 @@ function loadFeaturedDeals() {
     container.innerHTML = deals.map(product => createDealCard(product)).join('');
 }
 
+function loadWholesaleProducts() {
+    const container = document.getElementById('wholesaleGrid');
+    if (!container) return;
+
+    const wholesaleProducts = getWholesaleProducts();
+    container.innerHTML = wholesaleProducts.map(product => createWholesaleProductCard(product)).join('');
+}
+
 function loadSuggestedProducts() {
     const container = document.getElementById('suggestedProducts');
     if (!container) return;
@@ -616,9 +699,72 @@ function createCategoryCard(category) {
     `;
 }
 
+function createWholesaleProductCard(product) {
+    const discount = product.originalPrice > product.price ?
+        Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
+    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(product.id);
+
+    // Check inventory status
+    const inventoryStatus = typeof checkInventory === 'function' ?
+        checkInventory(product.id) : { available: product.inStock, stockCount: product.stockCount };
+
+    const stockStatus = !inventoryStatus.available ? 'out-of-stock' :
+                       inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
+
+    const stockText = !inventoryStatus.available ? 'Out of Stock' :
+                     inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : 'In Stock';
+
+    return `
+        <div class="product-card wholesale-card ${stockStatus}" data-product-id="${product.id}">
+            <div class="product-badge wholesale">WHOLESALE</div>
+            ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
+            <div class="stock-indicator ${stockStatus}">${stockText}</div>
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                <div class="product-overlay">
+                    <button class="quick-view-btn" onclick="quickView('${product.id}')">Quick View</button>
+                    <button class="add-to-cart-btn" onclick="addWholesaleToCart('${product.id}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
+                </div>
+            </div>
+            <div class="product-info">
+                <h3 class="product-title">${product.name}</h3>
+                <p class="product-description">${product.description}</p>
+                <div class="wholesale-moq">
+                    <span class="moq-label">MOQ: ${product.moq} units</span>
+                </div>
+                <div class="product-rating">
+                    <div class="stars">
+                        ${generateStarRating(product.rating)}
+                    </div>
+                    <span class="rating-text">${product.rating} (${product.reviews})</span>
+                </div>
+                <div class="product-price">
+                    <span class="current-price">₵${product.price.toLocaleString()}</span>
+                    ${product.originalPrice > product.price ?
+                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                    <div class="wholesale-savings">
+                        <small>Per unit pricing</small>
+                    </div>
+                </div>
+                <div class="product-actions">
+                    <button class="action-btn compare-btn" onclick="addToCompare('${product.id}')" title="Compare">
+                        <i class="fas fa-balance-scale"></i>
+                    </button>
+                    <button class="action-btn wishlist-btn ${isInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${product.id}')" title="Wishlist">
+                        <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function createDealCard(product) {
     const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
-    
+
     return `
         <div class="deal-card" data-product-id="${product.id}">
             <div class="deal-badge">${discount}% OFF</div>
@@ -1543,6 +1689,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Export functions for use in HTML
 window.addToCart = addToCart;
+window.addWholesaleToCart = addWholesaleToCart;
 window.removeFromCart = removeFromCart;
 window.updateCartQuantity = updateCartQuantity;
 window.clearCart = clearCart;

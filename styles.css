@@ -4748,3 +4748,129 @@ a:hover {
         display: none !important;
     }
 }
+
+/* Wholesale Styles */
+.wholesale-card {
+    border: 2px solid #FF6B35;
+    position: relative;
+}
+
+.wholesale-card .product-badge.wholesale {
+    background: linear-gradient(135deg, #FF6B35 0%, #ff5722 100%);
+    color: var(--white);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.wholesale-moq {
+    background: rgba(255, 107, 53, 0.1);
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+    text-align: center;
+    border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.moq-label {
+    color: #FF6B35;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.wholesale-savings {
+    font-size: 0.8rem;
+    color: var(--medium-gray);
+    margin-top: 0.25rem;
+}
+
+.wholesale-banner {
+    background: linear-gradient(135deg, #FF6B35 0%, #ff5722 100%);
+    color: var(--white);
+    padding: 3rem 2rem;
+    text-align: center;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.wholesale-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.wholesale-content p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.wholesale-features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.wholesale-features .feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    min-width: 120px;
+}
+
+.wholesale-features .feature i {
+    font-size: 2rem;
+    color: var(--white);
+}
+
+.wholesale-features .feature span {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Wholesale Cart Item */
+.cart-item.wholesale-item {
+    border-left: 4px solid #FF6B35;
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%);
+}
+
+.wholesale-indicator {
+    color: #FF6B35;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Mobile Wholesale Styles */
+@media (max-width: 768px) {
+    .wholesale-banner {
+        padding: 2rem 1rem;
+        margin: 1rem;
+    }
+
+    .wholesale-content h2 {
+        font-size: 2rem;
+    }
+
+    .wholesale-features {
+        gap: 1rem;
+    }
+
+    .wholesale-features .feature {
+        min-width: 100px;
+        padding: 0.75rem;
+    }
+
+    .wholesale-moq {
+        margin: 0.75rem 0;
+        padding: 0.75rem;
+    }
+}
