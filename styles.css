@@ -746,6 +746,19 @@ a:hover {
     object-fit: cover;
 }
 
+/* Mobile carousel image adjustments */
+@media (max-width: 768px) {
+    .carousel-slide img[src*="staff2.jpg"] {
+        object-fit: contain;
+        height: 120%;
+    }
+
+    .carousel-slide img[src*="dee2.jpg"],
+    .carousel-slide img[src*="staff.jpg"] {
+        transform: scale(1.3);
+    }
+}
+
 .carousel-overlay {
     position: absolute;
     top: 0;
