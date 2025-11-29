@@ -2003,10 +2003,7 @@ function initializeLiveChat() {
     // Load chat history from localStorage
     loadChatHistory();
 
-    // Chat icon click
-    liveChatIcon.addEventListener('click', function() {
-        toggleChatModal();
-    });
+    // Chat icon click is now handled in addDragFunctionality to avoid conflicts
 
     // Close chat modal
     if (chatClose) {
@@ -2295,6 +2292,7 @@ function renderChatHistory() {
 // Drag functionality for live chat icon
 function addDragFunctionality(element) {
     let isDragging = false;
+    let hasDragged = false;
     let startX, startY, initialX, initialY;
     let currentX, currentY;
 
@@ -2319,9 +2317,19 @@ function addDragFunctionality(element) {
     document.addEventListener('touchmove', drag, { passive: false });
     document.addEventListener('touchend', stopDrag);
 
+    // Handle click event separately to avoid conflict with drag
+    element.addEventListener('click', function(e) {
+        // Only toggle modal if we haven't dragged
+        if (!hasDragged) {
+            toggleChatModal();
+        }
+        hasDragged = false; // Reset for next interaction
+    });
+
     function startDrag(e) {
         e.preventDefault();
         isDragging = true;
+        hasDragged = false; // Reset drag flag
 
         // Add dragging class for styling
         element.classList.add('dragging');
@@ -2355,10 +2363,16 @@ function addDragFunctionality(element) {
             clientY = e.touches[0].clientY;
         }
 
-        // Calculate new position
+        // Calculate movement
         const deltaX = clientX - startX;
         const deltaY = clientY - startY;
 
+        // Check if we've moved enough to consider this a drag (prevent accidental drags)
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+            hasDragged = true;
+        }
+
+        // Calculate new position
         currentX = initialX + deltaX;
         currentY = initialY + deltaY;
 
