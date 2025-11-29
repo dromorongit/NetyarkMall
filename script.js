@@ -1982,3 +1982,317 @@ function processCheckout(form) {
     // Close modal
     form.closest('.checkout-modal').remove();
 }
+
+// Live Chat Functionality
+let chatMessages = [];
+let chatNotificationInterval;
+let lastChatActivity = Date.now();
+
+function initializeLiveChat() {
+    const liveChatIcon = document.getElementById('liveChatIcon');
+    const liveChatModal = document.getElementById('liveChatModal');
+    const chatClose = document.getElementById('chatClose');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const chatNotification = document.getElementById('chatNotification');
+    const openChatBtn = document.getElementById('openChatBtn');
+    const dismissNotificationBtn = document.getElementById('dismissNotificationBtn');
+
+    if (!liveChatIcon || !liveChatModal) return;
+
+    // Load chat history from localStorage
+    loadChatHistory();
+
+    // Chat icon click
+    liveChatIcon.addEventListener('click', function() {
+        toggleChatModal();
+    });
+
+    // Close chat modal
+    if (chatClose) {
+        chatClose.addEventListener('click', function() {
+            closeChatModal();
+        });
+    }
+
+    // Send message on button click
+    if (chatSendBtn) {
+        chatSendBtn.addEventListener('click', function() {
+            sendMessage();
+        });
+    }
+
+    // Send message on Enter key
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    // Notification buttons
+    if (openChatBtn) {
+        openChatBtn.addEventListener('click', function() {
+            openChatModal();
+            hideChatNotification();
+        });
+    }
+
+    if (dismissNotificationBtn) {
+        dismissNotificationBtn.addEventListener('click', function() {
+            hideChatNotification();
+        });
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        if (liveChatModal && liveChatModal.classList.contains('show')) {
+            if (!liveChatModal.contains(e.target) && !liveChatIcon.contains(e.target)) {
+                closeChatModal();
+            }
+        }
+    });
+
+    // Start notification timer
+    startChatNotificationTimer();
+
+    // Update chat timestamp
+    updateChatTimestamp();
+}
+
+function toggleChatModal() {
+    const liveChatModal = document.getElementById('liveChatModal');
+    if (liveChatModal.classList.contains('show')) {
+        closeChatModal();
+    } else {
+        openChatModal();
+    }
+}
+
+function openChatModal() {
+    const liveChatModal = document.getElementById('liveChatModal');
+    const chatInput = document.getElementById('chatInput');
+
+    if (liveChatModal) {
+        liveChatModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        // Focus on input
+        if (chatInput) {
+            setTimeout(() => chatInput.focus(), 100);
+        }
+
+        // Reset notification badge
+        resetChatNotificationBadge();
+
+        // Update activity
+        lastChatActivity = Date.now();
+    }
+}
+
+function closeChatModal() {
+    const liveChatModal = document.getElementById('liveChatModal');
+    if (liveChatModal) {
+        liveChatModal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function sendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    if (!chatInput) return;
+
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    // Add user message
+    addMessage('user', message);
+    chatInput.value = '';
+
+    // Update activity
+    lastChatActivity = Date.now();
+
+    // Simulate support response after delay
+    setTimeout(() => {
+        const responses = [
+            "Thank you for your message! Our support team will get back to you shortly.",
+            "I understand your concern. Let me connect you with a specialist.",
+            "Thanks for reaching out! How else can I assist you today?",
+            "We're here to help! Is there anything specific you'd like to know about our products?",
+            "Thank you for your patience. A support agent will respond soon.",
+            "I appreciate you contacting us. Let me help you with that.",
+            "Thanks for your message! We're working on getting you a response.",
+            "I see you've reached out. Our team is reviewing your message now."
+        ];
+
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        addMessage('support', randomResponse);
+    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+}
+
+function addMessage(type, content) {
+    const chatMessagesContainer = document.getElementById('chatMessages');
+    if (!chatMessagesContainer) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    if (type === 'support') {
+        messageDiv.innerHTML = `
+            <strong>Netyark Support</strong><br>
+            ${content}
+            <div class="message-time">${timestamp}</div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            ${content}
+            <div class="message-time">${timestamp}</div>
+        `;
+    }
+
+    chatMessagesContainer.appendChild(messageDiv);
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
+    // Save to chat history
+    chatMessages.push({
+        type: type,
+        content: content,
+        timestamp: Date.now()
+    });
+    saveChatHistory();
+
+    // Update timestamp display
+    updateChatTimestamp();
+}
+
+function updateChatTimestamp() {
+    const chatTimestamp = document.getElementById('chatTimestamp');
+    if (!chatTimestamp) return;
+
+    if (chatMessages.length === 0) {
+        chatTimestamp.textContent = 'Just now';
+        return;
+    }
+
+    const lastMessage = chatMessages[chatMessages.length - 1];
+    const timeDiff = Date.now() - lastMessage.timestamp;
+    const minutes = Math.floor(timeDiff / (1000 * 60));
+
+    if (minutes < 1) {
+        chatTimestamp.textContent = 'Just now';
+    } else if (minutes < 60) {
+        chatTimestamp.textContent = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else {
+        const hours = Math.floor(minutes / 60);
+        chatTimestamp.textContent = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    }
+}
+
+function startChatNotificationTimer() {
+    // Show notification every 6-7 minutes (360000-420000 ms)
+    function showPeriodicNotification() {
+        const timeSinceLastActivity = Date.now() - lastChatActivity;
+        const sixMinutes = 6 * 60 * 1000;
+
+        // Only show if user hasn't been active in chat for 6+ minutes
+        if (timeSinceLastActivity > sixMinutes) {
+            showChatNotification();
+        }
+
+        // Schedule next notification (6-7 minutes from now)
+        const nextInterval = 360000 + Math.random() * 60000; // 6-7 minutes
+        chatNotificationInterval = setTimeout(showPeriodicNotification, nextInterval);
+    }
+
+    // Start the cycle
+    const initialDelay = 360000 + Math.random() * 60000; // 6-7 minutes
+    chatNotificationInterval = setTimeout(showPeriodicNotification, initialDelay);
+}
+
+function showChatNotification() {
+    const chatNotification = document.getElementById('chatNotification');
+    if (!chatNotification) return;
+
+    chatNotification.classList.add('show');
+
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+        hideChatNotification();
+    }, 10000);
+}
+
+function hideChatNotification() {
+    const chatNotification = document.getElementById('chatNotification');
+    if (chatNotification) {
+        chatNotification.classList.remove('show');
+    }
+}
+
+function resetChatNotificationBadge() {
+    const badge = document.getElementById('chatNotificationBadge');
+    if (badge) {
+        badge.style.display = 'none';
+    }
+}
+
+function loadChatHistory() {
+    const saved = localStorage.getItem('chatHistory');
+    if (saved) {
+        chatMessages = JSON.parse(saved);
+        renderChatHistory();
+    }
+}
+
+function saveChatHistory() {
+    localStorage.setItem('chatHistory', JSON.stringify(chatMessages.slice(-50))); // Keep last 50 messages
+}
+
+function renderChatHistory() {
+    const chatMessagesContainer = document.getElementById('chatMessages');
+    if (!chatMessagesContainer) return;
+
+    chatMessagesContainer.innerHTML = '';
+
+    // Add welcome message if no history
+    if (chatMessages.length === 0) {
+        addMessage('support', 'Hi there! 👋 Welcome to Netyark Mall! How can we help you today?');
+        return;
+    }
+
+    // Render existing messages
+    chatMessages.forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${msg.type}`;
+
+        const timestamp = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        if (msg.type === 'support') {
+            messageDiv.innerHTML = `
+                <strong>Netyark Support</strong><br>
+                ${msg.content}
+                <div class="message-time">${timestamp}</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                ${msg.content}
+                <div class="message-time">${timestamp}</div>
+            `;
+        }
+
+        chatMessagesContainer.appendChild(messageDiv);
+    });
+
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+// Initialize live chat when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing initialization code ...
+
+    // Initialize live chat
+    initializeLiveChat();
+});
