@@ -210,6 +210,7 @@ a:hover {
 .mobile-logo-section .logo {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.75rem;
 }
 
@@ -4933,27 +4934,29 @@ a:hover {
 
     /* Desktop header adjustments */
     .header-content {
-        flex-direction: row;
+        flex-direction: column;
         align-items: center;
-        justify-content: space-between;
-        padding: 0 20px;
+        padding: 10px 20px;
+        position: relative;
     }
 
     .logo {
         margin-top: 0;
+        margin-bottom: 25px;
+        justify-content: center;
     }
 
     .logo img {
-        height: 85px; /* Scaled up */
+        height: 75px; /* Scaled down a bit */
     }
 
     .logo h1 {
-        font-size: 2.2rem; /* Larger and bolder */
+        font-size: 2rem; /* Reduced a little */
         font-weight: 800;
     }
 
     .logo p {
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 600;
     }
 
@@ -4961,13 +4964,15 @@ a:hover {
         flex-direction: row;
         align-items: center;
         gap: 2rem;
-        width: auto;
-        flex: 1;
-        justify-content: flex-end;
+        width: 100%;
+        justify-content: center;
     }
 
     .search-container {
         display: flex;
+        position: absolute;
+        top: 70px;
+        right: 20px;
     }
 
     .mobile-menu-btn {
