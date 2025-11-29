@@ -837,7 +837,7 @@ function showNotification(message, type = 'info') {
 }
 
 function navigateToCategory(categoryId) {
-    window.location.href = `categories.html#${categoryId}`;
+    window.location.href = `${categoryId}.html`;
 }
 
 function quickView(productId) {

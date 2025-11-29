@@ -21,31 +21,48 @@
                     </div>
                 </div>
                 
-                <nav class="nav"><button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Search"><i class="fas fa-search"></i></button><button class="mobile-menu-btn" aria-label="Toggle mobile menu"><i class="fas fa-bars"></i></button><ul class="nav-menu">
-                        <li><a href="index.html" class="nav-link">Home</a></li>
-                        <li class="dropdown">
-                            <a href="categories.html" class="nav-link dropdown-toggle active">Categories <i class="fas fa-chevron-down"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="categories.html#kitchen-appliances">Kitchen Appliances</a></li>
-                                <li><a href="categories.html#beauty-personal-care">Beauty & Personal Care</a></li>
-                                <li><a href="categories.html#photography-tools">Photography & Content Creation Tools</a></li>
-                                <li><a href="categories.html#nail-supplies">Nail Supplies</a></li>
-                                <li><a href="categories.html#kids-babies">Kids & Babies</a></li>
-                                <li><a href="categories.html#home-essentials">Home Essentials</a></li>
-                                <li><a href="categories.html#lighting-home-decor">Lighting & Home Decor</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="about.html" class="nav-link">About Us</a></li>
-                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
-                        <li><a href="cart.html" class="nav-link cart-link">
-                            <i class="fas fa-shopping-cart"></i> Cart 
-                            <span class="cart-count" id="cartCount">0</span>
-                        </a></li>
-                        <li><a href="contact.html" class="nav-link">Contact</a></li>
-                        <li><a href="login.html" class="nav-link">Login</a></li>
-                        <li><a href="register.html" class="nav-link">Register</a></li>
-                    </ul>
-                </nav>
+               <nav class="nav">
+                   <div class="search-container">
+                       <div class="search-input-group">
+                           <input type="text" id="globalSearch" placeholder="Search products...">
+                           <button class="search-btn" id="searchBtn">
+                               <i class="fas fa-search"></i>
+                           </button>
+                       </div>
+                       <div class="search-results" id="searchResults"></div>
+                   </div>
+                   <button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Search">
+                       <i class="fas fa-search"></i>
+                   </button>
+                   <button class="mobile-menu-btn" aria-label="Toggle mobile menu">
+                       <i class="fas fa-bars"></i>
+                   </button>
+                   <ul class="nav-menu">
+                       <li><a href="index.html" class="nav-link">Home</a></li>
+                       <li class="dropdown">
+                           <a href="#" class="nav-link dropdown-toggle">Categories <i class="fas fa-chevron-down"></i></a>
+                           <ul class="dropdown-menu">
+                               <li><a href="kitchen-appliances.html">Kitchen Appliances</a></li>
+                               <li><a href="beauty-personal-care.html">Beauty & Personal Care</a></li>
+                               <li><a href="photography-content-creation-tools.html">Photography & Content Creation Tools</a></li>
+                               <li><a href="nail-supplies.html">Nail Supplies</a></li>
+                               <li><a href="kids-babies.html">Kids & Babies</a></li>
+                               <li><a href="home-essentials.html">Home Essentials</a></li>
+                               <li><a href="lighting-home-decor.html">Lighting & Home Decor</a></li>
+                           </ul>
+                       </li>
+                       <li><a href="wholesale.html" class="nav-link">Wholesale</a></li>
+                       <li><a href="about.html" class="nav-link">About Us</a></li>
+                       <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                       <li><a href="cart.html" class="nav-link cart-link">
+                           <i class="fas fa-shopping-cart"></i> Cart
+                           <span class="cart-count" id="cartCount">0</span>
+                       </a></li>
+                       <li><a href="contact.html" class="nav-link">Contact</a></li>
+                       <li><a href="login.html" class="nav-link">Login</a></li>
+                       <li><a href="register.html" class="nav-link">Register</a></li>
+                   </ul>
+               </nav>
             </div>
         </div>
     </div></header>

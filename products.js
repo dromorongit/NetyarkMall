@@ -408,7 +408,7 @@ function getCategoryData() {
         },
         {
             name: 'Photography & Content Creation Tools',
-            id: 'photography-tools',
+            id: 'photography-content-creation-tools',
             image: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
             productCount: getProductsByCategory('electronics').length,
             color: '#008000'
