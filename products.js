@@ -29,8 +29,28 @@ async function fetchProducts(forceRefresh = false) {
     const response = await fetch(`${API_BASE}/products`);
     console.log('API response status:', response.status);
     if (response.ok) {
-      productCache = await response.json();
-      console.log('Fetched products:', productCache.length, 'items');
+      const apiProducts = await response.json();
+      console.log('Fetched API products:', apiProducts.length, 'items');
+
+      // Merge with legacy products to ensure all products are available
+      const legacyProducts = [];
+      Object.values(productDatabase).forEach(category => {
+        if (Array.isArray(category)) {
+          legacyProducts.push(...category);
+        }
+      });
+
+      // Combine API and legacy products, preferring API products for duplicates
+      const combinedProducts = [...apiProducts];
+      legacyProducts.forEach(legacyProduct => {
+        const exists = combinedProducts.find(p => p.id === legacyProduct.id || p._id === legacyProduct.id);
+        if (!exists) {
+          combinedProducts.push(legacyProduct);
+        }
+      });
+
+      productCache = combinedProducts;
+      console.log('Combined products:', productCache.length, 'items');
       return productCache;
     } else {
       console.error('API response not ok:', response.status, response.statusText);
