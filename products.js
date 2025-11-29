@@ -1,7 +1,50 @@
 // Product data for Netyark Mall E-commerce Website
 // All prices in Ghana Cedis (₵)
 
-// Sample product database with enhanced inventory
+// API Base URL - configure for your admin system domain
+// For local development: http://localhost:5000/api
+// For Railway deployment: https://your-railway-project.up.railway.app/api
+// For production: https://aims-netyarkmall.up.railway.app/api (replace with your actual Railway URL)
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:5000/api'
+  : 'https://aims-netyarkmall.up.railway.app/api'; // Replace with your actual Railway URL after deployment
+
+// Cache for products
+let productCache = null;
+let categoriesCache = null;
+
+// Fetch products from API
+async function fetchProducts() {
+  if (productCache) return productCache;
+
+  try {
+    const response = await fetch(`${API_BASE}/products`);
+    if (response.ok) {
+      productCache = await response.json();
+      return productCache;
+    }
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+
+  // Fallback to empty array if API fails
+  return [];
+}
+
+// Fetch wholesale products from API
+async function fetchWholesaleProducts() {
+  try {
+    const response = await fetch(`${API_BASE}/products/wholesale`);
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (error) {
+    console.error('Error fetching wholesale products:', error);
+  }
+  return [];
+}
+
+// Legacy product database for fallback (keeping for compatibility)
 const productDatabase = {
     // Electronics
     smartphones: [
@@ -355,38 +398,41 @@ const productDatabase = {
 };
 
 // Get all products as a flat array
-function getAllProducts() {
-    return Object.values(productDatabase).flat();
+async function getAllProducts() {
+    const products = await fetchProducts();
+    return products;
 }
 
 // Get products by category
-function getProductsByCategory(category) {
-    return Object.values(productDatabase)
-        .flat()
-        .filter(product => product.category === category);
+async function getProductsByCategory(category) {
+    const products = await fetchProducts();
+    return products.filter(product => product.category === category);
 }
 
 // Get new arrivals (products marked as new)
-function getNewArrivals() {
-    return getAllProducts().filter(product => product.isNew);
+async function getNewArrivals() {
+    const products = await getAllProducts();
+    return products.filter(product => product.isNew);
 }
 
 // Get wholesale products
-function getWholesaleProducts() {
-    return productDatabase.wholesale || [];
+async function getWholesaleProducts() {
+    return await fetchWholesaleProducts();
 }
 
 // Get fast-selling items (products with high review count and good ratings)
-function getFastSellingItems() {
-    return getAllProducts()
+async function getFastSellingItems() {
+    const products = await getAllProducts();
+    return products
         .filter(product => product.reviews > 50 && product.rating >= 4.0)
         .sort((a, b) => b.reviews - a.reviews)
         .slice(0, 8);
 }
 
 // Get products by ID
-function getProductById(id) {
-    return getAllProducts().find(product => product.id === id);
+async function getProductById(id) {
+    const products = await getAllProducts();
+    return products.find(product => product.id === id);
 }
 
 // Get category data for the homepage category grid
@@ -445,9 +491,10 @@ function getCategoryData() {
 }
 
 // Search products
-function searchProducts(query) {
+async function searchProducts(query) {
+    const products = await getAllProducts();
     const lowercaseQuery = query.toLowerCase();
-    return getAllProducts().filter(product => 
+    return products.filter(product =>
         product.name.toLowerCase().includes(lowercaseQuery) ||
         product.description.toLowerCase().includes(lowercaseQuery) ||
         product.category.toLowerCase().includes(lowercaseQuery)
@@ -455,8 +502,8 @@ function searchProducts(query) {
 }
 
 // Get suggested products for cart page
-function getSuggestedProducts(currentProductIds = []) {
-    const allProducts = getAllProducts();
+async function getSuggestedProducts(currentProductIds = []) {
+    const allProducts = await getAllProducts();
     return allProducts
         .filter(product => !currentProductIds.includes(product.id))
         .sort(() => 0.5 - Math.random()) // Shuffle

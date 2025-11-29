@@ -51,8 +51,8 @@ function initializeCart() {
     updateCartCount();
 }
 
-function addToCart(productId, quantity = 1) {
-    const product = getProductById(productId);
+async function addToCart(productId, quantity = 1) {
+    const product = await getProductById(productId);
     if (!product) {
         console.error('Product not found:', productId);
         showNotification('Product not found.', 'error');
@@ -99,8 +99,8 @@ function addToCart(productId, quantity = 1) {
     showNotification(`${product.name} added to cart!`, 'success');
 }
 
-function addWholesaleToCart(productId) {
-    const product = getProductById(productId);
+async function addWholesaleToCart(productId) {
+    const product = await getProductById(productId);
     if (!product || !product.isWholesale) {
         showNotification('Product not found or not a wholesale item.', 'error');
         return;
@@ -557,7 +557,7 @@ function initializeContactPage() {
 }
 
 // Product loading functions
-function loadNewArrivals() {
+async function loadNewArrivals() {
     console.log('Loading new arrivals...');
     const container = document.getElementById('newArrivals');
     if (!container) {
@@ -565,13 +565,18 @@ function loadNewArrivals() {
         return;
     }
 
-    const newArrivals = getNewArrivals().slice(0, 8);
-    console.log('New arrivals products:', newArrivals);
-    container.innerHTML = newArrivals.map(product => createProductCard(product)).join('');
-    console.log('New arrivals loaded successfully');
+    try {
+        const newArrivals = (await getNewArrivals()).slice(0, 8);
+        console.log('New arrivals products:', newArrivals);
+        container.innerHTML = newArrivals.map(product => createProductCard(product)).join('');
+        console.log('New arrivals loaded successfully');
+    } catch (error) {
+        console.error('Error loading new arrivals:', error);
+        container.innerHTML = '<p>Error loading products. Please try again later.</p>';
+    }
 }
 
-function loadFastSellingItems() {
+async function loadFastSellingItems() {
     console.log('Loading fast selling items...');
     const container = document.getElementById('fastSelling');
     if (!container) {
@@ -579,13 +584,18 @@ function loadFastSellingItems() {
         return;
     }
 
-    const fastSelling = getFastSellingItems().slice(0, 8);
-    console.log('Fast selling products:', fastSelling);
-    container.innerHTML = fastSelling.map(product => createProductCard(product)).join('');
-    console.log('Fast selling items loaded successfully');
+    try {
+        const fastSelling = (await getFastSellingItems()).slice(0, 8);
+        console.log('Fast selling products:', fastSelling);
+        container.innerHTML = fastSelling.map(product => createProductCard(product)).join('');
+        console.log('Fast selling items loaded successfully');
+    } catch (error) {
+        console.error('Error loading fast selling items:', error);
+        container.innerHTML = '<p>Error loading products. Please try again later.</p>';
+    }
 }
 
-function loadCategoryHighlights() {
+async function loadCategoryHighlights() {
     console.log('Loading category highlights...');
     const container = document.getElementById('categoryGrid');
     if (!container) {
@@ -593,10 +603,15 @@ function loadCategoryHighlights() {
         return;
     }
 
-    const categories = getCategoryData().slice(0, 6);
-    console.log('Categories data:', categories);
-    container.innerHTML = categories.map(category => createCategoryCard(category)).join('');
-    console.log('Category highlights loaded successfully');
+    try {
+        const categories = getCategoryData().slice(0, 6);
+        console.log('Categories data:', categories);
+        container.innerHTML = categories.map(category => createCategoryCard(category)).join('');
+        console.log('Category highlights loaded successfully');
+    } catch (error) {
+        console.error('Error loading category highlights:', error);
+        container.innerHTML = '<p>Error loading categories. Please try again later.</p>';
+    }
 }
 
 function loadFeaturedDeals() {
@@ -610,21 +625,31 @@ function loadFeaturedDeals() {
     container.innerHTML = deals.map(product => createDealCard(product)).join('');
 }
 
-function loadWholesaleProducts() {
+async function loadWholesaleProducts() {
     const container = document.getElementById('wholesaleGrid');
     if (!container) return;
 
-    const wholesaleProducts = getWholesaleProducts();
-    container.innerHTML = wholesaleProducts.map(product => createWholesaleProductCard(product)).join('');
+    try {
+        const wholesaleProducts = await getWholesaleProducts();
+        container.innerHTML = wholesaleProducts.map(product => createWholesaleProductCard(product)).join('');
+    } catch (error) {
+        console.error('Error loading wholesale products:', error);
+        container.innerHTML = '<p>Error loading wholesale products. Please try again later.</p>';
+    }
 }
 
-function loadSuggestedProducts() {
+async function loadSuggestedProducts() {
     const container = document.getElementById('suggestedProducts');
     if (!container) return;
 
-    const currentProductIds = cart.map(item => item.id);
-    const suggestions = getSuggestedProducts(currentProductIds);
-    container.innerHTML = suggestions.map(product => createProductCard(product)).join('');
+    try {
+        const currentProductIds = cart.map(item => item.id);
+        const suggestions = await getSuggestedProducts(currentProductIds);
+        container.innerHTML = suggestions.map(product => createProductCard(product)).join('');
+    } catch (error) {
+        console.error('Error loading suggested products:', error);
+        container.innerHTML = '<p>Error loading suggestions. Please try again later.</p>';
+    }
 }
 
 // Create HTML elements
@@ -840,8 +865,8 @@ function navigateToCategory(categoryId) {
     window.location.href = `${categoryId}.html`;
 }
 
-function quickView(productId) {
-    const product = getProductById(productId);
+async function quickView(productId) {
+    const product = await getProductById(productId);
     if (!product) return;
 
     // Create modal
@@ -1063,16 +1088,34 @@ function startCountdownTimer() {
 function setupContactForm() {
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
+        contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             // Get form data
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
-            
-            // Simulate form submission
-            showNotification('Thank you for your message! We\'ll get back to you soon.', 'success');
-            this.reset();
+
+            try {
+                // Send message to API
+                const response = await fetch(`${window.location.hostname === 'localhost' ? 'http://localhost:5000/api/messages' : 'https://aims-netyarkmall.up.railway.app/api/messages'}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender: data.name || 'Anonymous',
+                        message: `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n\n${data.message}`
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('Thank you for your message! We\'ll get back to you soon.', 'success');
+                    this.reset();
+                } else {
+                    showNotification('Failed to send message. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showNotification('Failed to send message. Please try again.', 'error');
+            }
         });
     }
 }
@@ -1206,47 +1249,52 @@ function performSearch() {
     }
 }
 
-function performLiveSearch(query) {
-    const results = searchProducts(query).slice(0, 5); // Limit to 5 results
-    const searchResults = document.getElementById('searchResults');
+async function performLiveSearch(query) {
+    try {
+        const results = (await searchProducts(query)).slice(0, 5); // Limit to 5 results
+        const searchResults = document.getElementById('searchResults');
 
-    if (results.length === 0) {
-        searchResults.style.display = 'none';
-        return;
-    }
+        if (results.length === 0) {
+            searchResults.style.display = 'none';
+            return;
+        }
 
-    let html = '';
-    results.forEach(product => {
-        const discount = product.originalPrice > product.price ?
-            Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+        let html = '';
+        results.forEach(product => {
+            const discount = product.originalPrice > product.price ?
+                Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-        html += `
-            <div class="search-result-item" onclick="viewProduct('${product.id}')">
-                <div class="search-result-image">
-                    <img src="${product.image}" alt="${product.name}">
-                </div>
-                <div class="search-result-info">
-                    <h4>${product.name}</h4>
-                    <div class="search-result-price">
-                        ₵${product.price.toLocaleString()}
-                        ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+            html += `
+                <div class="search-result-item" onclick="viewProduct('${product.id}')">
+                    <div class="search-result-image">
+                        <img src="${product.image}" alt="${product.name}">
                     </div>
+                    <div class="search-result-info">
+                        <h4>${product.name}</h4>
+                        <div class="search-result-price">
+                            ₵${product.price.toLocaleString()}
+                            ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Add "View all results" link
+        html += `
+            <div class="search-result-item view-all" onclick="performSearch()">
+                <div class="search-result-info">
+                    <h4>View all results for "${query}"</h4>
                 </div>
             </div>
         `;
-    });
 
-    // Add "View all results" link
-    html += `
-        <div class="search-result-item view-all" onclick="performSearch()">
-            <div class="search-result-info">
-                <h4>View all results for "${query}"</h4>
-            </div>
-        </div>
-    `;
-
-    searchResults.innerHTML = html;
-    searchResults.style.display = 'block';
+        searchResults.innerHTML = html;
+        searchResults.style.display = 'block';
+    } catch (error) {
+        console.error('Error performing live search:', error);
+        document.getElementById('searchResults').style.display = 'none';
+    }
 }
 
 function viewProduct(productId) {
@@ -1630,47 +1678,53 @@ function initializeMobileSearch() {
     });
 }
 
-function performMobileLiveSearch(query) {
-    const results = searchProducts(query).slice(0, 5);
-    const mobileSearchResults = document.getElementById('mobileSearchResults');
+async function performMobileLiveSearch(query) {
+    try {
+        const results = (await searchProducts(query)).slice(0, 5);
+        const mobileSearchResults = document.getElementById('mobileSearchResults');
 
-    if (!mobileSearchResults) return;
+        if (!mobileSearchResults) return;
 
-    if (results.length === 0) {
-        mobileSearchResults.style.display = 'none';
-        return;
-    }
+        if (results.length === 0) {
+            mobileSearchResults.style.display = 'none';
+            return;
+        }
 
-    let html = '';
-    results.forEach(product => {
-        const discount = product.originalPrice > product.price ?
-            Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+        let html = '';
+        results.forEach(product => {
+            const discount = product.originalPrice > product.price ?
+                Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-        html += `
-            <div class="mobile-search-result-item" onclick="viewProduct('${product.id}')">
-                <img src="${product.image}" alt="${product.name}">
-                <div class="mobile-search-result-info">
-                    <h4>${product.name}</h4>
-                    <div class="mobile-search-result-price">
-                        ₵${product.price.toLocaleString()}
-                        ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+            html += `
+                <div class="mobile-search-result-item" onclick="viewProduct('${product.id}')">
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="mobile-search-result-info">
+                        <h4>${product.name}</h4>
+                        <div class="mobile-search-result-price">
+                            ₵${product.price.toLocaleString()}
+                            ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                        </div>
                     </div>
+                </div>
+            `;
+        });
+
+        // Add "View all results" option
+        html += `
+            <div class="mobile-search-result-item view-all" onclick="window.location.href='categories.html?search=${encodeURIComponent(query)}'">
+                <div class="mobile-search-result-info">
+                    <h4>View all results for "${query}"</h4>
                 </div>
             </div>
         `;
-    });
 
-    // Add "View all results" option
-    html += `
-        <div class="mobile-search-result-item view-all" onclick="window.location.href='categories.html?search=${encodeURIComponent(query)}'">
-            <div class="mobile-search-result-info">
-                <h4>View all results for "${query}"</h4>
-            </div>
-        </div>
-    `;
-
-    mobileSearchResults.innerHTML = html;
-    mobileSearchResults.style.display = 'block';
+        mobileSearchResults.innerHTML = html;
+        mobileSearchResults.style.display = 'block';
+    } catch (error) {
+        console.error('Error performing mobile live search:', error);
+        const mobileSearchResults = document.getElementById('mobileSearchResults');
+        if (mobileSearchResults) mobileSearchResults.style.display = 'none';
+    }
 }
 
 // Initialize mobile features
@@ -2100,36 +2154,54 @@ function closeChatModal() {
     }
 }
 
-function sendMessage() {
+async function sendMessage() {
     const chatInput = document.getElementById('chatInput');
     if (!chatInput) return;
 
     const message = chatInput.value.trim();
     if (!message) return;
 
-    // Add user message
-    addMessage('user', message);
-    chatInput.value = '';
+    try {
+        // Send message to API
+        const response = await fetch(`${window.location.hostname === 'localhost' ? 'http://localhost:5000/api/messages' : 'https://aims-netyarkmall.up.railway.app/api/messages'}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sender: 'Customer',
+                message: message
+            })
+        });
 
-    // Update activity
-    lastChatActivity = Date.now();
+        if (response.ok) {
+            // Add user message to UI
+            addMessage('user', message);
+            chatInput.value = '';
 
-    // Simulate support response after delay
-    setTimeout(() => {
-        const responses = [
-            "Thank you for your message! Our support team will get back to you shortly.",
-            "I understand your concern. Let me connect you with a specialist.",
-            "Thanks for reaching out! How else can I assist you today?",
-            "We're here to help! Is there anything specific you'd like to know about our products?",
-            "Thank you for your patience. A support agent will respond soon.",
-            "I appreciate you contacting us. Let me help you with that.",
-            "Thanks for your message! We're working on getting you a response.",
-            "I see you've reached out. Our team is reviewing your message now."
-        ];
+            // Update activity
+            lastChatActivity = Date.now();
 
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        addMessage('support', randomResponse);
-    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+            // Simulate support response after delay (in real implementation, this would come from admin)
+            setTimeout(() => {
+                const responses = [
+                    "Thank you for your message! Our support team will get back to you shortly.",
+                    "I understand your concern. Let me connect you with a specialist.",
+                    "Thanks for reaching out! How else can I assist you today?",
+                    "We're here to help! Is there anything specific you'd like to know about our products?",
+                    "Thank you for your patience. A support agent will respond soon.",
+                    "I appreciate you contacting us. Let me help you with that.",
+                    "Thanks for your message! We're working on getting you a response.",
+                    "I see you've reached out. Our team is reviewing your message now."
+                ];
+
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addMessage('support', randomResponse);
+            }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+        } else {
+            console.error('Failed to send message');
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+    }
 }
 
 function addMessage(type, content) {
