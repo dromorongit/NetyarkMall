@@ -1,8 +1,10 @@
 // Authentication System for Netyark Mall
 // Handles user registration, login, logout, and session management
 
+// API Base URL
+const API_BASE = 'https://netyarkmallaims-production-d2ae.up.railway.app/api';
+
 // User data storage keys
-const USERS_KEY = 'netyark_users';
 const CURRENT_USER_KEY = 'netyark_current_user';
 
 // Initialize authentication on page load
@@ -13,25 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize authentication
 function initializeAuth() {
-    // Create default admin user if no users exist
-    const users = getUsers();
-    if (users.length === 0) {
-        const defaultUser = {
-            id: 'user_' + Date.now(),
-            firstName: 'Admin',
-            lastName: 'User',
-            email: 'admin@netyarkmall.com',
-            phone: '+233123456789',
-            password: 'admin123',
-            createdAt: new Date().toISOString(),
-            orders: [],
-            wishlist: [],
-            reviews: []
-        };
-        users.push(defaultUser);
-        saveUsers(users);
-    }
-
     // Handle login form
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -46,24 +29,15 @@ function initializeAuth() {
 }
 
 // User data management functions
-function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-}
-
-function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
 function getCurrentUser() {
-    const userId = localStorage.getItem(CURRENT_USER_KEY);
-    if (!userId) return null;
+    const userData = localStorage.getItem(CURRENT_USER_KEY);
+    if (!userData) return null;
 
-    const users = getUsers();
-    return users.find(user => user.id === userId) || null;
+    return JSON.parse(userData);
 }
 
-function setCurrentUser(userId) {
-    localStorage.setItem(CURRENT_USER_KEY, userId);
+function setCurrentUser(userData) {
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
 }
 
 function clearCurrentUser() {
@@ -71,30 +45,40 @@ function clearCurrentUser() {
 }
 
 // Authentication functions
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const remember = document.querySelector('input[name="remember"]').checked;
 
-    const users = getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
+    try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
 
-    if (user) {
-        setCurrentUser(user.id);
-        showNotification('Login successful! Welcome back.', 'success');
+        if (response.ok) {
+            const userData = await response.json();
+            setCurrentUser(userData);
+            showNotification('Login successful! Welcome back.', 'success');
 
-        // Redirect to home page after successful login
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
-    } else {
-        showNotification('Invalid email or password. Please try again.', 'error');
+            // Redirect to home page after successful login
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Invalid email or password. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showNotification('Login failed. Please try again.', 'error');
     }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
 
     const firstName = document.getElementById('firstName').value;
@@ -115,38 +99,36 @@ function handleRegister(e) {
         return;
     }
 
-    const users = getUsers();
+    try {
+        const response = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                firstName,
+                lastName,
+                email,
+                phone,
+                password
+            })
+        });
 
-    // Check if email already exists
-    if (users.some(u => u.email === email)) {
-        showNotification('Email already registered. Please use a different email.', 'error');
-        return;
+        if (response.ok) {
+            const userData = await response.json();
+            setCurrentUser(userData);
+            showNotification('Registration successful! Welcome to Netyark Mall.', 'success');
+
+            // Redirect to home page after successful registration
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Registration failed. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showNotification('Registration failed. Please try again.', 'error');
     }
-
-    // Create new user
-    const newUser = {
-        id: 'user_' + Date.now(),
-        firstName,
-        lastName,
-        email,
-        phone,
-        password,
-        createdAt: new Date().toISOString(),
-        orders: [],
-        wishlist: [],
-        reviews: []
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-    setCurrentUser(newUser.id);
-
-    showNotification('Registration successful! Welcome to Netyark Mall.', 'success');
-
-    // Redirect to home page after successful registration
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 1000);
 }
 
 function logout() {

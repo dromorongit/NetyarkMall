@@ -257,7 +257,7 @@ function updateCartDisplay() {
                 cartHTML += `
                     <div class="cart-item ${isWholesale ? 'wholesale-item' : ''}" data-product-id="${item.id}">
                         <div class="item-image">
-                            <img src="${item.image}" alt="${item.name}">
+                            <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(item.image) : item.image}" alt="${item.name}">
                         </div>
                         <div class="item-details">
                             <h3>${item.name}</h3>
@@ -675,7 +675,7 @@ function createProductCard(product) {
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
             <div class="stock-indicator ${stockStatus}">${stockText}</div>
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="quickView('${product.id}')">Quick View</button>
                     <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" ${!inventoryStatus.available ? 'disabled' : ''}>
@@ -685,7 +685,10 @@ function createProductCard(product) {
             </div>
             <div class="product-info">
                 <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
+                ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
+                <p class="product-description">${product.shortDescription || product.description}</p>
+                ${product.colors ? `<p class="product-colors">Colors: ${product.colors.join(', ')}</p>` : ''}
+                ${product.sizes ? `<p class="product-sizes">Sizes: ${product.sizes.join(', ')}</p>` : ''}
                 <div class="product-rating">
                     <div class="stars">
                         ${generateStarRating(product.rating)}
@@ -746,7 +749,7 @@ function createWholesaleProductCard(product) {
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
             <div class="stock-indicator ${stockStatus}">${stockText}</div>
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="quickView('${product.id}')">Quick View</button>
                     <button class="add-to-cart-btn" onclick="addWholesaleToCart('${product.id}')" ${!inventoryStatus.available ? 'disabled' : ''}>
@@ -794,7 +797,7 @@ function createDealCard(product) {
         <div class="deal-card" data-product-id="${product.id}">
             <div class="deal-badge">${discount}% OFF</div>
             <div class="deal-image">
-                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="deal-overlay">
                     <button class="quick-view-btn">Quick View</button>
                 </div>
@@ -880,12 +883,12 @@ async function quickView(productId) {
                     <div class="product-gallery">
                         <div class="gallery-thumbnails">
                             ${(product.images || [product.image]).map((img, index) =>
-                                `<img src="${img}" alt="Product image ${index + 1}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">`
+                                `<img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(img) : img}" alt="Product image ${index + 1}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${typeof getFullImageUrl === 'function' ? getFullImageUrl(img) : img}')">`
                             ).join('')}
                         </div>
                         <div class="main-image-container">
-                            <img src="${product.images ? product.images[0] : product.image}" alt="${product.name}" class="main-image" id="mainImage">
-                            <button class="image-zoom" onclick="toggleZoom('${product.images ? product.images[0] : product.image}')">
+                            <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.images ? product.images[0] : product.image) : (product.images ? product.images[0] : product.image)}" alt="${product.name}" class="main-image" id="mainImage">
+                            <button class="image-zoom" onclick="toggleZoom('${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.images ? product.images[0] : product.image) : (product.images ? product.images[0] : product.image)}')">
                                 <i class="fas fa-search-plus"></i>
                             </button>
                         </div>
@@ -1097,7 +1100,7 @@ function setupContactForm() {
 
             try {
                 // Send message to API
-                const response = await fetch(`${window.location.hostname === 'localhost' ? 'http://localhost:5000/api/messages' : 'https://aims-netyarkmall.up.railway.app/api/messages'}`, {
+                const response = await fetch('https://netyarkmallaims-production-d2ae.up.railway.app/api/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1267,7 +1270,7 @@ async function performLiveSearch(query) {
             html += `
                 <div class="search-result-item" onclick="viewProduct('${product.id}')">
                     <div class="search-result-image">
-                        <img src="${product.image}" alt="${product.name}">
+                        <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}">
                     </div>
                     <div class="search-result-info">
                         <h4>${product.name}</h4>
@@ -1408,7 +1411,7 @@ function updateCompareDisplay() {
         if (product) {
             html += `
                 <div class="compare-item">
-                    <img src="${product.image}" alt="${product.name}">
+                    <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}">
                     <span>${product.name}</span>
                     <button onclick="removeFromCompare('${productId}')" title="Remove">&times;</button>
                 </div>
@@ -1446,7 +1449,7 @@ function showCompareModal() {
                             <td>Image</td>
                             ${compareList.map(id => {
                                 const product = getProductById(id);
-                                return `<td><img src="${product ? product.image : ''}" alt="Product" style="width: 100px; height: 100px; object-fit: cover;"></td>`;
+                                return `<td><img src="${product ? (typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image) : ''}" alt="Product" style="width: 100px; height: 100px; object-fit: cover;"></td>`;
                             }).join('')}
                         </tr>
                         <tr>
@@ -1697,7 +1700,7 @@ async function performMobileLiveSearch(query) {
 
             html += `
                 <div class="mobile-search-result-item" onclick="viewProduct('${product.id}')">
-                    <img src="${product.image}" alt="${product.name}">
+                    <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}">
                     <div class="mobile-search-result-info">
                         <h4>${product.name}</h4>
                         <div class="mobile-search-result-price">
@@ -1895,7 +1898,7 @@ function showCheckoutModal() {
                     <div class="checkout-items">
                         ${cart.map(item => `
                             <div class="checkout-item">
-                                <img src="${item.image}" alt="${item.name}">
+                                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(item.image) : item.image}" alt="${item.name}">
                                 <div class="checkout-item-details">
                                     <h4>${item.name}</h4>
                                     <p>Quantity: ${item.quantity}</p>
@@ -2163,7 +2166,7 @@ async function sendMessage() {
 
     try {
         // Send message to API
-        const response = await fetch(`${window.location.hostname === 'localhost' ? 'http://localhost:5000/api/messages' : 'https://aims-netyarkmall.up.railway.app/api/messages'}`, {
+        const response = await fetch('https://netyarkmallaims-production-d2ae.up.railway.app/api/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

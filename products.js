@@ -4,10 +4,8 @@
 // API Base URL - configure for your admin system domain
 // For local development: http://localhost:5000/api
 // For Railway deployment: https://your-railway-project.up.railway.app/api
-// For production: https://aims-netyarkmall.up.railway.app/api (replace with your actual Railway URL)
-const API_BASE = window.location.hostname === 'localhost'
-  ? 'http://localhost:5000/api'
-  : 'https://aims-netyarkmall.up.railway.app/api'; // Replace with your actual Railway URL after deployment
+// For production: https://netyarkmallaims-production-d2ae.up.railway.app/api
+const API_BASE = 'https://netyarkmallaims-production-d2ae.up.railway.app/api';
 
 // Cache for products
 let productCache = null;
@@ -518,6 +516,14 @@ function formatPrice(price) {
 function calculateDiscount(originalPrice, currentPrice) {
     return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
 }
+// Helper function to get full image URL
+function getFullImageUrl(imagePath) {
+    if (imagePath && imagePath.startsWith('/uploads/')) {
+        return `${API_BASE}${imagePath}`;
+    }
+    return imagePath;
+}
+
 // Export for use in browser
 window.productDatabase = productDatabase;
 window.getAllProducts = getAllProducts;
@@ -531,6 +537,7 @@ window.searchProducts = searchProducts;
 window.getSuggestedProducts = getSuggestedProducts;
 window.formatPrice = formatPrice;
 window.calculateDiscount = calculateDiscount;
+window.getFullImageUrl = getFullImageUrl;
 
 
 // Product reviews management
@@ -731,27 +738,55 @@ function getShippingZones() {
 }
 
 // Order Processing
-function processOrder(orderData) {
-    // Mock order processing - in real app, this would call API
-    const order = {
-        id: 'order_' + Date.now(),
-        ...orderData,
-        status: 'processing',
-        createdAt: new Date().toISOString(),
-        trackingNumber: 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase()
-    };
+async function processOrder(orderData) {
+    try {
+        const response = await fetch(`${API_BASE}/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
 
-    // Update inventory
-    orderData.items.forEach(item => {
-        updateInventory(item.id, -item.quantity);
-    });
+        if (response.ok) {
+            const order = await response.json();
 
-    // Add to user's order history if logged in
-    if (typeof addOrder === 'function') {
-        addOrder(order);
+            // Update inventory locally
+            orderData.items.forEach(item => {
+                updateInventory(item.id, -item.quantity);
+            });
+
+            // Add to user's order history if logged in
+            if (typeof addOrder === 'function') {
+                addOrder(order);
+            }
+
+            return order;
+        } else {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to process order');
+        }
+    } catch (error) {
+        console.error('Order processing error:', error);
+        // Fallback to local processing if API fails
+        const order = {
+            id: 'order_' + Date.now(),
+            ...orderData,
+            status: 'processing',
+            createdAt: new Date().toISOString(),
+            trackingNumber: 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase()
+        };
+
+        // Update inventory
+        orderData.items.forEach(item => {
+            updateInventory(item.id, -item.quantity);
+        });
+
+        // Add to user's order history if logged in
+        if (typeof addOrder === 'function') {
+            addOrder(order);
+        }
+
+        return order;
     }
-
-    return order;
 }
 
 function getOrderStatus(orderId) {
