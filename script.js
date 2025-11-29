@@ -2060,6 +2060,9 @@ function initializeLiveChat() {
 
     // Update chat timestamp
     updateChatTimestamp();
+
+    // Add drag functionality
+    addDragFunctionality(liveChatIcon);
 }
 
 function toggleChatModal() {
@@ -2287,6 +2290,122 @@ function renderChatHistory() {
     });
 
     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+// Drag functionality for live chat icon
+function addDragFunctionality(element) {
+    let isDragging = false;
+    let startX, startY, initialX, initialY;
+    let currentX, currentY;
+
+    // Get initial position
+    const rect = element.getBoundingClientRect();
+    currentX = rect.left;
+    currentY = rect.top;
+
+    // Set initial position
+    element.style.position = 'fixed';
+    element.style.left = currentX + 'px';
+    element.style.top = currentY + 'px';
+    element.style.zIndex = '1000';
+
+    // Mouse events
+    element.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDrag);
+
+    // Touch events for mobile
+    element.addEventListener('touchstart', startDrag, { passive: false });
+    document.addEventListener('touchmove', drag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+
+    function startDrag(e) {
+        e.preventDefault();
+        isDragging = true;
+
+        // Add dragging class for styling
+        element.classList.add('dragging');
+
+        // Get initial mouse/touch position
+        if (e.type === 'mousedown') {
+            startX = e.clientX;
+            startY = e.clientY;
+        } else if (e.type === 'touchstart') {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }
+
+        // Get current element position
+        const rect = element.getBoundingClientRect();
+        initialX = rect.left;
+        initialY = rect.top;
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+
+        e.preventDefault();
+
+        let clientX, clientY;
+        if (e.type === 'mousemove') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        } else if (e.type === 'touchmove') {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        // Calculate new position
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+
+        currentX = initialX + deltaX;
+        currentY = initialY + deltaY;
+
+        // Constrain to viewport bounds
+        const rect = element.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+
+        currentX = Math.max(0, Math.min(currentX, maxX));
+        currentY = Math.max(0, Math.min(currentY, maxY));
+
+        // Apply new position
+        element.style.left = currentX + 'px';
+        element.style.top = currentY + 'px';
+    }
+
+    function stopDrag() {
+        if (!isDragging) return;
+
+        isDragging = false;
+        element.classList.remove('dragging');
+
+        // Snap to nearest edge for better UX
+        snapToEdge();
+    }
+
+    function snapToEdge() {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const windowWidth = window.innerWidth;
+
+        // Snap to left or right edge
+        if (centerX < windowWidth / 2) {
+            currentX = 20; // 20px from left edge
+        } else {
+            currentX = windowWidth - rect.width - 20; // 20px from right edge
+        }
+
+        // Animate to snapped position
+        element.style.transition = 'left 0.3s ease';
+        element.style.left = currentX + 'px';
+
+        // Remove transition after animation
+        setTimeout(() => {
+            element.style.transition = '';
+        }, 300);
+    }
 }
 
 // Initialize live chat when DOM is loaded

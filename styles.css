@@ -3499,21 +3499,35 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: grab;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     transition: all 0.3s ease;
     border: 3px solid var(--white);
+    user-select: none;
+    touch-action: none;
 }
 
 .live-chat-icon:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.live-chat-icon:active {
+    cursor: grabbing;
+}
+
+.live-chat-icon.dragging {
+    cursor: grabbing;
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    transition: none;
 }
 
 .live-chat-icon i {
     font-size: 24px;
     color: var(--white);
+    pointer-events: none;
 }
 
 .live-chat-icon .notification-badge {
@@ -3770,7 +3784,7 @@ a:hover {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 10000;

@@ -271,6 +271,47 @@
         </div>
     </footer>
 
+    <!-- Live Chat Icon -->
+    <div class="live-chat-icon" id="liveChatIcon">
+        <i class="fas fa-comments"></i>
+        <div class="notification-badge" id="chatNotificationBadge" style="display: none;">1</div>
+    </div>
+
+    <!-- Live Chat Modal -->
+    <div class="live-chat-modal" id="liveChatModal">
+        <div class="chat-header">
+            <h3>Chat with Netyark Mall</h3>
+            <button class="chat-close" id="chatClose">&times;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message support">
+                <strong>Netyark Support</strong><br>
+                Hi there! 👋 Welcome to Netyark Mall! How can we help you today?
+            </div>
+            <div class="message timestamp" id="chatTimestamp">
+                Just now
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here...">
+                <button class="chat-send-btn" id="chatSendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Notification -->
+    <div class="chat-notification" id="chatNotification">
+        <h4>💬 Need Help?</h4>
+        <p>Chat with our support team for faster responses to your questions!</p>
+        <div class="notification-actions">
+            <button class="notification-btn primary" id="openChatBtn">Start Chat</button>
+            <button class="notification-btn secondary" id="dismissNotificationBtn">Later</button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="products.js"></script>
     <script src="script.js"></script>
