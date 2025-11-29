@@ -4931,22 +4931,51 @@ a:hover {
         display: none !important;
     }
 
-    /* Desktop logo adjustments */
+    /* Desktop header adjustments */
+    .header {
+        height: 80px;
+    }
+
+    .header-content {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        min-height: 80px;
+    }
+
     .logo {
-        margin-top: 10px; /* Reposition down a little */
+        margin-top: 0;
     }
 
     .logo img {
-        height: 80px; /* Scale up the logo image */
+        height: 70px; /* Slightly reduced for better fit */
     }
 
     .logo h1 {
-        font-size: 2.2rem; /* Scale up the title */
-        font-weight: 800; /* Make bolder */
+        font-size: 2rem; /* Adjusted for better proportion */
+        font-weight: 800;
     }
 
     .logo p {
-        font-size: 1rem; /* Scale up the slogan */
-        font-weight: 600; /* Make bolder */
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .nav {
+        flex-direction: row;
+        align-items: center;
+        gap: 2rem;
+        width: auto;
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .search-container {
+        display: flex;
+    }
+
+    .mobile-menu-btn {
+        display: none;
     }
 }
