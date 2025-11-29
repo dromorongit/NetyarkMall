@@ -604,7 +604,7 @@ async function loadCategoryHighlights() {
     }
 
     try {
-        const categories = getCategoryData().slice(0, 6);
+        const categories = (await getCategoryData()).slice(0, 6);
         console.log('Categories data:', categories);
         container.innerHTML = categories.map(category => createCategoryCard(category)).join('');
         console.log('Category highlights loaded successfully');

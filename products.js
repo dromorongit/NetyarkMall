@@ -11,34 +11,56 @@ const API_BASE = 'https://netyarkmallaims-production-d2ae.up.railway.app/api';
 let productCache = null;
 let categoriesCache = null;
 
-// Fetch products from API
-async function fetchProducts() {
-  if (productCache) return productCache;
+// Clear product cache to force refresh
+function clearProductCache() {
+    productCache = null;
+    console.log('Product cache cleared');
+}
 
+// Fetch products from API
+async function fetchProducts(forceRefresh = false) {
+  if (productCache && !forceRefresh) {
+    console.log('Returning cached products:', productCache.length, 'items');
+    return productCache;
+  }
+
+  console.log('Fetching products from API...');
   try {
     const response = await fetch(`${API_BASE}/products`);
+    console.log('API response status:', response.status);
     if (response.ok) {
       productCache = await response.json();
+      console.log('Fetched products:', productCache.length, 'items');
       return productCache;
+    } else {
+      console.error('API response not ok:', response.status, response.statusText);
     }
   } catch (error) {
     console.error('Error fetching products:', error);
   }
 
   // Fallback to empty array if API fails
+  console.log('Falling back to empty array');
   return [];
 }
 
 // Fetch wholesale products from API
 async function fetchWholesaleProducts() {
+  console.log('Fetching wholesale products from API...');
   try {
     const response = await fetch(`${API_BASE}/products/wholesale`);
+    console.log('Wholesale API response status:', response.status);
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      console.log('Fetched wholesale products:', data.length, 'items');
+      return data;
+    } else {
+      console.error('Wholesale API response not ok:', response.status, response.statusText);
     }
   } catch (error) {
     console.error('Error fetching wholesale products:', error);
   }
+  console.log('Falling back to empty wholesale array');
   return [];
 }
 
@@ -410,21 +432,47 @@ async function getProductsByCategory(category) {
 // Get new arrivals (products marked as new)
 async function getNewArrivals() {
     const products = await getAllProducts();
-    return products.filter(product => product.isNew);
+    const newArrivals = products.filter(product => product.isNew);
+    console.log('New arrivals found:', newArrivals.length, 'products');
+    // For testing, if no new arrivals, return first few products
+    if (newArrivals.length === 0 && products.length > 0) {
+        console.log('No products marked as new, returning first 4 products for testing');
+        return products.slice(0, 4);
+    }
+    return newArrivals;
 }
 
 // Get wholesale products
 async function getWholesaleProducts() {
-    return await fetchWholesaleProducts();
+    // First try the dedicated wholesale endpoint
+    const wholesaleProducts = await fetchWholesaleProducts();
+    if (wholesaleProducts.length > 0) {
+        return wholesaleProducts;
+    }
+
+    // Fallback: filter all products for wholesale items (those with MOQ or isWholesale flag)
+    const allProducts = await getAllProducts();
+    const filteredWholesale = allProducts.filter(product =>
+        product.isWholesale || (product.moq && product.moq > 1)
+    );
+    console.log('Filtered wholesale products:', filteredWholesale.length, 'items');
+    return filteredWholesale;
 }
 
 // Get fast-selling items (products with high review count and good ratings)
 async function getFastSellingItems() {
     const products = await getAllProducts();
-    return products
+    const fastSelling = products
         .filter(product => product.reviews > 50 && product.rating >= 4.0)
         .sort((a, b) => b.reviews - a.reviews)
         .slice(0, 8);
+    console.log('Fast-selling items found:', fastSelling.length, 'products');
+    // For testing, if no fast-selling, return next 8 products
+    if (fastSelling.length === 0 && products.length > 4) {
+        console.log('No fast-selling products, returning next 8 products for testing');
+        return products.slice(4, 12);
+    }
+    return fastSelling;
 }
 
 // Get products by ID
@@ -434,55 +482,56 @@ async function getProductById(id) {
 }
 
 // Get category data for the homepage category grid
-function getCategoryData() {
+async function getCategoryData() {
+    const products = await getAllProducts();
     return [
         {
             name: 'Kitchen Appliances',
             id: 'kitchen-appliances',
             image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: getProductsByCategory('home').length,
+            productCount: products.filter(p => p.category === 'kitchen-appliances' || p.category === 'home').length,
             color: '#008000'
         },
         {
             name: 'Beauty & Personal Care',
             id: 'beauty-personal-care',
             image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: getProductsByCategory('beauty').length,
+            productCount: products.filter(p => p.category === 'beauty-personal-care' || p.category === 'beauty').length,
             color: '#FFA500'
         },
         {
             name: 'Photography & Content Creation Tools',
             id: 'photography-content-creation-tools',
             image: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: getProductsByCategory('electronics').length,
+            productCount: products.filter(p => p.category === 'photography-content-creation-tools' || p.category === 'electronics').length,
             color: '#008000'
         },
         {
             name: 'Nail Supplies',
             id: 'nail-supplies',
             image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: 0,
+            productCount: products.filter(p => p.category === 'nail-supplies').length,
             color: '#FFA500'
         },
         {
             name: 'Kids & Babies',
             id: 'kids-babies',
             image: 'https://images.unsplash.com/photo-1515488042361-ee00b0aa5b4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: 0,
+            productCount: products.filter(p => p.category === 'kids-babies').length,
             color: '#008000'
         },
         {
             name: 'Home Essentials',
             id: 'home-essentials',
             image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: getProductsByCategory('home').length,
+            productCount: products.filter(p => p.category === 'home-essentials' || p.category === 'home').length,
             color: '#FFA500'
         },
         {
             name: 'Lighting & Home Decor',
             id: 'lighting-home-decor',
             image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: 0,
+            productCount: products.filter(p => p.category === 'lighting-home-decor').length,
             color: '#008000'
         }
     ];
@@ -538,6 +587,7 @@ window.getSuggestedProducts = getSuggestedProducts;
 window.formatPrice = formatPrice;
 window.calculateDiscount = calculateDiscount;
 window.getFullImageUrl = getFullImageUrl;
+window.clearProductCache = clearProductCache;
 
 
 // Product reviews management
