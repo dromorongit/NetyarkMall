@@ -4932,16 +4932,11 @@ a:hover {
     }
 
     /* Desktop header adjustments */
-    .header {
-        height: 110px;
-    }
-
     .header-content {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
         padding: 0 20px;
-        min-height: 110px;
     }
 
     .logo {
@@ -4949,7 +4944,7 @@ a:hover {
     }
 
     .logo img {
-        height: 85px; /* Further scaled up */
+        height: 85px; /* Scaled up */
     }
 
     .logo h1 {
