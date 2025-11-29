@@ -42,9 +42,16 @@ async function fetchProducts(forceRefresh = false) {
     console.error('Error fetching products:', error);
   }
 
-  // Fallback to empty array if API fails
-  console.log('Falling back to empty array');
-  return [];
+  // Fallback to legacy products if API fails
+  console.log('Falling back to legacy products');
+  // Flatten the legacy product database
+  const legacyProducts = [];
+  Object.values(productDatabase).forEach(category => {
+    if (Array.isArray(category)) {
+      legacyProducts.push(...category);
+    }
+  });
+  return legacyProducts;
 }
 
 // Fetch wholesale products from API
@@ -65,8 +72,8 @@ async function fetchWholesaleProducts() {
   } catch (error) {
     console.error('Error fetching wholesale products:', error);
   }
-  console.log('Falling back to empty wholesale array');
-  return [];
+  console.log('Falling back to legacy wholesale products');
+  return productDatabase.wholesale || [];
 }
 
 // Legacy product database for fallback (keeping for compatibility)
