@@ -7,6 +7,11 @@ let slideInterval;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    // Clear product cache to ensure fresh data from API
+    if (typeof clearProductCache === 'function') {
+        clearProductCache();
+    }
+
     initializeCart();
     initializeNavigation();
     initializeCarousel();
@@ -654,14 +659,20 @@ async function loadSuggestedProducts() {
 
 // Create HTML elements
 function createProductCard(product) {
+    // Handle API product properties (use _id if id not present, stock if stockCount not present, etc.)
+    const productId = product.id || product._id;
+    const stockCount = product.stockCount || product.stock || 0;
+    const isNew = product.isNew || product.isNewArrival;
+    const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+
     const discount = product.originalPrice > product.price ?
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(product.id);
+    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(productId);
 
     // Check inventory status
     const inventoryStatus = typeof checkInventory === 'function' ?
-        checkInventory(product.id) : { available: product.inStock, stockCount: product.stockCount };
+        checkInventory(productId) : { available: inStock, stockCount: stockCount };
 
     const stockStatus = !inventoryStatus.available ? 'out-of-stock' :
                        inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
@@ -670,15 +681,15 @@ function createProductCard(product) {
                      inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : 'In Stock';
 
     return `
-        <div class="product-card ${stockStatus}" data-product-id="${product.id}">
-            ${product.isNew ? '<div class="product-badge new">New</div>' : ''}
+        <div class="product-card ${stockStatus}" data-product-id="${productId}">
+            ${isNew ? '<div class="product-badge new">New</div>' : ''}
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
             <div class="stock-indicator ${stockStatus}">${stockText}</div>
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="quickView('${product.id}')">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                    <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
+                    <button class="add-to-cart-btn" onclick="addToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                 </div>
@@ -728,14 +739,19 @@ function createCategoryCard(category) {
 }
 
 function createWholesaleProductCard(product) {
+    // Handle API product properties
+    const productId = product.id || product._id;
+    const stockCount = product.stockCount || product.stock || 0;
+    const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+
     const discount = product.originalPrice > product.price ?
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(product.id);
+    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(productId);
 
     // Check inventory status
     const inventoryStatus = typeof checkInventory === 'function' ?
-        checkInventory(product.id) : { available: product.inStock, stockCount: product.stockCount };
+        checkInventory(productId) : { available: inStock, stockCount: stockCount };
 
     const stockStatus = !inventoryStatus.available ? 'out-of-stock' :
                        inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
@@ -744,15 +760,15 @@ function createWholesaleProductCard(product) {
                      inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : 'In Stock';
 
     return `
-        <div class="product-card wholesale-card ${stockStatus}" data-product-id="${product.id}">
+        <div class="product-card wholesale-card ${stockStatus}" data-product-id="${productId}">
             <div class="product-badge wholesale">WHOLESALE</div>
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
             <div class="stock-indicator ${stockStatus}">${stockText}</div>
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="quickView('${product.id}')">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="addWholesaleToCart('${product.id}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                    <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
+                    <button class="add-to-cart-btn" onclick="addWholesaleToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                 </div>
@@ -778,10 +794,10 @@ function createWholesaleProductCard(product) {
                     </div>
                 </div>
                 <div class="product-actions">
-                    <button class="action-btn compare-btn" onclick="addToCompare('${product.id}')" title="Compare">
+                    <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
                         <i class="fas fa-balance-scale"></i>
                     </button>
-                    <button class="action-btn wishlist-btn ${isInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${product.id}')" title="Wishlist">
+                    <button class="action-btn wishlist-btn ${isInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
                         <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
                     </button>
                 </div>

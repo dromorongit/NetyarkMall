@@ -426,13 +426,25 @@ async function getAllProducts() {
 // Get products by category
 async function getProductsByCategory(category) {
     const products = await fetchProducts();
-    return products.filter(product => product.category === category);
+    // Handle both API categories (with spaces) and frontend categories (with dashes)
+    const categoryMap = {
+        'kitchen-appliances': 'Kitchen Appliances',
+        'beauty-personal-care': 'Beauty & Personal Care',
+        'photography-content-creation-tools': 'Photography & Content Creation Tools',
+        'nail-supplies': 'Nail Supplies',
+        'kids-babies': 'Kids & Babies',
+        'home-essentials': 'Home Essentials',
+        'lighting-home-decor': 'Lighting & Home Decor'
+    };
+
+    const apiCategory = categoryMap[category] || category;
+    return products.filter(product => product.category === apiCategory || product.category === category);
 }
 
 // Get new arrivals (products marked as new)
 async function getNewArrivals() {
     const products = await getAllProducts();
-    const newArrivals = products.filter(product => product.isNew);
+    const newArrivals = products.filter(product => product.isNew || product.isNewArrival);
     console.log('New arrivals found:', newArrivals.length, 'products');
     // For testing, if no new arrivals, return first few products
     if (newArrivals.length === 0 && products.length > 0) {
@@ -463,7 +475,7 @@ async function getWholesaleProducts() {
 async function getFastSellingItems() {
     const products = await getAllProducts();
     const fastSelling = products
-        .filter(product => product.reviews > 50 && product.rating >= 4.0)
+        .filter(product => product.isFastSelling || (product.reviews > 50 && product.rating >= 4.0))
         .sort((a, b) => b.reviews - a.reviews)
         .slice(0, 8);
     console.log('Fast-selling items found:', fastSelling.length, 'products');
@@ -478,7 +490,7 @@ async function getFastSellingItems() {
 // Get products by ID
 async function getProductById(id) {
     const products = await getAllProducts();
-    return products.find(product => product.id === id);
+    return products.find(product => product.id === id || product._id === id);
 }
 
 // Get category data for the homepage category grid
@@ -489,49 +501,49 @@ async function getCategoryData() {
             name: 'Kitchen Appliances',
             id: 'kitchen-appliances',
             image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: products.filter(p => p.category === 'kitchen-appliances' || p.category === 'home').length,
+            productCount: products.filter(p => p.category === 'Kitchen Appliances' || p.category === 'kitchen-appliances' || p.category === 'home').length,
             color: '#008000'
         },
         {
             name: 'Beauty & Personal Care',
             id: 'beauty-personal-care',
             image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: products.filter(p => p.category === 'beauty-personal-care' || p.category === 'beauty').length,
+            productCount: products.filter(p => p.category === 'Beauty & Personal Care' || p.category === 'beauty-personal-care' || p.category === 'beauty').length,
             color: '#FFA500'
         },
         {
             name: 'Photography & Content Creation Tools',
             id: 'photography-content-creation-tools',
             image: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: products.filter(p => p.category === 'photography-content-creation-tools' || p.category === 'electronics').length,
+            productCount: products.filter(p => p.category === 'Photography & Content Creation Tools' || p.category === 'photography-content-creation-tools' || p.category === 'electronics').length,
             color: '#008000'
         },
         {
             name: 'Nail Supplies',
             id: 'nail-supplies',
             image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: products.filter(p => p.category === 'nail-supplies').length,
+            productCount: products.filter(p => p.category === 'Nail Supplies' || p.category === 'nail-supplies').length,
             color: '#FFA500'
         },
         {
             name: 'Kids & Babies',
             id: 'kids-babies',
             image: 'https://images.unsplash.com/photo-1515488042361-ee00b0aa5b4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: products.filter(p => p.category === 'kids-babies').length,
+            productCount: products.filter(p => p.category === 'Kids & Babies' || p.category === 'kids-babies').length,
             color: '#008000'
         },
         {
             name: 'Home Essentials',
             id: 'home-essentials',
             image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: products.filter(p => p.category === 'home-essentials' || p.category === 'home').length,
+            productCount: products.filter(p => p.category === 'Home Essentials' || p.category === 'home-essentials' || p.category === 'home').length,
             color: '#FFA500'
         },
         {
             name: 'Lighting & Home Decor',
             id: 'lighting-home-decor',
             image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            productCount: products.filter(p => p.category === 'lighting-home-decor').length,
+            productCount: products.filter(p => p.category === 'Lighting & Home Decor' || p.category === 'lighting-home-decor').length,
             color: '#008000'
         }
     ];
@@ -660,16 +672,19 @@ function checkInventory(productId, requestedQuantity = 1) {
     const product = getProductById(productId);
     if (!product) return { available: false, reason: 'Product not found' };
 
-    if (!product.inStock) return { available: false, reason: 'Out of stock' };
+    const stockCount = product.stock || product.stockCount || 0;
+    const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
 
-    if (product.stockCount < requestedQuantity) {
+    if (!inStock) return { available: false, reason: 'Out of stock' };
+
+    if (stockCount < requestedQuantity) {
         return { available: false, reason: 'Insufficient stock' };
     }
 
     return {
         available: true,
-        stockCount: product.stockCount,
-        lowStock: product.stockCount <= 5 // Low stock threshold
+        stockCount: stockCount,
+        lowStock: stockCount <= 5 // Low stock threshold
     };
 }
 
@@ -677,17 +692,21 @@ function updateInventory(productId, quantityChange) {
     // Mock inventory update - in real app, this would call API
     const product = getProductById(productId);
     if (product) {
-        product.stockCount = Math.max(0, product.stockCount + quantityChange);
-        product.inStock = product.stockCount > 0;
+        const currentStock = product.stock || product.stockCount || 0;
+        const newStock = Math.max(0, currentStock + quantityChange);
+        product.stock = newStock;
+        product.stockCount = newStock; // Keep both for compatibility
+        product.inStock = newStock > 0;
         // In real app, this would persist to database
     }
 }
 
 function getLowStockProducts() {
     // Mock low stock check - in real app, this would call API
-    return getAllProducts().filter(product =>
-        product.stockCount <= 5 && product.stockCount > 0
-    );
+    return getAllProducts().filter(product => {
+        const stockCount = product.stock || product.stockCount || 0;
+        return stockCount <= 5 && stockCount > 0;
+    });
 }
 
 // Shipping Calculator
