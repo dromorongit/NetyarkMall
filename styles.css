@@ -4933,7 +4933,7 @@ a:hover {
 
     /* Desktop header adjustments */
     .header {
-        height: 80px;
+        height: 70px;
     }
 
     .header-content {
@@ -4941,7 +4941,7 @@ a:hover {
         align-items: center;
         justify-content: space-between;
         padding: 0 20px;
-        min-height: 80px;
+        min-height: 70px;
     }
 
     .logo {
@@ -4949,16 +4949,16 @@ a:hover {
     }
 
     .logo img {
-        height: 70px; /* Slightly reduced for better fit */
+        height: 55px; /* Reduced for compact header */
     }
 
     .logo h1 {
-        font-size: 2rem; /* Adjusted for better proportion */
+        font-size: 1.8rem; /* Scaled up but compact */
         font-weight: 800;
     }
 
     .logo p {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 600;
     }
 
