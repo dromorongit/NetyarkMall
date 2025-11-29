@@ -26,7 +26,14 @@ async function fetchProducts(forceRefresh = false) {
 
   console.log('Fetching products from API...');
   try {
-    const response = await fetch(`${API_BASE}/products`);
+    const response = await fetch(`${API_BASE}/products`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Include credentials if needed
+      credentials: 'include'
+    });
     console.log('API response status:', response.status);
     if (response.ok) {
       productCache = await response.json();
@@ -34,6 +41,9 @@ async function fetchProducts(forceRefresh = false) {
       return productCache;
     } else {
       console.error('API response not ok:', response.status, response.statusText);
+      // Log response text for debugging
+      const errorText = await response.text();
+      console.error('API error response:', errorText);
     }
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -48,7 +58,13 @@ async function fetchProducts(forceRefresh = false) {
 async function fetchWholesaleProducts() {
   console.log('Fetching wholesale products from API...');
   try {
-    const response = await fetch(`${API_BASE}/products/wholesale`);
+    const response = await fetch(`${API_BASE}/products/wholesale`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include'
+    });
     console.log('Wholesale API response status:', response.status);
     if (response.ok) {
       const data = await response.json();
@@ -56,6 +72,8 @@ async function fetchWholesaleProducts() {
       return data;
     } else {
       console.error('Wholesale API response not ok:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Wholesale API error response:', errorText);
     }
   } catch (error) {
     console.error('Error fetching wholesale products:', error);
@@ -581,6 +599,10 @@ function calculateDiscount(originalPrice, currentPrice) {
 function getFullImageUrl(imagePath) {
     if (imagePath && imagePath.startsWith('/uploads/')) {
         return `${API_BASE}${imagePath}`;
+    }
+    // Handle undefined or invalid image paths
+    if (!imagePath || imagePath === 'undefined' || imagePath === '') {
+        return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'; // Default placeholder image
     }
     return imagePath;
 }
