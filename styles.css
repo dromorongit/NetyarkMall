@@ -235,6 +235,10 @@ a:hover {
     font-weight: 500;
 }
 
+.mobile-logo-section .logo-text {
+    text-align: center;
+}
+
 /* Mobile Header Actions */
 .mobile-header-actions {
     display: flex;
