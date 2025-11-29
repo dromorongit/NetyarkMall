@@ -220,10 +220,97 @@
         </a>
     </nav>
 
+    <!-- Terms & Conditions Modal -->
+    <div id="termsModal" class="terms-modal">
+        <div class="terms-modal-content">
+            <div class="modal-header">
+                <h2>Terms & Conditions</h2>
+                <button class="modal-close" id="termsModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="terms-content">
+                    <h3>1. Acceptance of Terms</h3>
+                    <p>By accessing and using Netyark Mall, you accept and agree to be bound by the terms and provision of this agreement.</p>
+
+                    <h3>2. Use License</h3>
+                    <p>Permission is granted to temporarily download one copy of the materials on Netyark Mall for personal, non-commercial transitory viewing only.</p>
+
+                    <h3>3. User Account</h3>
+                    <p>When you create an account with us, you must provide information that is accurate, complete, and current at all times.</p>
+
+                    <h3>4. Products and Services</h3>
+                    <p>All products are subject to availability. We reserve the right to discontinue any product or service at any time.</p>
+
+                    <h3>5. Pricing and Payment</h3>
+                    <p>All prices are subject to change without notice. Payment must be made in full at the time of purchase.</p>
+
+                    <h3>6. Shipping and Delivery</h3>
+                    <p>We will make reasonable efforts to deliver products within the estimated timeframe, but we are not responsible for delays.</p>
+
+                    <h3>7. Returns and Exchanges</h3>
+                    <p>All sales are final. We do not offer returns or exchanges on any products purchased from Netyark Mall.</p>
+
+                    <h3>8. Limitation of Liability</h3>
+                    <p>In no event shall Netyark Mall or its suppliers be liable for any damages arising out of the use or inability to use the materials on our website.</p>
+
+                    <h3>9. Privacy Policy</h3>
+                    <p>Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the service.</p>
+
+                    <h3>10. Governing Law</h3>
+                    <p>These terms and conditions are governed by and construed in accordance with the laws of Ghana.</p>
+
+                    <h3>11. Changes to Terms</h3>
+                    <p>We reserve the right to modify these terms at any time. Your continued use of the service constitutes acceptance of the new terms.</p>
+
+                    <p><strong>Last updated: November 2025</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="products.js"></script>
     <script src="script.js"></script>
     <script src="auth.js"></script>
+    <script>
+        // Terms & Conditions Modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const termsModal = document.getElementById('termsModal');
+            const termsModalClose = document.getElementById('termsModalClose');
+            const termsLinks = document.querySelectorAll('.terms-link');
+
+            // Open modal when clicking terms links
+            termsLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    termsModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            // Close modal when clicking close button
+            termsModalClose.addEventListener('click', function() {
+                termsModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+
+            // Close modal when clicking outside
+            termsModal.addEventListener('click', function(e) {
+                if (e.target === termsModal) {
+                    termsModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && termsModal.style.display === 'flex') {
+                    termsModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 

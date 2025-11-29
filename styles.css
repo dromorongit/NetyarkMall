@@ -3487,6 +3487,96 @@ a:hover {
     font-size: 0.8rem;
 }
 
+/* Terms & Conditions Modal */
+.terms-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.terms-modal-content {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    max-width: 800px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+    background: var(--light-gray);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--dark-gray);
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    background: var(--error);
+    color: var(--white);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.terms-content h3 {
+    color: var(--primary-green);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.terms-content h3:first-child {
+    margin-top: 0;
+}
+
+.terms-content p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: var(--medium-gray);
+}
+
+.terms-content p:last-child {
+    margin-bottom: 0;
+    font-style: italic;
+    text-align: center;
+    color: var(--dark-gray);
+}
+
 /* Order Details Modal */
 .order-details-modal {
     position: fixed;
