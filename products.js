@@ -26,14 +26,7 @@ async function fetchProducts(forceRefresh = false) {
 
   console.log('Fetching products from API...');
   try {
-    const response = await fetch(`${API_BASE}/products`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // Include credentials if needed
-      credentials: 'include'
-    });
+    const response = await fetch(`${API_BASE}/products`);
     console.log('API response status:', response.status);
     if (response.ok) {
       productCache = await response.json();
@@ -58,13 +51,7 @@ async function fetchProducts(forceRefresh = false) {
 async function fetchWholesaleProducts() {
   console.log('Fetching wholesale products from API...');
   try {
-    const response = await fetch(`${API_BASE}/products/wholesale`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include'
-    });
+    const response = await fetch(`${API_BASE}/products/wholesale`);
     console.log('Wholesale API response status:', response.status);
     if (response.ok) {
       const data = await response.json();
