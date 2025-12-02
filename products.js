@@ -31,6 +31,7 @@ async function fetchProducts(forceRefresh = false) {
     if (response.ok) {
       const apiProducts = await response.json();
       console.log('Fetched API products:', apiProducts.length, 'items');
+      console.log('Sample API product:', apiProducts[0] ? JSON.stringify(apiProducts[0], null, 2) : 'No products');
 
       // Merge with legacy products to ensure all products are available
       const legacyProducts = [];
@@ -71,6 +72,7 @@ async function fetchProducts(forceRefresh = false) {
       legacyProducts.push(...category);
     }
   });
+  console.log('Legacy products count:', legacyProducts.length);
   return legacyProducts;
 }
 
@@ -457,7 +459,9 @@ async function getAllProducts() {
 
 // Get products by category
 async function getProductsByCategory(category) {
+    console.log('Getting products for category:', category);
     const products = await fetchProducts();
+    console.log('Total products available:', products.length);
     // Handle both API categories (with spaces) and frontend categories (with dashes)
     const categoryMap = {
         'kitchen-appliances': 'Kitchen Appliances',
@@ -470,7 +474,11 @@ async function getProductsByCategory(category) {
     };
 
     const apiCategory = categoryMap[category] || category;
-    return products.filter(product => product.category === apiCategory || product.category === category);
+    console.log('Mapped category:', category, '->', apiCategory);
+    const filteredProducts = products.filter(product => product.category === apiCategory || product.category === category);
+    console.log('Filtered products for category:', filteredProducts.length);
+    console.log('Sample filtered products:', filteredProducts.slice(0, 2).map(p => ({ name: p.name, category: p.category })));
+    return filteredProducts;
 }
 
 // Get new arrivals (products marked as new)
@@ -482,9 +490,12 @@ async function getNewArrivals() {
         if (response.ok) {
             const newArrivals = await response.json();
             console.log('Fetched new arrivals:', newArrivals.length, 'products');
+            console.log('New arrivals sample:', newArrivals.slice(0, 2).map(p => ({ name: p.name, isNewArrival: p.isNewArrival })));
             return newArrivals;
         } else {
             console.error('New arrivals API response not ok:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('New arrivals API error:', errorText);
         }
     } catch (error) {
         console.error('Error fetching new arrivals:', error);
@@ -493,8 +504,10 @@ async function getNewArrivals() {
     // Fallback to filtering all products
     console.log('Falling back to filtering all products for new arrivals');
     const products = await getAllProducts();
+    console.log('All products for filtering:', products.length);
     const newArrivals = products.filter(product => product.isNew || product.isNewArrival);
     console.log('New arrivals found:', newArrivals.length, 'products');
+    console.log('New arrivals details:', newArrivals.map(p => ({ name: p.name, isNew: p.isNew, isNewArrival: p.isNewArrival })));
     // For testing, if no new arrivals, return first few products
     if (newArrivals.length === 0 && products.length > 0) {
         console.log('No products marked as new, returning first 4 products for testing');
@@ -529,9 +542,12 @@ async function getFastSellingItems() {
         if (response.ok) {
             const fastSelling = await response.json();
             console.log('Fetched fast-selling items:', fastSelling.length, 'products');
+            console.log('Fast-selling sample:', fastSelling.slice(0, 2).map(p => ({ name: p.name, isFastSelling: p.isFastSelling })));
             return fastSelling;
         } else {
             console.error('Fast-selling API response not ok:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Fast-selling API error:', errorText);
         }
     } catch (error) {
         console.error('Error fetching fast-selling items:', error);
@@ -540,11 +556,13 @@ async function getFastSellingItems() {
     // Fallback to filtering all products
     console.log('Falling back to filtering all products for fast-selling items');
     const products = await getAllProducts();
+    console.log('All products for fast-selling filtering:', products.length);
     const fastSelling = products
         .filter(product => product.isFastSelling || (product.reviews > 50 && product.rating >= 4.0))
         .sort((a, b) => b.reviews - a.reviews)
         .slice(0, 8);
     console.log('Fast-selling items found:', fastSelling.length, 'products');
+    console.log('Fast-selling details:', fastSelling.map(p => ({ name: p.name, isFastSelling: p.isFastSelling, reviews: p.reviews, rating: p.rating })));
     // For testing, if no fast-selling, return next 8 products
     if (fastSelling.length === 0 && products.length > 4) {
         console.log('No fast-selling products, returning next 8 products for testing');

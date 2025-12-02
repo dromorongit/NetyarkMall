@@ -7,9 +7,11 @@ let slideInterval;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing application...');
     // Clear product cache to ensure fresh data from API
     if (typeof clearProductCache === 'function') {
         clearProductCache();
+        console.log('Product cache cleared');
     }
 
     initializeCart();
@@ -27,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check which page we're on and initialize accordingly
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    console.log('Current page:', currentPage);
 
     switch(currentPage) {
         case 'index.html':
@@ -47,6 +50,13 @@ document.addEventListener('DOMContentLoaded', function() {
             break;
         case 'contact.html':
             initializeContactPage();
+            break;
+        default:
+            // Check if it's a category page
+            if (currentPage.includes('-') && !currentPage.includes('.')) {
+                console.log('Detected category page:', currentPage);
+                // Category pages are handled by category-pages.js
+            }
             break;
     }
 });
@@ -572,9 +582,10 @@ async function loadNewArrivals() {
 
     try {
         const newArrivals = (await getNewArrivals()).slice(0, 8);
-        console.log('New arrivals products:', newArrivals);
+        console.log('New arrivals products to display:', newArrivals.length);
+        console.log('New arrivals product names:', newArrivals.map(p => p.name));
         container.innerHTML = newArrivals.map(product => createProductCard(product)).join('');
-        console.log('New arrivals loaded successfully');
+        console.log('New arrivals loaded successfully, HTML length:', container.innerHTML.length);
     } catch (error) {
         console.error('Error loading new arrivals:', error);
         container.innerHTML = '<p>Error loading products. Please try again later.</p>';
@@ -591,9 +602,10 @@ async function loadFastSellingItems() {
 
     try {
         const fastSelling = (await getFastSellingItems()).slice(0, 8);
-        console.log('Fast selling products:', fastSelling);
+        console.log('Fast selling products to display:', fastSelling.length);
+        console.log('Fast selling product names:', fastSelling.map(p => p.name));
         container.innerHTML = fastSelling.map(product => createProductCard(product)).join('');
-        console.log('Fast selling items loaded successfully');
+        console.log('Fast selling items loaded successfully, HTML length:', container.innerHTML.length);
     } catch (error) {
         console.error('Error loading fast selling items:', error);
         container.innerHTML = '<p>Error loading products. Please try again later.</p>';

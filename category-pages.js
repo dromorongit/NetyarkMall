@@ -50,16 +50,23 @@ function initializeCategoryPage() {
 }
 
 async function loadCategoryProducts(category, containerId) {
+    console.log('Loading category products for:', category, 'container:', containerId);
     const container = document.getElementById(containerId);
-    if (!container) return;
+    if (!container) {
+        console.error('Container not found:', containerId);
+        return;
+    }
 
     let products = await getProductsByCategory(category);
+    console.log('Products fetched for category:', products.length);
 
     // Sort products by default (newest first)
     products = sortProducts(products, 'newest');
+    console.log('Products after sorting:', products.length);
 
     // Display products
     displayProducts(products, container);
+    console.log('Products displayed in container');
 }
 
 function initializeFilters() {
