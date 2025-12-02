@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netyark Mall - Product Details</title>
+    <meta name="description" content="View detailed product information at Netyark Mall">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="Netyark.jfif" alt="Netyark Mall Logo">
+                    <div class="logo-text">
+                        <h1>Netyark Mall</h1>
+                        <p>Shop At Your Own Comfort</p>
+                    </div>
+                </div>
+
+                <nav class="nav">
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <input type="text" id="globalSearch" placeholder="Search products...">
+                            <button class="search-btn" id="searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                    <button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="mobile-menu-btn" aria-label="Toggle mobile menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="kitchen-appliances.html">Kitchen Appliances</a></li>
+                                <li><a href="beauty-personal-care.html">Beauty & Personal Care</a></li>
+                                <li><a href="photography-content-creation-tools.html">Photography & Content Creation Tools</a></li>
+                                <li><a href="nail-supplies.html">Nail Supplies</a></li>
+                                <li><a href="kids-babies.html">Kids & Babies</a></li>
+                                <li><a href="home-essentials.html">Home Essentials</a></li>
+                                <li><a href="lighting-home-decor.html">Lighting & Home Decor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="wholesale.html" class="nav-link">Wholesale</a></li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                        <li><a href="login.html" class="nav-link">Login</a></li>
+                        <li><a href="register.html" class="nav-link">Register</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar (expandable) -->
+        <div class="mobile-search-container" id="mobileSearchContainer">
+            <div class="mobile-search-input-group">
+                <input type="text" id="mobileGlobalSearch" placeholder="Search products, brands, categories...">
+                <button class="mobile-search-close" id="mobileSearchClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-search-results" id="mobileSearchResults"></div>
+        </div>
+    </div></header>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="tab-item" data-tab="home">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="categories.html" class="tab-item" data-tab="categories">
+            <i class="fas fa-th-large"></i>
+            <span>Categories</span>
+        </a>
+        <a href="wholesale.html" class="tab-item" data-tab="wholesale">
+            <i class="fas fa-boxes"></i>
+            <span>Wholesale</span>
+        </a>
+        <a href="cart.html" class="tab-item" data-tab="cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Cart</span>
+            <span class="tab-badge" id="cartTabBadge" style="display: none;">0</span>
+        </a>
+        <a href="profile.html" class="tab-item" data-tab="profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" id="breadcrumb">
+                <a href="index.html">Home</a> > <span id="breadcrumbCategory">Category</span> > <span id="breadcrumbProduct">Product Name</span>
+            </nav>
+
+            <!-- Product Details Section -->
+            <section class="product-details-section" id="productDetails">
+                <!-- Loading state -->
+                <div class="loading" id="loadingState">
+                    <div class="spinner"></div>
+                    <p>Loading product details...</p>
+                </div>
+
+                <!-- Error state -->
+                <div class="error-state" id="errorState" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Product Not Found</h3>
+                    <p>The product you're looking for doesn't exist or has been removed.</p>
+                    <a href="index.html" class="btn btn-primary">Back to Home</a>
+                </div>
+
+                <!-- Product content will be loaded here -->
+            </section>
+
+            <!-- Related Products Section -->
+            <section class="related-products-section" id="relatedProductsSection" style="display: none;">
+                <h2>You Might Also Like</h2>
+                <div class="product-grid" id="relatedProducts"></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Product Comparison Bar -->
+    <div class="compare-container" id="compareContainer">
+        <div class="compare-bar">
+            <div class="compare-items" id="compareItems"></div>
+            <div class="compare-actions">
+                <button class="compare-btn" id="compareBtn">Compare</button>
+                <button class="clear-compare" id="clearCompareBtn">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Company Information -->
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <!-- Customer Service -->
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact.html">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Quality Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="wholesale.html">Wholesale</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/share/1AHrj3BQnW/?mibextid" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.instagram.com/netyark_mall/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@netyark_mall/" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Live Chat Icon -->
+    <div class="live-chat-icon" id="liveChatIcon">
+        <i class="fas fa-comments"></i>
+        <div class="notification-badge" id="chatNotificationBadge" style="display: none;">1</div>
+    </div>
+
+    <!-- Live Chat Modal -->
+    <div class="live-chat-modal" id="liveChatModal">
+        <div class="chat-header">
+            <h3>Chat with Netyark Mall</h3>
+            <button class="chat-close" id="chatClose">&times;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message support">
+                <strong>Netyark Support</strong><br>
+                Hi there! 👋 Welcome to Netyark Mall! How can we help you today?
+            </div>
+            <div class="message timestamp" id="chatTimestamp">
+                Just now
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here...">
+                <button class="chat-send-btn" id="chatSendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Notification -->
+    <div class="chat-notification" id="chatNotification">
+        <h4>💬 Need Help?</h4>
+        <p>Chat with our support team for faster responses to your questions!</p>
+        <div class="notification-actions">
+            <button class="notification-btn primary" id="openChatBtn">Start Chat</button>
+            <button class="notification-btn secondary" id="dismissNotificationBtn">Later</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="products.js"></script>
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Product detail page specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeProductDetailPage();
+        });
+
+        async function initializeProductDetailPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            if (!productId) {
+                showErrorState();
+                return;
+            }
+
+            try {
+                const product = await getProductById(productId);
+                if (!product) {
+                    showErrorState();
+                    return;
+                }
+
+                displayProductDetails(product);
+                loadRelatedProducts(product.category, productId);
+                updateBreadcrumb(product);
+            } catch (error) {
+                console.error('Error loading product:', error);
+                showErrorState();
+            }
+        }
+
+        function displayProductDetails(product) {
+            const container = document.getElementById('productDetails');
+            const loadingState = document.getElementById('loadingState');
+
+            // Hide loading
+            loadingState.style.display = 'none';
+
+            const productId = product.id || product._id;
+            const stockCount = product.stockCount || product.stock || 0;
+            const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+            const moq = product.moq || product.minOrderQty || 1;
+            const isWholesale = product.isWholesale;
+            const wholesalePrice = product.wholesalePrice;
+
+            const discount = product.originalPrice > product.price ?
+                Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
+            const stockStatus = !inStock ? 'out-of-stock' :
+                              stockCount <= 5 ? 'low-stock' : 'in-stock';
+
+            const stockText = !inStock ? 'Out of Stock' :
+                            stockCount <= 5 ? `Only ${stockCount} left` : 'In Stock';
+
+            container.innerHTML = `
+                <div class="product-detail-container">
+                    <!-- Product Images -->
+                    <div class="product-gallery">
+                        <div class="main-image-container">
+                            <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}"
+                                 alt="${product.name}" class="main-product-image" id="mainProductImage">
+                        </div>
+                        ${product.additionalMedia && product.additionalMedia.length > 0 ? `
+                            <div class="thumbnail-gallery">
+                                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}"
+                                     alt="${product.name}" class="thumbnail active" onclick="changeMainImage(this)">
+                                ${product.additionalMedia.map((img, index) =>
+                                    `<img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(img) : img}"
+                                          alt="Product image ${index + 2}" class="thumbnail" onclick="changeMainImage(this)">`
+                                ).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-info-section">
+                        <div class="product-header">
+                            <h1 class="product-title">${product.name}</h1>
+                            ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
+                            <div class="product-rating">
+                                <div class="stars">
+                                    ${generateStarRating(product.rating || 0)}
+                                </div>
+                                <span class="rating-text">${product.rating || 0} (${product.reviews || 0} reviews)</span>
+                            </div>
+                        </div>
+
+                        <div class="product-price-section">
+                            ${isWholesale && wholesalePrice ? `
+                                <div class="price-display">
+                                    <span class="current-price wholesale-price">₵${wholesalePrice.toLocaleString()}</span>
+                                    <span class="regular-price">₵${product.price.toLocaleString()}</span>
+                                    <span class="wholesale-label">Wholesale Price</span>
+                                </div>
+                            ` : `
+                                <div class="price-display">
+                                    <span class="current-price">₵${product.price.toLocaleString()}</span>
+                                    ${product.originalPrice > product.price ?
+                                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                                </div>
+                            `}
+                            ${discount > 0 ? `<div class="discount-badge">-${discount}% OFF</div>` : ''}
+                        </div>
+
+                        <div class="product-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Category:</span>
+                                <span class="meta-value">${product.category}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Stock Status:</span>
+                                <span class="meta-value stock-${stockStatus}">${stockText}</span>
+                            </div>
+                            ${isWholesale ? `
+                                <div class="meta-item">
+                                    <span class="meta-label">MOQ:</span>
+                                    <span class="meta-value">${moq} units</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        ${product.colors && product.colors.length > 0 ? `
+                            <div class="product-variants">
+                                <h4>Available Colors</h4>
+                                <div class="color-options">
+                                    ${product.colors.map(color =>
+                                        `<span class="color-option" style="background-color: ${color.toLowerCase()};" title="${color}"></span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${product.sizes && product.sizes.length > 0 ? `
+                            <div class="product-variants">
+                                <h4>Available Sizes</h4>
+                                <div class="size-options">
+                                    ${product.sizes.map(size =>
+                                        `<span class="size-option">${size}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="product-actions">
+                            ${isWholesale ?
+                                `<button class="btn btn-primary" onclick="addWholesaleToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart (MOQ: ${moq})
+                                </button>` :
+                                `<button class="btn btn-primary" onclick="addToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>`
+                            }
+                            <button class="btn btn-outline" onclick="addToCompare('${productId}')">
+                                <i class="fas fa-balance-scale"></i> Compare
+                            </button>
+                            <button class="btn btn-outline wishlist-btn" onclick="toggleWishlist('${productId}')">
+                                <i class="far fa-heart"></i> Add to Wishlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Description -->
+                <div class="product-description-section">
+                    <h2>Product Description</h2>
+                    <div class="description-content">
+                        ${product.longDescription || product.description || product.shortDescription || 'No description available.'}
+                    </div>
+                </div>
+
+                <!-- Product Specifications -->
+                <div class="product-specifications">
+                    <h2>Specifications</h2>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Product Name:</span>
+                            <span class="spec-value">${product.name}</span>
+                        </div>
+                        ${product.brand ? `
+                            <div class="spec-item">
+                                <span class="spec-label">Brand:</span>
+                                <span class="spec-value">${product.brand}</span>
+                            </div>
+                        ` : ''}
+                        <div class="spec-item">
+                            <span class="spec-label">Category:</span>
+                            <span class="spec-value">${product.category}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Price:</span>
+                            <span class="spec-value">₵${product.price.toLocaleString()}</span>
+                        </div>
+                        ${isWholesale && wholesalePrice ? `
+                            <div class="spec-item">
+                                <span class="spec-label">Wholesale Price:</span>
+                                <span class="spec-value">₵${wholesalePrice.toLocaleString()}</span>
+                            </div>
+                        ` : ''}
+                        <div class="spec-item">
+                            <span class="spec-label">Stock:</span>
+                            <span class="spec-value">${stockCount}</span>
+                        </div>
+                        ${isWholesale ? `
+                            <div class="spec-item">
+                                <span class="spec-label">Minimum Order Quantity:</span>
+                                <span class="spec-value">${moq}</span>
+                            </div>
+                        ` : ''}
+                        <div class="spec-item">
+                            <span class="spec-label">Rating:</span>
+                            <span class="spec-value">${product.rating || 0}/5 (${product.reviews || 0} reviews)</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeMainImage(thumbnail) {
+            const mainImage = document.getElementById('mainProductImage');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+
+            if (mainImage && thumbnail) {
+                mainImage.src = thumbnail.src;
+                thumbnails.forEach(t => t.classList.remove('active'));
+                thumbnail.classList.add('active');
+            }
+        }
+
+        async function loadRelatedProducts(category, excludeProductId) {
+            try {
+                const relatedProducts = await getProductsByCategory(category);
+                const filteredProducts = relatedProducts
+                    .filter(p => (p.id || p._id) !== excludeProductId)
+                    .slice(0, 4);
+
+                if (filteredProducts.length > 0) {
+                    const container = document.getElementById('relatedProducts');
+                    container.innerHTML = filteredProducts.map(product => createProductCard(product)).join('');
+                    document.getElementById('relatedProductsSection').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading related products:', error);
+            }
+        }
+
+        function updateBreadcrumb(product) {
+            const breadcrumbCategory = document.getElementById('breadcrumbCategory');
+            const breadcrumbProduct = document.getElementById('breadcrumbProduct');
+
+            if (breadcrumbCategory) breadcrumbCategory.textContent = product.category;
+            if (breadcrumbProduct) breadcrumbProduct.textContent = product.name;
+        }
+
+        function showErrorState() {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+
+            loadingState.style.display = 'none';
+            errorState.style.display = 'block';
+        }
+
+        function generateStarRating(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            let stars = '';
+
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+
+            if (hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+
+            const emptyStars = 5 - Math.ceil(rating);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+
+            return stars;
+        }
+    </script>
+</body>
+</html>

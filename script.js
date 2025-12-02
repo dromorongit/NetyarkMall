@@ -738,6 +738,9 @@ function createProductCard(product) {
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-actions">
+                    <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
                         <i class="fas fa-balance-scale"></i>
                     </button>
@@ -821,6 +824,9 @@ function createWholesaleProductCard(product) {
                     </div>
                 </div>
                 <div class="product-actions">
+                    <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
                         <i class="fas fa-balance-scale"></i>
                     </button>
@@ -1349,6 +1355,11 @@ function viewProduct(productId) {
     window.location.href = `categories.html?product=${productId}`;
 }
 
+function viewProductDetails(productId) {
+    // Redirect to product detail page
+    window.location.href = `product.html?id=${productId}`;
+}
+
 // Toggle wishlist function
 function toggleWishlist(productId) {
     if (typeof addToWishlist === 'function' && typeof removeFromWishlist === 'function') {
@@ -1797,6 +1808,7 @@ window.navigateToCategory = navigateToCategory;
 window.quickView = quickView;
 window.toggleWishlist = toggleWishlist;
 window.viewProduct = viewProduct;
+window.viewProductDetails = viewProductDetails;
 window.addToCompare = addToCompare;
 window.removeFromCompare = removeFromCompare;
 window.clearCompareList = clearCompareList;
