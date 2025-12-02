@@ -58,6 +58,26 @@ router.get('/shop-by-category', async (req, res) => {
   }
 });
 
+// Get in-stock products (public)
+router.get('/in-stock', async (req, res) => {
+  try {
+    const products = await Product.find({ stockStatus: 'in-stock' });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get out-of-stock products (public)
+router.get('/out-of-stock', async (req, res) => {
+  try {
+    const products = await Product.find({ stockStatus: 'out-of-stock' });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Get wholesale products (public)
 router.get('/wholesale', async (req, res) => {
   try {

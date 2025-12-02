@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Status Test</title>
+    <script src="products.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Status Feature Test</h1>
+
+    <div class="test-section">
+        <h2>Test Stock Status Functions</h2>
+        <button onclick="testStockStatusFunctions()">Test Stock Status Functions</button>
+        <div id="test-results" class="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Product Creation with Stock Status</h2>
+        <p>This would test the admin form functionality. In a real implementation, you would:</p>
+        <ol>
+            <li>Go to the admin panel</li>
+            <li>Add a new product</li>
+            <li>Select either "In Stock" or "Out of Stock" radio button</li>
+            <li>Submit the form</li>
+            <li>The product should be saved with the correct stock status</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Test API Endpoints</h2>
+        <p>The following API endpoints should be available:</p>
+        <ul>
+            <li>/api/products/in-stock - Returns all in-stock products</li>
+            <li>/api/products/out-of-stock - Returns all out-of-stock products</li>
+        </ul>
+    </div>
+
+    <script>
+        async function testStockStatusFunctions() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = 'Testing stock status functions...<br>';
+
+            try {
+                // Test that the functions are available
+                if (typeof getInStockProducts === 'function') {
+                    resultsDiv.innerHTML += '✅ getInStockProducts function is available<br>';
+                } else {
+                    resultsDiv.innerHTML += '❌ getInStockProducts function is NOT available<br>';
+                }
+
+                if (typeof getOutOfStockProducts === 'function') {
+                    resultsDiv.innerHTML += '✅ getOutOfStockProducts function is available<br>';
+                } else {
+                    resultsDiv.innerHTML += '❌ getOutOfStockProducts function is NOT available<br>';
+                }
+
+                // Test the functions (they will fail if API is not running, but that's expected)
+                resultsDiv.innerHTML += '<br>Testing function calls (may fail if API is not running)...<br>';
+
+                try {
+                    const inStock = await getInStockProducts();
+                    resultsDiv.innerHTML += `✅ getInStockProducts() returned ${inStock.length} products<br>`;
+                } catch (error) {
+                    resultsDiv.innerHTML += `⚠️ getInStockProducts() failed: ${error.message}<br>`;
+                }
+
+                try {
+                    const outOfStock = await getOutOfStockProducts();
+                    resultsDiv.innerHTML += `✅ getOutOfStockProducts() returned ${outOfStock.length} products<br>`;
+                } catch (error) {
+                    resultsDiv.innerHTML += `⚠️ getOutOfStockProducts() failed: ${error.message}<br>`;
+                }
+
+            } catch (error) {
+                resultsDiv.innerHTML += `❌ Error during testing: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

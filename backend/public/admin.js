@@ -65,6 +65,9 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     formData.append('isNewArrival', document.getElementById('product-new-arrival').checked);
     formData.append('isFastSelling', document.getElementById('product-fast-selling').checked);
     formData.append('isShopByCategory', document.getElementById('product-shop-category').checked);
+    // Add stock status field
+    const stockStatus = document.querySelector('input[name="stock-status"]:checked').value;
+    formData.append('stockStatus', stockStatus);
     try {
       const res = await fetch(`${API_BASE}/products`, {
         method: 'POST',
@@ -143,12 +146,14 @@ async function loadProducts() {
         <p><strong>Stock:</strong> ${p.stock}</p>
         <p><strong>Category:</strong> ${p.category}</p>
         <p><strong>Wholesale:</strong> ${p.isWholesale ? 'Yes (MOQ: ' + p.minOrderQty + ')' : 'No'}</p>
+        <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
         <p><strong>Sections:</strong> ${[
           p.isNewArrival ? 'New Arrivals' : '',
           p.isFastSelling ? 'Fast-Selling Items' : '',
           p.isShopByCategory ? 'Shop by Category' : ''
         ].filter(s => s).join(', ') || 'None'}</p>
         <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
+        <button onclick="editProduct('${p._id}')">Edit</button>
         <button onclick="deleteProduct('${p._id}')">Delete</button>
       </div>
     `).join('');
@@ -221,6 +226,94 @@ async function updateStock(id, currentStock) {
     }
   }
 }
+
+async function editProduct(id) {
+  try {
+    // Fetch the product data
+    const response = await fetch(`${API_BASE}/products/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch product data');
+    }
+
+    const product = await response.json();
+
+    // Populate the edit modal with product data
+    document.getElementById('edit-product-id').value = product._id;
+    document.getElementById('edit-product-name').value = product.name;
+    document.getElementById('edit-product-short-description').value = product.shortDescription;
+    document.getElementById('edit-product-long-description').value = product.longDescription || '';
+    document.getElementById('edit-product-brand').value = product.brand || '';
+    document.getElementById('edit-product-colors').value = product.colors ? product.colors.join(', ') : '';
+    document.getElementById('edit-product-sizes').value = product.sizes ? product.sizes.join(', ') : '';
+    document.getElementById('edit-product-price').value = product.price;
+    document.getElementById('edit-product-stock').value = product.stock;
+    document.getElementById('edit-product-category').value = product.category;
+
+    // Set stock status radio buttons
+    const stockStatusRadios = document.getElementsByName('edit-stock-status');
+    stockStatusRadios.forEach(radio => {
+      if (radio.value === (product.stockStatus || 'in-stock')) {
+        radio.checked = true;
+      }
+    });
+
+    // Show the edit modal
+    document.getElementById('edit-product-modal').style.display = 'block';
+
+  } catch (err) {
+    console.error('Error editing product:', err);
+    alert('Error editing product: ' + err.message);
+  }
+}
+
+function closeEditModal() {
+  document.getElementById('edit-product-modal').style.display = 'none';
+}
+
+// Handle edit product form submission
+document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const productId = document.getElementById('edit-product-id').value;
+  const productData = {
+    name: document.getElementById('edit-product-name').value,
+    shortDescription: document.getElementById('edit-product-short-description').value,
+    longDescription: document.getElementById('edit-product-long-description').value,
+    brand: document.getElementById('edit-product-brand').value,
+    colors: document.getElementById('edit-product-colors').value.split(',').map(c => c.trim()).filter(c => c),
+    sizes: document.getElementById('edit-product-sizes').value.split(',').map(s => s.trim()).filter(s => s),
+    price: parseFloat(document.getElementById('edit-product-price').value),
+    stock: parseInt(document.getElementById('edit-product-stock').value),
+    category: document.getElementById('edit-product-category').value,
+    stockStatus: document.querySelector('input[name="edit-stock-status"]:checked').value
+  };
+
+  try {
+    const response = await fetch(`${API_BASE}/products/${productId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(productData)
+    });
+
+    if (response.ok) {
+      alert('Product updated successfully!');
+      closeEditModal();
+      loadProducts();
+    } else {
+      const errorData = await response.json();
+      alert('Failed to update product: ' + (errorData.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Error updating product:', err);
+    alert('Error updating product: ' + err.message);
+  }
+});
 
 async function deleteProduct(id) {
   if (confirm('Delete this product?')) {

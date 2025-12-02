@@ -29,6 +29,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 1000);
 
+    // Add periodic refresh for product data (every 5 minutes)
+    setInterval(() => {
+        if (typeof fetchProducts === 'function') {
+            fetchProducts(true).then(() => {
+                console.log('Periodic product refresh completed');
+                // Refresh the current page content
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                if (currentPage === 'index.html' || currentPage === '') {
+                    loadNewArrivals();
+                    loadFastSellingItems();
+                    loadCategoryHighlights();
+                } else if (currentPage === 'wholesale.html') {
+                    loadWholesaleProducts();
+                } else if (currentPage === 'deals.html') {
+                    loadFeaturedDeals();
+                }
+            });
+        }
+    }, 300000); // 5 minutes
+
     initializeCart();
     initializeNavigation();
     initializeCarousel();
@@ -594,8 +614,8 @@ function initializeContactPage() {
 }
 
 // Product loading functions
-async function loadNewArrivals() {
-    console.log('Loading new arrivals...');
+async function loadNewArrivals(forceRefresh = false) {
+    console.log('Loading new arrivals...', forceRefresh ? '(forced refresh)' : '');
     const container = document.getElementById('newArrivals');
     if (!container) {
         console.error('newArrivals container not found');
@@ -603,7 +623,9 @@ async function loadNewArrivals() {
     }
 
     try {
-        const newArrivals = (await getNewArrivals()).slice(0, 8);
+        // Add cache busting parameter to ensure fresh data
+        const cacheBust = forceRefresh ? `?timestamp=${Date.now()}` : '';
+        const newArrivals = (await getNewArrivals(cacheBust)).slice(0, 8);
         console.log('New arrivals products to display:', newArrivals.length);
         console.log('New arrivals product names:', newArrivals.map(p => p.name));
 
@@ -640,8 +662,8 @@ function filterInStockProducts(products) {
     });
 }
 
-async function loadFastSellingItems() {
-    console.log('Loading fast selling items...');
+async function loadFastSellingItems(forceRefresh = false) {
+    console.log('Loading fast selling items...', forceRefresh ? '(forced refresh)' : '');
     const container = document.getElementById('fastSelling');
     if (!container) {
         console.error('fastSelling container not found');
@@ -649,7 +671,9 @@ async function loadFastSellingItems() {
     }
 
     try {
-        const fastSelling = (await getFastSellingItems()).slice(0, 8);
+        // Add cache busting parameter to ensure fresh data
+        const cacheBust = forceRefresh ? `?timestamp=${Date.now()}` : '';
+        const fastSelling = (await getFastSellingItems(cacheBust)).slice(0, 8);
         console.log('Fast selling products to display:', fastSelling.length);
         console.log('Fast selling product names:', fastSelling.map(p => p.name));
 
@@ -704,12 +728,15 @@ function loadFeaturedDeals() {
     }
 }
 
-async function loadWholesaleProducts() {
+async function loadWholesaleProducts(forceRefresh = false) {
+    console.log('Loading wholesale products...', forceRefresh ? '(forced refresh)' : '');
     const container = document.getElementById('wholesaleGrid');
     if (!container) return;
 
     try {
-        const wholesaleProducts = await getWholesaleProducts();
+        // Add cache busting parameter to ensure fresh data
+        const cacheBust = forceRefresh ? `?timestamp=${Date.now()}` : '';
+        const wholesaleProducts = await getWholesaleProducts(cacheBust);
 
         // Filter out out-of-stock products
         const inStockWholesale = filterInStockProducts(wholesaleProducts);
@@ -719,11 +746,45 @@ async function loadWholesaleProducts() {
         } else {
             container.innerHTML = inStockWholesale.map(product => createWholesaleProductCard(product)).join('');
         }
+        console.log('Wholesale products loaded successfully');
     } catch (error) {
         console.error('Error loading wholesale products:', error);
         container.innerHTML = '<p>Error loading wholesale products. Please try again later.</p>';
     }
 }
+
+// Manual refresh function for product data
+function refreshProductData() {
+    showLoading();
+    console.log('Manually refreshing product data...');
+
+    // Clear any existing product cache
+    if (typeof clearProductCache === 'function') {
+        clearProductCache();
+    }
+
+    // Force refresh all product data
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    if (currentPage === 'index.html' || currentPage === '') {
+        loadNewArrivals(true);
+        loadFastSellingItems(true);
+        loadCategoryHighlights();
+    } else if (currentPage === 'wholesale.html') {
+        loadWholesaleProducts(true);
+    } else if (currentPage === 'deals.html') {
+        loadFeaturedDeals();
+    }
+
+    // Show notification
+    setTimeout(() => {
+        hideLoading();
+        showNotification('Product data refreshed! New products should now appear.', 'success');
+    }, 2000);
+}
+
+// Add refresh function to window for global access
+window.refreshProductData = refreshProductData;
 
 async function loadSuggestedProducts() {
     const container = document.getElementById('suggestedProducts');
@@ -2698,10 +2759,26 @@ function testOutOfStockFiltering() {
     };
 }
 
+// Test function for refresh button
+function testRefreshButton() {
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        console.log('Refresh button found and initialized');
+return true;
+    } else {
+        console.log('Refresh button not found');
+        return false;
+    }
+}
+
 // Run test on page load
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof filterInStockProducts === 'function') {
         const testResults = testOutOfStockFiltering();
         console.log('Out-of-stock filtering test completed:', testResults);
     }
+
+    // Test refresh button
+    const refreshTestResult = testRefreshButton();
+    console.log('Refresh button test result:', refreshTestResult);
 });

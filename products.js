@@ -404,6 +404,66 @@ async function getWholesaleProducts() {
     return filteredWholesale;
 }
 
+// Get in-stock products
+async function getInStockProducts() {
+    console.log('Fetching in-stock products from API...');
+    try {
+        const response = await fetch(`${API_BASE}/products/in-stock`);
+        console.log('In-stock API response status:', response.status);
+        if (response.ok) {
+            const inStockProducts = await response.json();
+            console.log('Fetched in-stock products:', inStockProducts.length, 'products');
+            return inStockProducts;
+        } else {
+            console.error('In-stock API response not ok:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('In-stock API error:', errorText);
+        }
+    } catch (error) {
+        console.error('Error fetching in-stock products:', error);
+    }
+
+    // Fallback to filtering all products
+    console.log('Falling back to filtering all products for in-stock items');
+    const products = await getAllProducts();
+    console.log('All products for in-stock filtering:', products.length);
+    const inStockProducts = products.filter(product =>
+        product.stockStatus === 'in-stock' || (product.stock && product.stock > 0)
+    );
+    console.log('In-stock products found:', inStockProducts.length, 'products');
+    return inStockProducts;
+}
+
+// Get out-of-stock products
+async function getOutOfStockProducts() {
+    console.log('Fetching out-of-stock products from API...');
+    try {
+        const response = await fetch(`${API_BASE}/products/out-of-stock`);
+        console.log('Out-of-stock API response status:', response.status);
+        if (response.ok) {
+            const outOfStockProducts = await response.json();
+            console.log('Fetched out-of-stock products:', outOfStockProducts.length, 'products');
+            return outOfStockProducts;
+        } else {
+            console.error('Out-of-stock API response not ok:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Out-of-stock API error:', errorText);
+        }
+    } catch (error) {
+        console.error('Error fetching out-of-stock products:', error);
+    }
+
+    // Fallback to filtering all products
+    console.log('Falling back to filtering all products for out-of-stock items');
+    const products = await getAllProducts();
+    console.log('All products for out-of-stock filtering:', products.length);
+    const outOfStockProducts = products.filter(product =>
+        product.stockStatus === 'out-of-stock' || (product.stock !== undefined && product.stock <= 0)
+    );
+    console.log('Out-of-stock products found:', outOfStockProducts.length, 'products');
+    return outOfStockProducts;
+}
+
 // Get fast-selling items (products with high review count and good ratings)
 async function getFastSellingItems() {
     console.log('Fetching fast-selling items from API...');
@@ -559,6 +619,8 @@ window.getFastSellingItems = getFastSellingItems;
 window.getProductById = getProductById;
 window.getCategoryData = getCategoryData;
 window.getWholesaleProducts = getWholesaleProducts;
+window.getInStockProducts = getInStockProducts;
+window.getOutOfStockProducts = getOutOfStockProducts;
 window.searchProducts = searchProducts;
 window.getSuggestedProducts = getSuggestedProducts;
 window.formatPrice = formatPrice;
@@ -619,6 +681,8 @@ if (typeof module !== 'undefined' && module.exports) {
         getProductById,
         getCategoryData,
         getWholesaleProducts,
+        getInStockProducts,
+        getOutOfStockProducts,
         searchProducts,
         getSuggestedProducts,
         formatPrice,

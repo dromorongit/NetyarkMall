@@ -18,6 +18,7 @@ const productSchema = new mongoose.Schema({
   isNewArrival: { type: Boolean, default: false },
   isFastSelling: { type: Boolean, default: false },
   isShopByCategory: { type: Boolean, default: false },
+  stockStatus: { type: String, enum: ['in-stock', 'out-of-stock'], default: 'in-stock' },
   createdAt: { type: Date, default: Date.now }
 });
 
