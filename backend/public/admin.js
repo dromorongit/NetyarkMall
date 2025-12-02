@@ -49,15 +49,8 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     colors.forEach(color => formData.append('colors', color));
     const sizes = document.getElementById('product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
     sizes.forEach(size => formData.append('sizes', size));
-    const priceValue = document.getElementById('product-price').value;
-    const stockValue = document.getElementById('product-stock').value;
-    console.log('DEBUG: Original price input:', priceValue, 'type:', typeof priceValue);
-    console.log('DEBUG: Original stock input:', stockValue, 'type:', typeof stockValue);
-    const parsedPrice = parseFloat(priceValue);
-    const parsedStock = parseInt(stockValue);
-    console.log('DEBUG: Parsed price:', parsedPrice, 'Parsed stock:', parsedStock);
-    formData.append('price', parsedPrice);
-    formData.append('stock', parsedStock);
+    formData.append('price', parseFloat(document.getElementById('product-price').value));
+    formData.append('stock', parseInt(document.getElementById('product-stock').value));
     formData.append('category', document.getElementById('product-category').value);
     formData.append('image', document.getElementById('product-image').files[0]);
     const additionalMedia = document.getElementById('product-additional-media').files;
@@ -81,9 +74,6 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         body: formData
       });
       if (res.ok) {
-        const createdProduct = await res.json();
-        console.log('DEBUG: Created product response:', createdProduct);
-        console.log('DEBUG: Saved price:', createdProduct.price, 'Saved stock:', createdProduct.stock);
         loadProducts();
         document.getElementById('product-form').reset();
         document.getElementById('product-moq').value = '1';
