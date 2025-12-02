@@ -664,7 +664,9 @@ function calculateDiscount(originalPrice, currentPrice) {
 // Helper function to get full image URL
 function getFullImageUrl(imagePath) {
     if (imagePath && imagePath.startsWith('/uploads/')) {
-        return `${API_BASE}${imagePath}`;
+        // Remove '/api' from API_BASE for uploads since backend serves them directly at /uploads
+        const baseUrl = API_BASE.replace('/api', '');
+        return `${baseUrl}${imagePath}`;
     }
     // Handle undefined or invalid image paths
     if (!imagePath || imagePath === 'undefined' || imagePath === '') {
