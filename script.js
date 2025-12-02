@@ -128,19 +128,27 @@ async function addToCart(productId, quantity = 1) {
     showNotification(`${product.name} added to cart!`, 'success');
 }
 
-async function addWholesaleToCart(productId) {
+async function addWholesaleToCart(productId, quantity = null) {
     const product = await getProductById(productId);
     if (!product || !product.isWholesale) {
         showNotification('Product not found or not a wholesale item.', 'error');
         return;
     }
 
-    const existingItem = cart.find(item => item.id === productId);
     const moq = product.moq || product.minOrderQty || 1;
+    const addQuantity = quantity || moq;
+
+    // Validate quantity is multiple of MOQ
+    if (addQuantity % moq !== 0) {
+        showNotification(`Quantity must be in multiples of MOQ (${moq}).`, 'error');
+        return;
+    }
+
+    const existingItem = cart.find(item => item.id === productId);
 
     if (existingItem) {
-        // For wholesale, allow adding more but check MOQ increments
-        const newQuantity = existingItem.quantity + moq;
+        // For wholesale, add the specified quantity
+        const newQuantity = existingItem.quantity + addQuantity;
 
         // Check inventory
         const inventoryCheck = typeof checkInventory === 'function' ?
@@ -152,13 +160,13 @@ async function addWholesaleToCart(productId) {
         }
 
         existingItem.quantity = newQuantity;
-        showNotification(`Added ${moq} more ${product.name} to cart!`, 'success');
+        showNotification(`Added ${addQuantity} more ${product.name} to cart!`, 'success');
     } else {
-        // First time adding wholesale item - set to MOQ
+        // First time adding wholesale item
 
-        // Check inventory for MOQ
+        // Check inventory for the quantity
         const inventoryCheck = typeof checkInventory === 'function' ?
-            checkInventory(productId, moq) : { available: product.inStock };
+            checkInventory(productId, addQuantity) : { available: product.inStock };
 
         if (!inventoryCheck.available) {
             showNotification(inventoryCheck.reason || 'Cannot add item. Insufficient stock.', 'error');
@@ -170,12 +178,12 @@ async function addWholesaleToCart(productId) {
             name: product.name,
             price: product.wholesalePrice || product.price,
             image: product.image,
-            quantity: moq,
+            quantity: addQuantity,
             isWholesale: true,
             moq: moq
         });
 
-        showNotification(`${product.name} added to cart with MOQ of ${moq}!`, 'success');
+        showNotification(`${product.name} added to cart with quantity ${addQuantity}!`, 'success');
     }
 
     saveCart();
@@ -829,7 +837,15 @@ function createWholesaleProductCard(product) {
                     </div>
                 </div>
                 <div class="product-card-actions">
-                    <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                    <div class="wholesale-quantity-controls" style="margin-bottom: 10px;">
+                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity (MOQ: ${moq}):</label>
+                        <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
+                            <button class="quantity-btn decrease" onclick="adjustWholesaleQuantity('${productId}', -${moq})" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">-</button>
+                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="${moq}" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;" ${!inventoryStatus.available ? 'disabled' : ''} readonly>
+                            <button class="quantity-btn increase" onclick="adjustWholesaleQuantity('${productId}', ${moq})" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">+</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))" ${!inventoryStatus.available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                     <div class="product-actions">
@@ -1400,6 +1416,17 @@ function updateWishlistButtons() {
     });
 }
 
+function adjustWholesaleQuantity(productId, delta) {
+    const quantityInput = document.getElementById(`wholesale-qty-${productId}`);
+    if (!quantityInput) return;
+
+    const currentValue = parseInt(quantityInput.value) || 0;
+    const minValue = parseInt(quantityInput.min) || 1;
+    const newValue = Math.max(minValue, currentValue + delta);
+
+    quantityInput.value = newValue;
+}
+
 // Product comparison functionality
 let compareList = JSON.parse(localStorage.getItem('compare_list') || '[]');
 
@@ -1811,6 +1838,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Export functions for use in HTML
 window.addToCart = addToCart;
 window.addWholesaleToCart = addWholesaleToCart;
+window.adjustWholesaleQuantity = adjustWholesaleQuantity;
 window.removeFromCart = removeFromCart;
 window.updateCartQuantity = updateCartQuantity;
 window.clearCart = clearCart;
