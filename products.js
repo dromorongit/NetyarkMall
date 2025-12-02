@@ -33,25 +33,8 @@ async function fetchProducts(forceRefresh = false) {
       console.log('Fetched API products:', apiProducts.length, 'items');
       console.log('Sample API product:', apiProducts[0] ? JSON.stringify(apiProducts[0], null, 2) : 'No products');
 
-      // Merge with legacy products to ensure all products are available
-      const legacyProducts = [];
-      Object.values(productDatabase).forEach(category => {
-        if (Array.isArray(category)) {
-          legacyProducts.push(...category);
-        }
-      });
-
-      // Combine API and legacy products, preferring API products for duplicates
-      const combinedProducts = [...apiProducts];
-      legacyProducts.forEach(legacyProduct => {
-        const exists = combinedProducts.find(p => p.id === legacyProduct.id || p._id === legacyProduct.id);
-        if (!exists) {
-          combinedProducts.push(legacyProduct);
-        }
-      });
-
-      productCache = combinedProducts;
-      console.log('Combined products:', productCache.length, 'items');
+      productCache = apiProducts;
+      console.log('API products:', productCache.length, 'items');
       return productCache;
     } else {
       console.error('API response not ok:', response.status, response.statusText);
@@ -63,17 +46,9 @@ async function fetchProducts(forceRefresh = false) {
     console.error('Error fetching products:', error);
   }
 
-  // Fallback to legacy products if API fails
-  console.log('Falling back to legacy products');
-  // Flatten the legacy product database
-  const legacyProducts = [];
-  Object.values(productDatabase).forEach(category => {
-    if (Array.isArray(category)) {
-      legacyProducts.push(...category);
-    }
-  });
-  console.log('Legacy products count:', legacyProducts.length);
-  return legacyProducts;
+  // Return empty array if API fails - no fallback to legacy products
+  console.log('API failed, returning empty array');
+  return [];
 }
 
 // Fetch wholesale products from API
@@ -94,8 +69,8 @@ async function fetchWholesaleProducts() {
   } catch (error) {
     console.error('Error fetching wholesale products:', error);
   }
-  console.log('Falling back to legacy wholesale products');
-  return productDatabase.wholesale || [];
+  console.log('API failed, returning empty array for wholesale products');
+  return [];
 }
 
 // Legacy product database for fallback (keeping for compatibility)
@@ -344,111 +319,8 @@ const productDatabase = {
         }
     ],
 
-    // Wholesale Products
-    wholesale: [
-        {
-            id: 'wholesale-smartphones',
-            name: 'Bulk Smartphone Pack (10 units)',
-            price: 18000, // Wholesale price
-            originalPrice: 25000, // Retail equivalent
-            wholesalePrice: 18000,
-            moq: 10,
-            image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-            category: 'wholesale',
-            description: 'Premium smartphones in bulk for wholesale buyers',
-            rating: 4.5,
-            reviews: 23,
-            isNew: false,
-            inStock: true,
-            stockCount: 100,
-            isWholesale: true
-        },
-        {
-            id: 'wholesale-laptops',
-            name: 'Business Laptops Bulk (5 units)',
-            price: 17500, // Wholesale price
-            originalPrice: 22500, // Retail equivalent
-            wholesalePrice: 17500,
-            moq: 5,
-            image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-            category: 'wholesale',
-            description: 'Professional laptops for corporate buyers',
-            rating: 4.6,
-            reviews: 18,
-            isNew: true,
-            inStock: true,
-            stockCount: 50,
-            isWholesale: true
-        },
-        {
-            id: 'wholesale-dresses',
-            name: 'Designer Dresses Collection (20 pieces)',
-            price: 3200, // Wholesale price
-            originalPrice: 4000, // Retail equivalent
-            wholesalePrice: 3200,
-            moq: 20,
-            image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-            category: 'wholesale',
-            description: 'Elegant dresses for fashion retailers',
-            rating: 4.4,
-            reviews: 31,
-            isNew: false,
-            inStock: true,
-            stockCount: 200,
-            isWholesale: true
-        },
-        {
-            id: 'wholesale-kitchen-set',
-            name: 'Professional Kitchen Set (15 sets)',
-            price: 6750, // Wholesale price
-            originalPrice: 9000, // Retail equivalent
-            wholesalePrice: 6750,
-            moq: 15,
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-            category: 'wholesale',
-            description: 'Complete kitchen sets for bulk buyers',
-            rating: 4.7,
-            reviews: 27,
-            isNew: true,
-            inStock: true,
-            stockCount: 75,
-            isWholesale: true
-        },
-        {
-            id: 'wholesale-skincare',
-            name: 'Premium Skincare Bundle (25 units)',
-            price: 3000, // Wholesale price
-            originalPrice: 4500, // Retail equivalent
-            wholesalePrice: 3000,
-            moq: 25,
-            image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-            category: 'wholesale',
-            description: 'Complete skincare routines for beauty retailers',
-            rating: 4.8,
-            reviews: 42,
-            isNew: false,
-            inStock: true,
-            stockCount: 150,
-            isWholesale: true
-        },
-        {
-            id: 'wholesale-jewelry',
-            name: 'Fashion Jewelry Mix (50 pieces)',
-            price: 9000, // Wholesale price
-            originalPrice: 13500, // Retail equivalent
-            wholesalePrice: 9000,
-            moq: 50,
-            image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-            category: 'wholesale',
-            description: 'Assorted jewelry collection for retailers',
-            rating: 4.3,
-            reviews: 19,
-            isNew: true,
-            inStock: true,
-            stockCount: 300,
-            isWholesale: true
-        }
-    ]
+    // Wholesale Products - removed hardcoded products
+    wholesale: []
 };
 
 // Get all products as a flat array
@@ -529,7 +401,6 @@ async function getWholesaleProducts() {
     const filteredWholesale = allProducts.filter(product =>
         product.isWholesale || (product.moq && product.moq > 1)
     );
-    console.log('Filtered wholesale products:', filteredWholesale.length, 'items');
     return filteredWholesale;
 }
 
