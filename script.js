@@ -679,7 +679,7 @@ function createProductCard(product) {
     const discount = product.originalPrice > product.price ?
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(productId);
+    const isProductInWishlist = typeof window.isInWishlist === 'function' && window.isInWishlist(productId);
 
     // Check inventory status
     const inventoryStatus = typeof checkInventory === 'function' ?
@@ -726,8 +726,8 @@ function createProductCard(product) {
                     <button class="action-btn compare-btn" onclick="addToCompare('${product.id}')" title="Compare">
                         <i class="fas fa-balance-scale"></i>
                     </button>
-                    <button class="action-btn wishlist-btn ${isInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${product.id}')" title="Wishlist">
-                        <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
+                    <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${product.id}')" title="Wishlist">
+                        <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
                     </button>
                 </div>
             </div>
@@ -758,7 +758,7 @@ function createWholesaleProductCard(product) {
     const discount = product.originalPrice > product.price ?
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-    const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(productId);
+    const isProductInWishlist = typeof window.isInWishlist === 'function' && window.isInWishlist(productId);
 
     // Check inventory status
     const inventoryStatus = typeof checkInventory === 'function' ?
@@ -808,8 +808,8 @@ function createWholesaleProductCard(product) {
                     <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
                         <i class="fas fa-balance-scale"></i>
                     </button>
-                    <button class="action-btn wishlist-btn ${isInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
-                        <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
+                    <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
+                        <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
                     </button>
                 </div>
             </div>
