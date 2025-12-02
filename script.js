@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCart();
     initializeNavigation();
     initializeCarousel();
-    initializePageSpecific();
     initializeSearch();
     initializeComparison();
     updateCartCount();

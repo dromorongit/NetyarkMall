@@ -1,8 +1,7 @@
 // Authentication System for Netyark Mall
 // Handles user registration, login, logout, and session management
 
-// API Base URL
-const API_BASE = 'https://netyarkmall-production.up.railway.app/api';
+// API Base URL is defined in products.js
 
 // User data storage keys
 const CURRENT_USER_KEY = 'netyark_current_user';
