@@ -168,7 +168,7 @@ async function addWholesaleToCart(productId) {
         cart.push({
             id: productId,
             name: product.name,
-            price: product.price,
+            price: product.wholesalePrice || product.price,
             image: product.image,
             quantity: moq,
             isWholesale: true,
@@ -813,11 +813,11 @@ function createWholesaleProductCard(product) {
                     <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
                 </div>
                 <div class="product-price">
-                    <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
+                    <span class="current-price">₵${(product.wholesalePrice || product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                     <div class="wholesale-savings">
-                        <small>Per unit pricing</small>
+                        <small>Wholesale pricing</small>
                     </div>
                 </div>
                 <div class="product-actions">

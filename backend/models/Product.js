@@ -13,6 +13,7 @@ const productSchema = new mongoose.Schema({
   image: { type: String }, // URL or path
   additionalMedia: { type: [String] }, // array of additional media paths (images/videos)
   isWholesale: { type: Boolean, default: false },
+  wholesalePrice: { type: Number }, // wholesale price in GHS
   minOrderQty: { type: Number, default: 1 },
   isNewArrival: { type: Boolean, default: false },
   isFastSelling: { type: Boolean, default: false },
