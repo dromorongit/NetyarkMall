@@ -406,11 +406,21 @@
                         ` : ''}
 
                         <div class="product-actions">
+                            ${!isWholesale ? `
+                                <div class="quantity-selector">
+                                    <label for="productQuantity">Quantity:</label>
+                                    <div class="quantity-controls">
+                                        <button class="quantity-btn" onclick="changeQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
+                                        <input type="number" id="productQuantity" value="1" min="1" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
+                                        <button class="quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                    </div>
+                                </div>
+                            ` : ''}
                             ${isWholesale ?
                                 `<button class="btn btn-primary" onclick="addWholesaleToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i> Add to Cart (MOQ: ${moq})
                                 </button>` :
-                                `<button class="btn btn-primary" onclick="addToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
+                                `<button class="btn btn-primary" onclick="addToCart('${productId}', parseInt(document.getElementById('productQuantity').value))" ${!inStock ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i> Add to Cart
                                 </button>`
                             }
@@ -521,6 +531,17 @@
 
             loadingState.style.display = 'none';
             errorState.style.display = 'block';
+        }
+
+        function changeQuantity(delta) {
+            const quantityInput = document.getElementById('productQuantity');
+            if (!quantityInput) return;
+
+            const currentValue = parseInt(quantityInput.value) || 1;
+            const newValue = Math.max(1, currentValue + delta);
+            const maxValue = parseInt(quantityInput.max) || 999;
+
+            quantityInput.value = Math.min(newValue, maxValue);
         }
 
         function generateStarRating(rating) {
