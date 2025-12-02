@@ -27,46 +27,56 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 document.getElementById('product-form').addEventListener('submit', async (e) => {
-   e.preventDefault();
-   const formData = new FormData();
-   formData.append('name', document.getElementById('product-name').value);
-   formData.append('shortDescription', document.getElementById('product-short-description').value);
-   formData.append('longDescription', document.getElementById('product-long-description').value);
-   formData.append('brand', document.getElementById('product-brand').value);
-   const colors = document.getElementById('product-colors').value.split(',').map(c => c.trim()).filter(c => c);
-   colors.forEach(color => formData.append('colors', color));
-   const sizes = document.getElementById('product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
-   sizes.forEach(size => formData.append('sizes', size));
-   formData.append('price', parseFloat(document.getElementById('product-price').value));
-   formData.append('stock', parseInt(document.getElementById('product-stock').value));
-   formData.append('category', document.getElementById('product-category').value);
-   formData.append('image', document.getElementById('product-image').files[0]);
-   const additionalMedia = document.getElementById('product-additional-media').files;
-   for (let i = 0; i < additionalMedia.length; i++) {
-     formData.append('additionalMedia', additionalMedia[i]);
-   }
-   formData.append('isWholesale', document.getElementById('product-wholesale').checked);
-   formData.append('minOrderQty', parseInt(document.getElementById('product-moq').value) || 1);
-   formData.append('isNewArrival', document.getElementById('product-new-arrival').checked);
-   formData.append('isFastSelling', document.getElementById('product-fast-selling').checked);
-   formData.append('isShopByCategory', document.getElementById('product-shop-category').checked);
-   try {
-     const res = await fetch(`${API_BASE}/products`, {
-       method: 'POST',
-       headers: {
-         'Authorization': `Bearer ${token}`
-       },
-       body: formData
-     });
-     if (res.ok) {
-       loadProducts();
-       document.getElementById('product-form').reset();
-       document.getElementById('product-moq').value = '1';
-     }
-   } catch (err) {
-     console.error(err);
-   }
- });
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('product-name').value);
+    formData.append('shortDescription', document.getElementById('product-short-description').value);
+    formData.append('longDescription', document.getElementById('product-long-description').value);
+    formData.append('brand', document.getElementById('product-brand').value);
+    const colors = document.getElementById('product-colors').value.split(',').map(c => c.trim()).filter(c => c);
+    colors.forEach(color => formData.append('colors', color));
+    const sizes = document.getElementById('product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
+    sizes.forEach(size => formData.append('sizes', size));
+    const priceValue = document.getElementById('product-price').value;
+    const stockValue = document.getElementById('product-stock').value;
+    console.log('DEBUG: Original price input:', priceValue, 'type:', typeof priceValue);
+    console.log('DEBUG: Original stock input:', stockValue, 'type:', typeof stockValue);
+    const parsedPrice = parseFloat(priceValue);
+    const parsedStock = parseInt(stockValue);
+    console.log('DEBUG: Parsed price:', parsedPrice, 'Parsed stock:', parsedStock);
+    formData.append('price', parsedPrice);
+    formData.append('stock', parsedStock);
+    formData.append('category', document.getElementById('product-category').value);
+    formData.append('image', document.getElementById('product-image').files[0]);
+    const additionalMedia = document.getElementById('product-additional-media').files;
+    for (let i = 0; i < additionalMedia.length; i++) {
+      formData.append('additionalMedia', additionalMedia[i]);
+    }
+    formData.append('isWholesale', document.getElementById('product-wholesale').checked);
+    formData.append('minOrderQty', parseInt(document.getElementById('product-moq').value) || 1);
+    formData.append('isNewArrival', document.getElementById('product-new-arrival').checked);
+    formData.append('isFastSelling', document.getElementById('product-fast-selling').checked);
+    formData.append('isShopByCategory', document.getElementById('product-shop-category').checked);
+    try {
+      const res = await fetch(`${API_BASE}/products`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      if (res.ok) {
+        const createdProduct = await res.json();
+        console.log('DEBUG: Created product response:', createdProduct);
+        console.log('DEBUG: Saved price:', createdProduct.price, 'Saved stock:', createdProduct.stock);
+        loadProducts();
+        document.getElementById('product-form').reset();
+        document.getElementById('product-moq').value = '1';
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
 
 document.getElementById('create-staff-form').addEventListener('submit', async (e) => {
   e.preventDefault();

@@ -84,6 +84,9 @@ router.post('/', auth, adminAuth, upload.fields([
   { name: 'additionalMedia', maxCount: 10 }
 ]), async (req, res) => {
   const productData = req.body;
+  console.log('DEBUG: Received product data:', productData);
+  console.log('DEBUG: Price from request:', productData.price, 'type:', typeof productData.price);
+  console.log('DEBUG: Stock from request:', productData.stock, 'type:', typeof productData.stock);
   if (req.files.image && req.files.image[0]) {
     productData.image = '/uploads/' + req.files.image[0].filename;
   }
@@ -91,10 +94,13 @@ router.post('/', auth, adminAuth, upload.fields([
     productData.additionalMedia = req.files.additionalMedia.map(file => '/uploads/' + file.filename);
   }
   const product = new Product(productData);
+  console.log('DEBUG: Product before save:', product.price, product.stock);
   try {
-    await product.save();
-    res.status(201).json(product);
+    const savedProduct = await product.save();
+    console.log('DEBUG: Product after save:', savedProduct.price, savedProduct.stock);
+    res.status(201).json(savedProduct);
   } catch (err) {
+    console.error('DEBUG: Error saving product:', err);
     res.status(400).json({ message: err.message });
   }
 });
