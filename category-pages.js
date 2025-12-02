@@ -15,33 +15,30 @@ function initializeCategoryPage() {
     // Detect category from filename
     const pageName = window.location.pathname.split('/').pop();
     let category = '';
-    
-    if (pageName.includes('consumer-electrics')) {
-        category = 'electronics';
-        loadCategoryProducts('electronics', 'electronicsProducts');
-    } else if (pageName.includes('clothing-apparel')) {
-        category = 'fashion';
-        loadCategoryProducts('fashion', 'fashionProducts');
-    } else if (pageName.includes('health-beauty')) {
-        category = 'beauty';
-        loadCategoryProducts('beauty', 'beautyProducts');
-    } else if (pageName.includes('home-kitchen')) {
-        category = 'home';
-        loadCategoryProducts('home', 'homeProducts');
-    } else if (pageName.includes('jewelry-accessories')) {
-        category = 'fashion'; // Jewelry is under fashion category
-        loadCategoryProducts('fashion', 'jewelryProducts');
-    } else if (pageName.includes('for-men')) {
-        category = 'fashion';
-        loadCategoryProducts('fashion', 'mensProducts');
-    } else if (pageName.includes('for-women')) {
-        category = 'fashion';
-        loadCategoryProducts('fashion', 'womensProducts');
-    } else if (pageName.includes('for-kids')) {
-        category = 'fashion';
-        loadCategoryProducts('fashion', 'kidsProducts');
+
+    if (pageName.includes('kitchen-appliances')) {
+        category = 'kitchen-appliances';
+        loadCategoryProducts('kitchen-appliances', 'beautyProducts'); // Using beautyProducts as container ID
+    } else if (pageName.includes('beauty-personal-care')) {
+        category = 'beauty-personal-care';
+        loadCategoryProducts('beauty-personal-care', 'beautyProducts');
+    } else if (pageName.includes('photography-content-creation-tools')) {
+        category = 'photography-content-creation-tools';
+        loadCategoryProducts('photography-content-creation-tools', 'beautyProducts'); // Using beautyProducts as container ID
+    } else if (pageName.includes('nail-supplies')) {
+        category = 'nail-supplies';
+        loadCategoryProducts('nail-supplies', 'beautyProducts'); // Using beautyProducts as container ID
+    } else if (pageName.includes('kids-babies')) {
+        category = 'kids-babies';
+        loadCategoryProducts('kids-babies', 'beautyProducts'); // Using beautyProducts as container ID
+    } else if (pageName.includes('home-essentials')) {
+        category = 'home-essentials';
+        loadCategoryProducts('home-essentials', 'beautyProducts'); // Using beautyProducts as container ID
+    } else if (pageName.includes('lighting-home-decor')) {
+        category = 'lighting-home-decor';
+        loadCategoryProducts('lighting-home-decor', 'beautyProducts'); // Using beautyProducts as container ID
     }
-    
+
     // Initialize filters
     initializeFilters();
     updateProductCount();
@@ -88,49 +85,51 @@ function initializeFilters() {
 function applyFilters() {
     const currentPage = window.location.pathname.split('/').pop();
     let category = '';
-    let containerId = '';
-    
-    // Determine category and container
-    if (currentPage.includes('consumer-electronics')) {
-        category = 'electronics';
-        containerId = 'electronicsProducts';
-    } else if (currentPage.includes('clothing-apparel')) {
-        category = 'fashion';
-        containerId = 'fashionProducts';
-    } else if (currentPage.includes('health-beauty')) {
-        category = 'beauty';
-        containerId = 'beautyProducts';
-    } else if (currentPage.includes('home-kitchen')) {
-        category = 'home';
-        containerId = 'homeProducts';
+    let containerId = 'beautyProducts'; // Default container ID for category pages
+
+    // Determine category
+    if (currentPage.includes('kitchen-appliances')) {
+        category = 'kitchen-appliances';
+    } else if (currentPage.includes('beauty-personal-care')) {
+        category = 'beauty-personal-care';
+    } else if (currentPage.includes('photography-content-creation-tools')) {
+        category = 'photography-content-creation-tools';
+    } else if (currentPage.includes('nail-supplies')) {
+        category = 'nail-supplies';
+    } else if (currentPage.includes('kids-babies')) {
+        category = 'kids-babies';
+    } else if (currentPage.includes('home-essentials')) {
+        category = 'home-essentials';
+    } else if (currentPage.includes('lighting-home-decor')) {
+        category = 'lighting-home-decor';
     }
-    
+
     let products = getProductsByCategory(category);
-    
+
     // Apply price filter
     const priceRange = document.getElementById('priceRange')?.value;
     if (priceRange && priceRange !== 'all') {
         products = filterByPrice(products, priceRange);
     }
-    
+
     // Apply sorting
     const sortBy = document.getElementById('sortBy')?.value;
     if (sortBy) {
         products = sortProducts(products, sortBy);
     }
-    
+
     // Apply additional filters
     const sizeFilter = document.getElementById('sizeFilter')?.value;
     if (sizeFilter && sizeFilter !== 'all') {
         // For fashion items, we could filter by size if the data included it
         // This is a placeholder for future implementation
     }
-    
+
     const productType = document.getElementById('productType')?.value;
     if (productType && productType !== 'all') {
         products = filterByType(products, productType);
     }
-    
+
     // Display filtered products
     const container = document.getElementById(containerId);
     if (container) {
@@ -247,28 +246,33 @@ function initializeCategorySearch() {
 function searchInCategory(query) {
     const currentPage = window.location.pathname.split('/').pop();
     let category = '';
-    
-    if (currentPage.includes('consumer-electrics')) {
-        category = 'electronics';
-    } else if (currentPage.includes('clothing-apparel')) {
-        category = 'fashion';
-    } else if (currentPage.includes('health-beauty')) {
-        category = 'beauty';
-    } else if (currentPage.includes('home-kitchen')) {
-        category = 'home';
+
+    if (currentPage.includes('kitchen-appliances')) {
+        category = 'kitchen-appliances';
+    } else if (currentPage.includes('beauty-personal-care')) {
+        category = 'beauty-personal-care';
+    } else if (currentPage.includes('photography-content-creation-tools')) {
+        category = 'photography-content-creation-tools';
+    } else if (currentPage.includes('nail-supplies')) {
+        category = 'nail-supplies';
+    } else if (currentPage.includes('kids-babies')) {
+        category = 'kids-babies';
+    } else if (currentPage.includes('home-essentials')) {
+        category = 'home-essentials';
+    } else if (currentPage.includes('lighting-home-decor')) {
+        category = 'lighting-home-decor';
     }
-    
+
     let products = getProductsByCategory(category);
-    
+
     if (query) {
-        products = products.filter(product => 
+        products = products.filter(product =>
             product.name.toLowerCase().includes(query) ||
             product.description.toLowerCase().includes(query)
         );
     }
-    
-    const containerId = getContainerIdByPage(currentPage);
-    const container = document.getElementById(containerId);
+
+    const container = document.getElementById('beautyProducts'); // Use consistent container ID
     if (container) {
         displayProducts(products, container);
         updateProductCount(products.length);

@@ -2,7 +2,7 @@
 // Handles user registration, login, logout, and session management
 
 // API Base URL
-const API_BASE = 'https://netyarkmallaims-production-d2ae.up.railway.app/api';
+const API_BASE = 'https://netyarkmall-production.up.railway.app/api';
 
 // User data storage keys
 const CURRENT_USER_KEY = 'netyark_current_user';

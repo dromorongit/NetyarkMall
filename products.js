@@ -4,8 +4,8 @@
 // API Base URL - configure for your admin system domain
 // For local development: http://localhost:5000/api
 // For Railway deployment: https://your-railway-project.up.railway.app/api
-// For production: https://netyarkmallaims-production-d2ae.up.railway.app/api
-const API_BASE = 'https://netyarkmallaims-production-d2ae.up.railway.app/api';
+// For production: https://netyarkmall-production.up.railway.app/api
+const API_BASE = 'https://netyarkmall-production.up.railway.app/api';
 
 // Cache for products
 let productCache = null;

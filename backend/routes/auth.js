@@ -65,6 +65,8 @@ router.get('/check-superadmin', async (req, res) => {
 // Get profile
 router.get('/profile', auth, (req, res) => {
   res.json(req.user);
+});
+
 // Get all users (superadmin only)
 router.get('/users', auth, superAdminAuth, async (req, res) => {
   try {
@@ -85,9 +87,6 @@ router.delete('/users/:id', auth, superAdminAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
-
-module.exports = router;
 });
 
 module.exports = router;

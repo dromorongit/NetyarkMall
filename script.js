@@ -1116,7 +1116,7 @@ function setupContactForm() {
 
             try {
                 // Send message to API
-                const response = await fetch('https://netyarkmallaims-production-d2ae.up.railway.app/api/messages', {
+                const response = await fetch('https://netyarkmall-production.up.railway.app/api/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2182,7 +2182,7 @@ async function sendMessage() {
 
     try {
         // Send message to API
-        const response = await fetch('https://netyarkmallaims-production-d2ae.up.railway.app/api/messages', {
+        const response = await fetch('https://netyarkmall-production.up.railway.app/api/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
