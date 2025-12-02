@@ -737,16 +737,21 @@ function createProductCard(product) {
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
-                <div class="product-actions">
-                    <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
-                        <i class="fas fa-eye"></i>
+                <div class="product-card-actions">
+                    <button class="btn btn-primary add-to-cart-btn" onclick="addToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
-                    <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
-                        <i class="fas fa-balance-scale"></i>
-                    </button>
-                    <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
-                        <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
-                    </button>
+                    <div class="product-actions">
+                        <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
+                            <i class="fas fa-balance-scale"></i>
+                        </button>
+                        <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
+                            <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -823,16 +828,21 @@ function createWholesaleProductCard(product) {
                         <small>Wholesale pricing</small>
                     </div>
                 </div>
-                <div class="product-actions">
-                    <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
-                        <i class="fas fa-eye"></i>
+                <div class="product-card-actions">
+                    <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
-                    <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
-                        <i class="fas fa-balance-scale"></i>
-                    </button>
-                    <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
-                        <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
-                    </button>
+                    <div class="product-actions">
+                        <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
+                            <i class="fas fa-balance-scale"></i>
+                        </button>
+                        <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
+                            <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
