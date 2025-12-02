@@ -760,13 +760,13 @@ function createProductCard(product) {
                        inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
 
     const stockText = !inventoryStatus.available ? 'Out of Stock' :
-                     inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : 'In Stock';
+                     inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : '';
 
     return `
         <div class="product-card ${stockStatus}" data-product-id="${productId}">
             ${isNew ? '<div class="product-badge new">New</div>' : ''}
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
-            ${stockText ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
+            ${stockText && stockText !== 'In Stock' ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
@@ -795,12 +795,12 @@ function createProductCard(product) {
                 </div>
                 <div class="product-card-actions">
                     <button class="btn btn-primary add-to-cart-btn" onclick="addToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                    <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
+                        <i class="fas fa-eye"></i> View Details
                     </button>
                     <div class="product-actions">
-                        <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
-                            <i class="fas fa-eye"></i>
-                        </button>
                         <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
                             <i class="fas fa-balance-scale"></i>
                         </button>
@@ -845,13 +845,13 @@ function createWholesaleProductCard(product) {
         checkInventory(productId) : { available: inStock, stockCount: stockCount };
 
     const stockStatus = !inventoryStatus.available ? 'out-of-stock' : '';
-    const stockText = !inventoryStatus.available ? 'Out of Stock' : '';
+    const stockText = !inventoryStatus.available ? 'Out of Stock' : (inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : '');
 
     return `
         <div class="product-card wholesale-card ${stockStatus}" data-product-id="${productId}">
             <div class="product-badge wholesale">WHOLESALE</div>
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
-            ${stockText ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
+            ${stockText && stockText !== 'In Stock' ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
