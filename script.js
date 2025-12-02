@@ -103,7 +103,7 @@ async function addToCart(productId, quantity = 1) {
             image: product.image,
             quantity: quantity,
             isWholesale: product.isWholesale || false,
-            moq: product.moq || 1
+            moq: product.moq || product.minOrderQty || 1
         });
     }
 
@@ -121,10 +121,10 @@ async function addWholesaleToCart(productId) {
     }
 
     const existingItem = cart.find(item => item.id === productId);
+    const moq = product.moq || product.minOrderQty || 1;
 
     if (existingItem) {
         // For wholesale, allow adding more but check MOQ increments
-        const moq = product.moq || 1;
         const newQuantity = existingItem.quantity + moq;
 
         // Check inventory
@@ -140,7 +140,6 @@ async function addWholesaleToCart(productId) {
         showNotification(`Added ${moq} more ${product.name} to cart!`, 'success');
     } else {
         // First time adding wholesale item - set to MOQ
-        const moq = product.moq || 1;
 
         // Check inventory for MOQ
         const inventoryCheck = typeof checkInventory === 'function' ?
@@ -183,8 +182,9 @@ function updateCartQuantity(productId, quantity) {
             removeFromCart(productId);
         } else {
             // For wholesale items, prevent reducing below MOQ
-            if (item.isWholesale && quantity < item.moq) {
-                showNotification(`Cannot reduce quantity below MOQ of ${item.moq} for wholesale items.`, 'warning');
+            const moq = item.moq || item.minOrderQty || 1;
+            if (item.isWholesale && quantity < moq) {
+                showNotification(`Cannot reduce quantity below MOQ of ${moq} for wholesale items.`, 'warning');
                 return;
             }
             item.quantity = quantity;
@@ -265,7 +265,7 @@ function updateCartDisplay() {
             let cartHTML = '';
             cart.forEach(item => {
                 const isWholesale = item.isWholesale;
-                const moq = item.moq || 1;
+                const moq = item.moq || item.minOrderQty || 1;
                 const canDecrease = !isWholesale || item.quantity > moq;
 
                 cartHTML += `
@@ -706,27 +706,27 @@ function createProductCard(product) {
                 </div>
             </div>
             <div class="product-info">
-                <h3 class="product-title">${product.name}</h3>
+                <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
                 ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
-                <p class="product-description">${product.shortDescription || product.description}</p>
-                ${product.colors ? `<p class="product-colors">Colors: ${product.colors.join(', ')}</p>` : ''}
-                ${product.sizes ? `<p class="product-sizes">Sizes: ${product.sizes.join(', ')}</p>` : ''}
+                <p class="product-description">${product.shortDescription || product.description || 'No description available'}</p>
+                ${product.colors && product.colors.length > 0 ? `<p class="product-colors">Colors: ${product.colors.join(', ')}</p>` : ''}
+                ${product.sizes && product.sizes.length > 0 ? `<p class="product-sizes">Sizes: ${product.sizes.join(', ')}</p>` : ''}
                 <div class="product-rating">
                     <div class="stars">
-                        ${generateStarRating(product.rating)}
+                        ${generateStarRating(product.rating || 0)}
                     </div>
-                    <span class="rating-text">${product.rating} (${product.reviews})</span>
+                    <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
                 </div>
                 <div class="product-price">
-                    <span class="current-price">₵${product.price.toLocaleString()}</span>
+                    <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-actions">
-                    <button class="action-btn compare-btn" onclick="addToCompare('${product.id}')" title="Compare">
+                    <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
                         <i class="fas fa-balance-scale"></i>
                     </button>
-                    <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${product.id}')" title="Wishlist">
+                    <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
                         <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
                     </button>
                 </div>
@@ -754,6 +754,7 @@ function createWholesaleProductCard(product) {
     const productId = product.id || product._id;
     const stockCount = product.stockCount || product.stock || 0;
     const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+    const moq = product.moq || product.minOrderQty || 1;
 
     const discount = product.originalPrice > product.price ?
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
@@ -776,7 +777,7 @@ function createWholesaleProductCard(product) {
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
             <div class="stock-indicator ${stockStatus}">${stockText}</div>
             <div class="product-image">
-                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
+                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
                     <button class="add-to-cart-btn" onclick="addWholesaleToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
@@ -785,19 +786,19 @@ function createWholesaleProductCard(product) {
                 </div>
             </div>
             <div class="product-info">
-                <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
+                <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
+                <p class="product-description">${product.description || product.shortDescription || 'No description available'}</p>
                 <div class="wholesale-moq">
-                    <span class="moq-label">MOQ: ${product.moq} units</span>
+                    <span class="moq-label">MOQ: ${moq} units</span>
                 </div>
                 <div class="product-rating">
                     <div class="stars">
-                        ${generateStarRating(product.rating)}
+                        ${generateStarRating(product.rating || 0)}
                     </div>
-                    <span class="rating-text">${product.rating} (${product.reviews})</span>
+                    <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
                 </div>
                 <div class="product-price">
-                    <span class="current-price">₵${product.price.toLocaleString()}</span>
+                    <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                     <div class="wholesale-savings">
