@@ -1336,7 +1336,7 @@ function viewProduct(productId) {
 // Toggle wishlist function
 function toggleWishlist(productId) {
     if (typeof addToWishlist === 'function' && typeof removeFromWishlist === 'function') {
-        const isInWishlist = isInWishlist(productId);
+        const isInWishlist = window.isInWishlist(productId);
 
         if (isInWishlist) {
             removeFromWishlist(productId);
@@ -1353,7 +1353,7 @@ function updateWishlistButtons() {
     const wishlistBtns = document.querySelectorAll('.wishlist-btn');
     wishlistBtns.forEach(btn => {
         const productId = btn.closest('[data-product-id]').getAttribute('data-product-id');
-        const isInWishlist = typeof isInWishlist === 'function' && isInWishlist(productId);
+        const isInWishlist = typeof window.isInWishlist === 'function' && window.isInWishlist(productId);
 
         btn.classList.toggle('in-wishlist', isInWishlist);
         const icon = btn.querySelector('i');
