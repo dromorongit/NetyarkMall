@@ -138,9 +138,9 @@ async function addWholesaleToCart(productId, quantity = null) {
     const moq = product.moq || product.minOrderQty || 1;
     const addQuantity = quantity || moq;
 
-    // Validate quantity is multiple of MOQ
-    if (addQuantity % moq !== 0) {
-        showNotification(`Quantity must be in multiples of MOQ (${moq}).`, 'error');
+    // Validate quantity meets minimum order quantity
+    if (addQuantity < moq) {
+        showNotification(`Minimum order quantity is ${moq}.`, 'error');
         return;
     }
 
@@ -838,11 +838,11 @@ function createWholesaleProductCard(product) {
                 </div>
                 <div class="product-card-actions">
                     <div class="wholesale-quantity-controls" style="margin-bottom: 10px;">
-                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity (MOQ: ${moq}):</label>
+                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity (Min: ${moq}):</label>
                         <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
-                            <button class="quantity-btn decrease" onclick="adjustWholesaleQuantity('${productId}', -${moq})" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">-</button>
-                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="${moq}" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;" ${!inventoryStatus.available ? 'disabled' : ''} readonly>
-                            <button class="quantity-btn increase" onclick="adjustWholesaleQuantity('${productId}', ${moq})" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">+</button>
+                            <button class="quantity-btn decrease" onclick="adjustWholesaleQuantity('${productId}', -1)" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">-</button>
+                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="1" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;" ${!inventoryStatus.available ? 'disabled' : ''} readonly>
+                            <button class="quantity-btn increase" onclick="adjustWholesaleQuantity('${productId}', 1)" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">+</button>
                         </div>
                     </div>
                     <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))" ${!inventoryStatus.available ? 'disabled' : ''}>
