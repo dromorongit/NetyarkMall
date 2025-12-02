@@ -718,7 +718,7 @@ function createProductCard(product) {
         <div class="product-card ${stockStatus}" data-product-id="${productId}">
             ${isNew ? '<div class="product-badge new">New</div>' : ''}
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
-            <div class="stock-indicator ${stockStatus}">${stockText}</div>
+            ${stockText ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
@@ -796,17 +796,14 @@ function createWholesaleProductCard(product) {
     const inventoryStatus = typeof checkInventory === 'function' ?
         checkInventory(productId) : { available: inStock, stockCount: stockCount };
 
-    const stockStatus = !inventoryStatus.available ? 'out-of-stock' :
-                       inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
-
-    const stockText = !inventoryStatus.available ? 'Out of Stock' :
-                     inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : 'In Stock';
+    const stockStatus = !inventoryStatus.available ? 'out-of-stock' : '';
+    const stockText = !inventoryStatus.available ? 'Out of Stock' : '';
 
     return `
         <div class="product-card wholesale-card ${stockStatus}" data-product-id="${productId}">
             <div class="product-badge wholesale">WHOLESALE</div>
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
-            <div class="stock-indicator ${stockStatus}">${stockText}</div>
+            ${stockText ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
