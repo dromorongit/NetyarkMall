@@ -60,14 +60,32 @@ async function handleLogin(e) {
         });
 
         if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
-            showNotification('Login successful! Welcome back.', 'success');
+            const data = await response.json();
+            const userData = data.user;
+            const token = data.token;
 
-            // Redirect to home page after successful login
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
+            setCurrentUser(userData);
+
+            // Check if user is admin/staff and redirect to admin system
+            if (userData.role === 'superadmin' || userData.role === 'staff') {
+                // Set admin system tokens
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(userData));
+
+                showNotification('Admin login successful! Redirecting to admin panel.', 'success');
+
+                // Redirect to admin dashboard
+                setTimeout(() => {
+                    window.location.href = 'https://netyarkmall-production.up.railway.app/admin.html';
+                }, 1000);
+            } else {
+                showNotification('Login successful! Welcome back.', 'success');
+
+                // Redirect to home page for regular users
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }
         } else {
             const error = await response.json();
             showNotification(error.message || 'Invalid email or password. Please try again.', 'error');
@@ -104,11 +122,10 @@ async function handleRegister(e) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                firstName,
-                lastName,
+                name: `${firstName} ${lastName}`,
                 email,
-                phone,
-                password
+                password,
+                role: 'customer'
             })
         });
 
@@ -153,24 +170,38 @@ function updateAuthUI() {
     const navMenus = document.querySelectorAll('.nav-menu');
     navMenus.forEach(navMenu => {
         // Remove existing login/register links
-        const existingAuthLinks = navMenu.querySelectorAll('li a[href*="login.html"], li a[href*="register.html"]');
-        existingAuthLinks.forEach(link => link.parentElement.remove());
+        const existingAuthLinks = navMenu.querySelectorAll('li a[href*="login.html"], li a[href*="register.html"], li.auth-link');
+        existingAuthLinks.forEach(link => link.remove());
 
         if (currentUser) {
-            // Add user menu
-            const userMenu = document.createElement('li');
-            userMenu.className = 'dropdown auth-link';
-            userMenu.innerHTML = `
-                <a href="#" class="nav-link dropdown-toggle">${currentUser.firstName} <i class="fas fa-chevron-down"></i></a>
-                <ul class="dropdown-menu">
-                    <li><a href="profile.html">My Profile</a></li>
-                    <li><a href="orders.html">My Orders</a></li>
-                    <li><a href="#" onclick="logout()">Logout</a></li>
-                </ul>
-            `;
-            navMenu.appendChild(userMenu);
+            if (currentUser.role === 'superadmin' || currentUser.role === 'staff') {
+                // Add admin menu
+                const adminMenu = document.createElement('li');
+                adminMenu.className = 'dropdown auth-link';
+                adminMenu.innerHTML = `
+                    <a href="#" class="nav-link dropdown-toggle">${currentUser.name} (Admin) <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="https://netyarkmall-production.up.railway.app/admin.html">Admin Panel</a></li>
+                        <li><a href="#" onclick="logout()">Logout</a></li>
+                    </ul>
+                `;
+                navMenu.appendChild(adminMenu);
+            } else {
+                // Add customer menu
+                const userMenu = document.createElement('li');
+                userMenu.className = 'dropdown auth-link';
+                userMenu.innerHTML = `
+                    <a href="#" class="nav-link dropdown-toggle">${currentUser.name} <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="profile.html">My Profile</a></li>
+                        <li><a href="orders.html">My Orders</a></li>
+                        <li><a href="#" onclick="logout()">Logout</a></li>
+                    </ul>
+                `;
+                navMenu.appendChild(userMenu);
+            }
         } else {
-            // Add login/register links
+            // Add login/register links for non-logged-in users
             const loginLink = document.createElement('li');
             loginLink.className = 'auth-link';
             loginLink.innerHTML = '<a href="login.html" class="nav-link">Login</a>';

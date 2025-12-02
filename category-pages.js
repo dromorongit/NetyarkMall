@@ -44,15 +44,15 @@ function initializeCategoryPage() {
     updateProductCount();
 }
 
-function loadCategoryProducts(category, containerId) {
+async function loadCategoryProducts(category, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    
-    let products = getProductsByCategory(category);
-    
+
+    let products = await getProductsByCategory(category);
+
     // Sort products by default (newest first)
     products = sortProducts(products, 'newest');
-    
+
     // Display products
     displayProducts(products, container);
 }
@@ -82,7 +82,7 @@ function initializeFilters() {
     }
 }
 
-function applyFilters() {
+async function applyFilters() {
     const currentPage = window.location.pathname.split('/').pop();
     let category = '';
     let containerId = 'beautyProducts'; // Default container ID for category pages
@@ -104,7 +104,7 @@ function applyFilters() {
         category = 'lighting-home-decor';
     }
 
-    let products = getProductsByCategory(category);
+    let products = await getProductsByCategory(category);
 
     // Apply price filter
     const priceRange = document.getElementById('priceRange')?.value;
@@ -243,7 +243,7 @@ function initializeCategorySearch() {
     }
 }
 
-function searchInCategory(query) {
+async function searchInCategory(query) {
     const currentPage = window.location.pathname.split('/').pop();
     let category = '';
 
@@ -263,7 +263,7 @@ function searchInCategory(query) {
         category = 'lighting-home-decor';
     }
 
-    let products = getProductsByCategory(category);
+    let products = await getProductsByCategory(category);
 
     if (query) {
         products = products.filter(product =>

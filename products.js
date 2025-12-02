@@ -475,6 +475,23 @@ async function getProductsByCategory(category) {
 
 // Get new arrivals (products marked as new)
 async function getNewArrivals() {
+    console.log('Fetching new arrivals from API...');
+    try {
+        const response = await fetch(`${API_BASE}/products/new-arrivals`);
+        console.log('New arrivals API response status:', response.status);
+        if (response.ok) {
+            const newArrivals = await response.json();
+            console.log('Fetched new arrivals:', newArrivals.length, 'products');
+            return newArrivals;
+        } else {
+            console.error('New arrivals API response not ok:', response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching new arrivals:', error);
+    }
+
+    // Fallback to filtering all products
+    console.log('Falling back to filtering all products for new arrivals');
     const products = await getAllProducts();
     const newArrivals = products.filter(product => product.isNew || product.isNewArrival);
     console.log('New arrivals found:', newArrivals.length, 'products');
@@ -505,6 +522,23 @@ async function getWholesaleProducts() {
 
 // Get fast-selling items (products with high review count and good ratings)
 async function getFastSellingItems() {
+    console.log('Fetching fast-selling items from API...');
+    try {
+        const response = await fetch(`${API_BASE}/products/fast-selling`);
+        console.log('Fast-selling API response status:', response.status);
+        if (response.ok) {
+            const fastSelling = await response.json();
+            console.log('Fetched fast-selling items:', fastSelling.length, 'products');
+            return fastSelling;
+        } else {
+            console.error('Fast-selling API response not ok:', response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching fast-selling items:', error);
+    }
+
+    // Fallback to filtering all products
+    console.log('Falling back to filtering all products for fast-selling items');
     const products = await getAllProducts();
     const fastSelling = products
         .filter(product => product.isFastSelling || (product.reviews > 50 && product.rating >= 4.0))
