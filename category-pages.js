@@ -218,8 +218,39 @@ function displayProducts(products, container) {
         `;
         return;
     }
-    
-    container.innerHTML = products.map(product => createProductCard(product)).join('');
+
+    // Filter out out-of-stock products
+    const inStockProducts = filterInStockProducts(products);
+
+    if (inStockProducts.length === 0) {
+        container.innerHTML = `
+            <div class="no-products">
+                <p>No products are currently available in stock.</p>
+                <button class="btn btn-outline" onclick="clearFilters()">Clear Filters</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = inStockProducts.map(product => createProductCard(product)).join('');
+}
+
+// Filter products to only show in-stock items
+function filterInStockProducts(products) {
+    return products.filter(product => {
+        // Check if product has stock information
+        const stockCount = product.stockCount || product.stock || 0;
+        const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+
+        // Check inventory status if checkInventory function is available
+        if (typeof checkInventory === 'function') {
+            const inventoryStatus = checkInventory(product.id || product._id);
+            return inventoryStatus.available;
+        }
+
+        // Fallback to basic stock check
+        return inStock;
+    });
 }
 
 function updateProductCount(count = null) {
@@ -298,6 +329,9 @@ async function searchInCategory(query) {
             product.description.toLowerCase().includes(query)
         );
     }
+
+    // Filter out out-of-stock products
+    products = filterInStockProducts(products);
 
     const container = document.getElementById(containerId);
     if (container) {

@@ -606,12 +606,38 @@ async function loadNewArrivals() {
         const newArrivals = (await getNewArrivals()).slice(0, 8);
         console.log('New arrivals products to display:', newArrivals.length);
         console.log('New arrivals product names:', newArrivals.map(p => p.name));
-        container.innerHTML = newArrivals.map(product => createProductCard(product)).join('');
+
+        // Filter out out-of-stock products
+        const inStockArrivals = filterInStockProducts(newArrivals);
+
+        if (inStockArrivals.length === 0) {
+            container.innerHTML = '<p>No new arrivals currently in stock.</p>';
+        } else {
+            container.innerHTML = inStockArrivals.map(product => createProductCard(product)).join('');
+        }
         console.log('New arrivals loaded successfully, HTML length:', container.innerHTML.length);
     } catch (error) {
         console.error('Error loading new arrivals:', error);
         container.innerHTML = '<p>Error loading products. Please try again later.</p>';
     }
+}
+
+// Filter products to only show in-stock items
+function filterInStockProducts(products) {
+    return products.filter(product => {
+        // Check if product has stock information
+        const stockCount = product.stockCount || product.stock || 0;
+        const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+
+        // Check inventory status if checkInventory function is available
+        if (typeof checkInventory === 'function') {
+            const inventoryStatus = checkInventory(product.id || product._id);
+            return inventoryStatus.available;
+        }
+
+        // Fallback to basic stock check
+        return inStock;
+    });
 }
 
 async function loadFastSellingItems() {
@@ -626,7 +652,15 @@ async function loadFastSellingItems() {
         const fastSelling = (await getFastSellingItems()).slice(0, 8);
         console.log('Fast selling products to display:', fastSelling.length);
         console.log('Fast selling product names:', fastSelling.map(p => p.name));
-        container.innerHTML = fastSelling.map(product => createProductCard(product)).join('');
+
+        // Filter out out-of-stock products
+        const inStockFastSelling = filterInStockProducts(fastSelling);
+
+        if (inStockFastSelling.length === 0) {
+            container.innerHTML = '<p>No fast-selling items currently in stock.</p>';
+        } else {
+            container.innerHTML = inStockFastSelling.map(product => createProductCard(product)).join('');
+        }
         console.log('Fast selling items loaded successfully, HTML length:', container.innerHTML.length);
     } catch (error) {
         console.error('Error loading fast selling items:', error);
@@ -658,10 +692,16 @@ function loadFeaturedDeals() {
     if (!container) return;
 
     const deals = getAllProducts()
-        .filter(product => product.originalPrice > product.price)
-        .slice(0, 3);
-    
-    container.innerHTML = deals.map(product => createDealCard(product)).join('');
+        .filter(product => product.originalPrice > product.price);
+
+    // Filter out out-of-stock products
+    const inStockDeals = filterInStockProducts(deals).slice(0, 3);
+
+    if (inStockDeals.length === 0) {
+        container.innerHTML = '<p>No featured deals currently in stock.</p>';
+    } else {
+        container.innerHTML = inStockDeals.map(product => createDealCard(product)).join('');
+    }
 }
 
 async function loadWholesaleProducts() {
@@ -670,7 +710,15 @@ async function loadWholesaleProducts() {
 
     try {
         const wholesaleProducts = await getWholesaleProducts();
-        container.innerHTML = wholesaleProducts.map(product => createWholesaleProductCard(product)).join('');
+
+        // Filter out out-of-stock products
+        const inStockWholesale = filterInStockProducts(wholesaleProducts);
+
+        if (inStockWholesale.length === 0) {
+            container.innerHTML = '<p>No wholesale products currently in stock.</p>';
+        } else {
+            container.innerHTML = inStockWholesale.map(product => createWholesaleProductCard(product)).join('');
+        }
     } catch (error) {
         console.error('Error loading wholesale products:', error);
         container.innerHTML = '<p>Error loading wholesale products. Please try again later.</p>';
@@ -2593,4 +2641,67 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize live chat
     initializeLiveChat();
+});
+
+// Test function to verify out-of-stock filtering
+function testOutOfStockFiltering() {
+    // Create test products
+    const testProducts = [
+        {
+            id: 'test-in-stock',
+            name: 'In Stock Product',
+            price: 100,
+            stockCount: 10,
+            inStock: true,
+            category: 'test'
+        },
+        {
+            id: 'test-out-of-stock',
+            name: 'Out of Stock Product',
+            price: 200,
+            stockCount: 0,
+            inStock: false,
+            category: 'test'
+        },
+        {
+            id: 'test-low-stock',
+            name: 'Low Stock Product',
+            price: 150,
+            stockCount: 2,
+            inStock: true,
+            category: 'test'
+        }
+    ];
+
+    // Test the filter function
+    const filteredProducts = filterInStockProducts(testProducts);
+
+    console.log('Test Results:');
+    console.log('Original products:', testProducts.length);
+    console.log('Filtered products:', filteredProducts.length);
+    console.log('Filtered product names:', filteredProducts.map(p => p.name));
+
+    // Verify results
+    const allInStock = filteredProducts.every(p => {
+        const stockCount = p.stockCount || p.stock || 0;
+        const inStock = p.inStock !== undefined ? p.inStock : stockCount > 0;
+        return inStock;
+    });
+
+    console.log('All filtered products are in stock:', allInStock);
+
+    return {
+        originalCount: testProducts.length,
+        filteredCount: filteredProducts.length,
+        allInStock: allInStock,
+        filteredProductNames: filteredProducts.map(p => p.name)
+    };
+}
+
+// Run test on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof filterInStockProducts === 'function') {
+        const testResults = testOutOfStockFiltering();
+        console.log('Out-of-stock filtering test completed:', testResults);
+    }
 });
