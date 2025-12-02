@@ -3542,7 +3542,7 @@ a:hover {
     transition: all 0.3s ease;
     border: 3px solid var(--white);
     user-select: none;
-    touch-action: none;
+    touch-action: manipulation;
 }
 
 .live-chat-icon:hover {
@@ -3598,6 +3598,7 @@ a:hover {
     display: none;
     flex-direction: column;
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .live-chat-modal.show {
@@ -5397,5 +5398,67 @@ a:hover {
 
     .mobile-menu-btn {
         display: none;
+    }
+}
+
+/* Mobile Live Chat Fixes */
+@media (max-width: 768px) {
+    /* Make live chat icon larger and easier to tap */
+    .live-chat-icon {
+        width: 70px;
+        height: 70px;
+        bottom: 90px;
+        right: 15px;
+    }
+
+    .live-chat-icon i {
+        font-size: 28px;
+    }
+
+    /* Make live chat modal full screen on mobile */
+    .live-chat-modal {
+        width: calc(100% - 30px) !important;
+        height: 80% !important;
+        bottom: 10px;
+        right: 15px;
+        left: 15px;
+        border-radius: 16px;
+    }
+
+    .live-chat-icon.dragging {
+        transform: scale(1.1) !important;
+    }
+
+    /* Make chat messages more readable on mobile */
+    .chat-messages {
+        font-size: 15px;
+    }
+
+    .message {
+        max-width: 90%;
+        font-size: 14px;
+    }
+
+    /* Make chat input area larger */
+    .chat-input-area {
+        padding: 12px;
+    }
+
+    .chat-input {
+        font-size: 15px;
+        min-height: 40px;
+    }
+
+    .chat-send-btn {
+        width: 48px;
+        height: 48px;
+    }
+
+    /* Adjust chat notification for mobile */
+    .chat-notification {
+        bottom: 110px;
+        right: 15px;
+        max-width: 280px;
+        font-size: 14px;
     }
 }

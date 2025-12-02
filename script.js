@@ -2600,6 +2600,44 @@ function addDragFunctionality(element) {
         hasDragged = false; // Reset for next interaction
     });
 
+    // Add specific mobile touch handling
+    element.addEventListener('touchstart', function(e) {
+        // Store the touch start time
+        const touchStartTime = Date.now();
+
+        // Store the touch start position
+        const touch = e.touches[0];
+        const startX = touch.clientX;
+        const startY = touch.clientY;
+
+        // Add touchend listener to detect tap vs drag
+        const touchEndHandler = function(te) {
+            const touchEndTime = Date.now();
+            const duration = touchEndTime - touchStartTime;
+
+            // If it's a quick tap (less than 200ms), treat it as a click
+            if (duration < 200) {
+                const endTouch = te.changedTouches[0];
+                const endX = endTouch.clientX;
+                const endY = endTouch.clientY;
+
+                // Check if the touch moved significantly
+                const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+
+                // If it didn't move much (less than 10px), treat it as a click
+                if (distance < 10) {
+                    e.preventDefault();
+                    toggleChatModal();
+                }
+            }
+
+            // Remove the touchend listener
+            element.removeEventListener('touchend', touchEndHandler);
+        };
+
+        element.addEventListener('touchend', touchEndHandler, { once: true });
+    });
+
     function startDrag(e) {
         e.preventDefault();
         isDragging = true;
