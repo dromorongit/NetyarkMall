@@ -210,13 +210,23 @@ async function updateStock(id, currentStock) {
 async function deleteProduct(id) {
   if (confirm('Delete this product?')) {
     try {
-      await fetch(`${API_BASE}/products/${id}`, {
+      console.log('Deleting product:', id);
+      const response = await fetch(`${API_BASE}/products/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      loadProducts();
+      console.log('Delete response status:', response.status);
+      if (response.ok) {
+        console.log('Product deleted successfully');
+        loadProducts();
+      } else {
+        const errorData = await response.json();
+        console.error('Delete failed:', errorData);
+        alert('Failed to delete product: ' + (errorData.message || 'Unknown error'));
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Error deleting product:', err);
+      alert('Error deleting product: ' + err.message);
     }
   }
 }
