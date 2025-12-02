@@ -537,12 +537,16 @@ function getFullImageUrl(imagePath) {
     if (imagePath && imagePath.startsWith('/uploads/')) {
         // Remove '/api' from API_BASE for uploads since backend serves them directly at /uploads
         const baseUrl = API_BASE.replace('/api', '');
-        return `${baseUrl}${imagePath}`;
+        const fullUrl = `${baseUrl}${imagePath}`;
+        console.log('Constructed image URL:', fullUrl, 'from path:', imagePath);
+        return fullUrl;
     }
     // Handle undefined or invalid image paths
     if (!imagePath || imagePath === 'undefined' || imagePath === '') {
+        console.log('Using default placeholder image for invalid path:', imagePath);
         return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'; // Default placeholder image
     }
+    console.log('Returning image path as-is:', imagePath);
     return imagePath;
 }
 
