@@ -14,6 +14,21 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Product cache cleared');
     }
 
+    // Force refresh products on page load to ensure latest data
+    setTimeout(() => {
+        if (typeof fetchProducts === 'function') {
+            fetchProducts(true).then(() => {
+                console.log('Products refreshed from API');
+                // Re-initialize homepage if we're on it
+                if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+                    loadNewArrivals();
+                    loadFastSellingItems();
+                    loadCategoryHighlights();
+                }
+            });
+        }
+    }, 1000);
+
     initializeCart();
     initializeNavigation();
     initializeCarousel();
