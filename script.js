@@ -847,8 +847,8 @@ function createProductCard(product) {
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="addToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
+                    <button class="add-to-cart-btn" onclick="addToCart('${productId}')" ${!available ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${!available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                 </div>
             </div>
@@ -870,7 +870,7 @@ function createProductCard(product) {
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-card-actions">
-                    <button class="btn btn-primary add-to-cart-btn" onclick="addToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
+                    <button class="btn btn-primary add-to-cart-btn" onclick="addToCart('${productId}')" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                     <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
