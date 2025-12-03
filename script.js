@@ -338,7 +338,19 @@ function updateCartDisplay() {
             cart.forEach(item => {
                 const isWholesale = item.isWholesale === true;
                 const moq = isWholesale ? (item.moq || item.minOrderQty || 1) : 1;
-                const canDecrease = !isWholesale || item.quantity > moq;
+                const canDecrease = !isWholesale || (isWholesale && item.quantity > moq);
+                const canIncrease = true; // Always allow increasing quantity for non-wholesale items
+
+                // Debug logging
+                console.log('Cart item debug:', {
+                    itemId: item.id,
+                    itemName: item.name,
+                    isWholesale: isWholesale,
+                    quantity: item.quantity,
+                    moq: moq,
+                    canDecrease: canDecrease,
+                    canIncrease: canIncrease
+                });
 
                 cartHTML += `
                     <div class="cart-item ${isWholesale ? 'wholesale-item' : ''}" data-product-id="${item.id}">
@@ -353,7 +365,7 @@ function updateCartDisplay() {
                         <div class="item-quantity">
                             <button class="quantity-btn decrease" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})" ${!canDecrease ? 'disabled' : ''}>-</button>
                             <span class="quantity">${item.quantity}</span>
-                            <button class="quantity-btn increase" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})">+</button>
+                            <button class="quantity-btn increase" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})" ${isWholesale ? '' : ''}>+</button>
                         </div>
                         <div class="item-total">
                             ₵${(item.price * item.quantity).toLocaleString()}
