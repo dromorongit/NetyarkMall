@@ -323,6 +323,7 @@
                         <div class="main-image-container">
                             <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}"
                                  alt="${product.name}" class="main-product-image" id="mainProductImage">
+                            ${discount > 0 ? `<div class="discount-badge">-${discount}%</div>` : ''}
                         </div>
                         ${product.additionalMedia && product.additionalMedia.length > 0 ? `
                             <div class="thumbnail-gallery">
@@ -340,7 +341,7 @@
                     <div class="product-info-section">
                         <div class="product-header">
                             <h1 class="product-title">${product.name}</h1>
-                            ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
+                            ${product.brand ? `<p class="product-brand">by ${product.brand}</p>` : ''}
                             <div class="product-rating">
                                 <div class="stars">
                                     ${generateStarRating(product.rating || 0)}
@@ -363,24 +364,11 @@
                                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                                 </div>
                             `}
-                            ${discount > 0 ? `<div class="discount-badge">-${discount}% OFF</div>` : ''}
                         </div>
 
-                        <div class="product-meta">
-                            <div class="meta-item">
-                                <span class="meta-label">Category:</span>
-                                <span class="meta-value">${product.category}</span>
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Stock Status:</span>
-                                <span class="meta-value stock-${stockStatus}">${stockText}</span>
-                            </div>
-                            ${isWholesale ? `
-                                <div class="meta-item">
-                                    <span class="meta-label">MOQ:</span>
-                                    <span class="meta-value">${moq} units</span>
-                                </div>
-                            ` : ''}
+                        <div class="product-stock-status">
+                            <span class="stock-indicator stock-${stockStatus}">${stockText}</span>
+                            ${isWholesale ? `<span class="moq-info">Minimum Order: ${moq} units</span>` : ''}
                         </div>
 
                         ${product.colors && product.colors.length > 0 ? `
@@ -415,21 +403,29 @@
                                         <button class="quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
                                     </div>
                                 </div>
-                            ` : ''}
-                            ${isWholesale ?
-                                `<button class="btn btn-primary" onclick="addWholesaleToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
-                                    <i class="fas fa-shopping-cart"></i> Add to Cart (MOQ: ${moq})
-                                </button>` :
-                                `<button class="btn btn-primary" onclick="addToCart('${productId}', parseInt(document.getElementById('productQuantity').value))" ${!inStock ? 'disabled' : ''}>
+                                <button class="btn btn-primary add-to-cart-btn" ${!inStock ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i> Add to Cart
-                                </button>`
-                            }
-                            <button class="btn btn-outline" onclick="addToCompare('${productId}')">
-                                <i class="fas fa-balance-scale"></i> Compare
-                            </button>
-                            <button class="btn btn-outline wishlist-btn" onclick="toggleWishlist('${productId}')">
-                                <i class="far fa-heart"></i> Add to Wishlist
-                            </button>
+                                </button>
+                            ` : `
+                                <button class="btn btn-secondary wholesale-btn" onclick="window.location.href='wholesale.html'">
+                                    <i class="fas fa-boxes"></i> View Wholesale Options
+                                </button>
+                            `}
+                            <div class="secondary-actions">
+                                <button class="btn btn-outline" onclick="addToCompare('${productId}')">
+                                    <i class="fas fa-balance-scale"></i> Compare
+                                </button>
+                                <button class="btn btn-outline wishlist-btn" onclick="toggleWishlist('${productId}')">
+                                    <i class="far fa-heart"></i> Add to Wishlist
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="product-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Category:</span>
+                                <span class="meta-value">${product.category}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
