@@ -141,7 +141,7 @@ async function addToCart(productId, quantity = 1) {
             image: product.image,
             quantity: quantity,
             isWholesale: product.isWholesale || false,
-            moq: product.moq || product.minOrderQty || 1
+            moq: product.isWholesale ? (product.moq || product.minOrderQty || 1) : 1
         });
     }
 
@@ -327,7 +327,7 @@ function updateCartDisplay() {
             let cartHTML = '';
             cart.forEach(item => {
                 const isWholesale = item.isWholesale;
-                const moq = item.moq || item.minOrderQty || 1;
+                const moq = isWholesale ? (item.moq || item.minOrderQty || 1) : 1;
                 const canDecrease = !isWholesale || item.quantity > moq;
 
                 cartHTML += `
@@ -364,12 +364,11 @@ function updateCartDisplay() {
             const shippingMethod = selectedShipping ? selectedShipping.value : 'standard';
             const shippingCost = typeof calculateShipping === 'function' ?
                 calculateShipping(cart, 'accra', shippingMethod) : 50; // Default shipping
-            const tax = subtotal * 0.12; // 12% tax
-            const total = subtotal + shippingCost + tax;
+            const total = subtotal + shippingCost;
 
             if (subtotalElement) subtotalElement.textContent = `₵${subtotal.toLocaleString()}`;
             if (shippingElement) shippingElement.textContent = `₵${shippingCost.toLocaleString()}`;
-            if (taxElement) taxElement.textContent = `₵${tax.toLocaleString()}`;
+            if (taxElement) taxElement.textContent = `₵0.00`;
             if (totalElement) totalElement.textContent = `₵${total.toLocaleString()}`;
 
             // Show shipping calculator
@@ -2198,8 +2197,7 @@ function showCheckoutModal() {
     const subtotal = getCartTotal();
     const shippingCost = typeof calculateShipping === 'function' ?
         calculateShipping(cart, shippingZone, shippingMethod) : 50;
-    const tax = subtotal * 0.12;
-    const total = subtotal + shippingCost + tax;
+    const total = subtotal + shippingCost;
 
     const modal = document.createElement('div');
     modal.className = 'checkout-modal';
@@ -2227,7 +2225,6 @@ function showCheckoutModal() {
                     <div class="checkout-totals">
                         <div class="checkout-row"><span>Subtotal:</span><span>₵${subtotal.toLocaleString()}</span></div>
                         <div class="checkout-row"><span>Shipping:</span><span>₵${shippingCost.toLocaleString()}</span></div>
-                        <div class="checkout-row"><span>Tax (12%):</span><span>₵${tax.toLocaleString()}</span></div>
                         <div class="checkout-row total"><span>Total:</span><span>₵${total.toLocaleString()}</span></div>
                     </div>
                 </div>
@@ -2385,8 +2382,7 @@ function loadCheckoutItems() {
 
     // Update totals
     const shippingCost = 50; // Default shipping
-    const tax = subtotal * 0.12;
-    const total = subtotal + shippingCost + tax;
+    const total = subtotal + shippingCost;
 
     document.getElementById('checkoutSubtotal').textContent = `₵${subtotal.toLocaleString()}`;
     document.getElementById('checkoutShipping').textContent = `₵${shippingCost.toLocaleString()}`;
@@ -2405,8 +2401,7 @@ async function processCheckoutOrder(form) {
         // Calculate totals
         const subtotal = getCartTotal();
         const shippingCost = 50; // Default shipping cost
-        const tax = subtotal * 0.12;
-        const total = subtotal + shippingCost + tax;
+        const total = subtotal + shippingCost;
 
         // Prepare order data
         const orderData = {
@@ -2616,13 +2611,34 @@ async function sendMessage() {
     if (!message) return;
 
     try {
+        // Generate conversation ID for this user session
+        const conversationId = localStorage.getItem('chatConversationId') || `conv_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+        // Store conversation ID for future messages
+        localStorage.setItem('chatConversationId', conversationId);
+
+        // Get user info if available
+        const user = JSON.parse(localStorage.getItem('user'));
+        const senderInfo = user ? {
+            sender: 'user',
+            senderId: user.id,
+            senderName: user.name,
+            senderEmail: user.email
+        } : {
+            sender: 'guest',
+            senderId: `guest_${Date.now()}`,
+            senderName: 'Guest User',
+            senderEmail: ''
+        };
+
         // Send message to API
         const response = await fetch('https://netyarkmall-production.up.railway.app/api/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                sender: 'Customer',
-                message: message
+                ...senderInfo,
+                message: message,
+                conversationId: conversationId
             })
         });
 
@@ -2693,6 +2709,11 @@ function addMessage(type, content) {
 
     // Update timestamp display
     updateChatTimestamp();
+
+    // Check if this is a response from admin and show notification
+    if (type === 'support' && content.includes('response') || content.includes('Response')) {
+        showChatNotification();
+    }
 }
 
 function updateChatTimestamp() {
@@ -2742,6 +2763,17 @@ function startChatNotificationTimer() {
 function showChatNotification() {
     const chatNotification = document.getElementById('chatNotification');
     if (!chatNotification) return;
+
+    // Update notification text to indicate a response
+    const notificationText = chatNotification.querySelector('h4');
+    if (notificationText) {
+        notificationText.textContent = '💬 New Response!';
+    }
+
+    const notificationMessage = chatNotification.querySelector('p');
+    if (notificationMessage) {
+        notificationMessage.textContent = 'You have a new response from our support team! Click to view.';
+    }
 
     chatNotification.classList.add('show');
 

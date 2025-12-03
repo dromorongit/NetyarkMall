@@ -134,8 +134,7 @@ function loadUserOrders() {
         const orderDate = new Date(order.createdAt || order.date).toLocaleDateString();
         const total = order.items ? order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) : 0;
         const shippingCost = order.shippingCost || 0;
-        const tax = order.tax || 0;
-        const finalTotal = total + shippingCost + tax;
+        const finalTotal = total + shippingCost;
 
         // Get order tracking info
         const trackingInfo = typeof getOrderStatus === 'function' ?
@@ -181,8 +180,7 @@ function showOrderDetails(orderId) {
     const orderDate = new Date(order.createdAt || order.date).toLocaleDateString();
     const total = order.items ? order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) : 0;
     const shippingCost = order.shippingCost || 0;
-    const tax = order.tax || 0;
-    const finalTotal = total + shippingCost + tax;
+    const finalTotal = total + shippingCost;
 
     // Create order details modal
     const modal = document.createElement('div');
@@ -236,7 +234,6 @@ function showOrderDetails(orderId) {
                 <div class="order-summary-details">
                     <div class="summary-row"><span>Subtotal:</span><span>₵${total.toLocaleString()}</span></div>
                     <div class="summary-row"><span>Shipping:</span><span>₵${shippingCost.toLocaleString()}</span></div>
-                    <div class="summary-row"><span>Tax (12%):</span><span>₵${tax.toLocaleString()}</span></div>
                     <div class="summary-row total"><span>Total:</span><span>₵${finalTotal.toLocaleString()}</span></div>
                 </div>
             </div>
