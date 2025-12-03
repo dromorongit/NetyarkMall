@@ -828,7 +828,7 @@ function createProductCard(product) {
                        inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
 
     const stockText = !inventoryStatus.available ? 'Out of Stock' :
-                     inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : '';
+                     (inventoryStatus.lowStock && inventoryStatus.stockCount > 0) ? `Only ${inventoryStatus.stockCount} left` : '';
 
     return `
         <div class="product-card ${stockStatus}" data-product-id="${productId}">
@@ -913,7 +913,7 @@ function createWholesaleProductCard(product) {
         checkInventory(productId) : { available: inStock, stockCount: stockCount };
 
     const stockStatus = !inventoryStatus.available ? 'out-of-stock' : '';
-    const stockText = !inventoryStatus.available ? 'Out of Stock' : (inventoryStatus.lowStock ? `Only ${inventoryStatus.stockCount} left` : '');
+    const stockText = !inventoryStatus.available ? 'Out of Stock' : (inventoryStatus.lowStock && inventoryStatus.stockCount > 0) ? `Only ${inventoryStatus.stockCount} left` : '';
 
     return `
         <div class="product-card wholesale-card ${stockStatus}" data-product-id="${productId}">
@@ -954,17 +954,17 @@ function createWholesaleProductCard(product) {
                         <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity (Min: ${moq}):</label>
                         <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
                             <button class="quantity-btn decrease" onclick="adjustWholesaleQuantity('${productId}', -1)" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">-</button>
-                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="1" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;" ${!inventoryStatus.available ? 'disabled' : ''} readonly>
+                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="1" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;" ${!inventoryStatus.available ? 'disabled' : ''}>
                             <button class="quantity-btn increase" onclick="adjustWholesaleQuantity('${productId}', 1)" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">+</button>
                         </div>
                     </div>
                     <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))" ${!inventoryStatus.available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
+                    <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
                     <div class="product-actions">
-                        <button class="action-btn view-more-btn" onclick="viewProductDetails('${productId}')" title="View Details">
-                            <i class="fas fa-eye"></i>
-                        </button>
                         <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
                             <i class="fas fa-balance-scale"></i>
                         </button>
@@ -1538,6 +1538,18 @@ function adjustWholesaleQuantity(productId, delta) {
     const newValue = Math.max(minValue, currentValue + delta);
 
     quantityInput.value = newValue;
+
+    // Remove readonly attribute to make the field editable
+    quantityInput.removeAttribute('readonly');
+
+    // Also allow manual input changes
+    quantityInput.addEventListener('change', function() {
+        const manualValue = parseInt(this.value) || minValue;
+        if (manualValue < minValue) {
+            this.value = minValue;
+            showNotification(`Minimum order quantity is ${minValue}.`, 'warning');
+        }
+    });
 }
 
 // Product comparison functionality
