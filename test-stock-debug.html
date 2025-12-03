@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Status Debug Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #008000;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .debug-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .debug-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .debug-results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .product-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .test-btn {
+            background: #008000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        .test-btn:hover {
+            background: #006600;
+        }
+        .test-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>Stock Status Debug Test</h1>
+
+        <div class="debug-section">
+            <h2>Product Data Analysis</h2>
+            <p>This test will fetch products and analyze their stock status to identify why products show as out of stock.</p>
+
+            <button class="test-btn" id="fetchProductsBtn">Fetch Products and Analyze</button>
+            <button class="test-btn" id="testInventoryBtn">Test Inventory Check Function</button>
+            <button class="test-btn" id="testSpecificProductBtn">Test Specific Product (Enter ID)</button>
+            <input type="text" id="productIdInput" placeholder="Enter product ID" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+
+            <div class="debug-results" id="debugResults">
+                <p>Click the buttons above to run tests.</p>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h2>Stock Status Debug Console</h2>
+            <div class="debug-results" id="debugConsole">
+                <!-- Debug output will appear here -->
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h2>Expected vs Actual Results</h2>
+            <p><strong>Expected:</strong> Products with stockStatus='in-stock' should show as available</p>
+            <p><strong>Expected:</strong> Products with stockCount > 0 should show as available</p>
+            <p><strong>Expected:</strong> Inventory check should return { available: true } for in-stock products</p>
+            <div id="expectedResults" style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+                <p>Results will show expected vs actual behavior here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="products.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugResults = document.getElementById('debugResults');
+            const debugConsole = document.getElementById('debugConsole');
+            const expectedResults = document.getElementById('expectedResults');
+
+            // Add log function
+            function logToConsole(message, type = 'info') {
+                const logEntry = document.createElement('p');
+                logEntry.textContent = message;
+                if (type === 'success') logEntry.className = 'success';
+                else if (type === 'error') logEntry.className = 'error';
+                else if (type === 'warning') logEntry.className = 'warning';
+                else logEntry.className = 'info';
+
+                debugConsole.appendChild(logEntry);
+                debugConsole.scrollTop = debugConsole.scrollHeight;
+            }
+
+            // Fetch products and analyze
+            document.getElementById('fetchProductsBtn').addEventListener('click', async function() {
+                debugResults.innerHTML = '<p>Fetching products...</p>';
+                logToConsole('Starting product fetch and analysis...');
+
+                try {
+                    const products = await getAllProducts();
+                    logToConsole(`Fetched ${products.length} products`, 'success');
+
+                    if (products.length === 0) {
+                        debugResults.innerHTML += '<p class="error">No products found!</p>';
+                        logToConsole('No products found - this might be the issue!', 'error');
+                        return;
+                    }
+
+                    // Analyze products
+                    let inStockCount = 0;
+                    let outOfStockCount = 0;
+                    let problematicProducts = [];
+
+                    products.forEach((product, index) => {
+                        const stockStatus = product.stockStatus || 'unknown';
+                        const stockCount = product.stock || product.stockCount || 0;
+                        const inStock = product.inStock !== undefined ? product.inStock : (stockCount > 0);
+
+                        logToConsole(`Product ${index + 1}: ${product.name || 'Unnamed'} - Status: ${stockStatus}, Count: ${stockCount}, InStock: ${inStock}`);
+
+                        if (stockStatus === 'in-stock' || inStock) {
+                            inStockCount++;
+                        } else {
+                            outOfStockCount++;
+                        }
+
+                        // Check for problematic patterns
+                        if (stockStatus === 'in-stock' && stockCount === 0) {
+                            problematicProducts.push({
+                                id: product.id,
+                                name: product.name,
+                                issue: 'stockStatus is in-stock but stockCount is 0'
+                            });
+                        } else if (stockStatus === 'out-of-stock' && stockCount > 0) {
+                            problematicProducts.push({
+                                id: product.id,
+                                name: product.name,
+                                issue: 'stockStatus is out-of-stock but stockCount > 0'
+                            });
+                        } else if (!stockStatus && !inStock && stockCount > 0) {
+                            problematicProducts.push({
+                                id: product.id,
+                                name: product.name,
+                                issue: 'No stockStatus, not inStock, but stockCount > 0'
+                            });
+                        }
+                    });
+
+                    // Display results
+                    let resultsHTML = `
+                        <h3>Analysis Results:</h3>
+                        <p><strong>Total Products:</strong> ${products.length}</p>
+                        <p><strong>In Stock:</strong> ${inStockCount}</p>
+                        <p><strong>Out of Stock:</strong> ${outOfStockCount}</p>
+                    `;
+
+                    if (problematicProducts.length > 0) {
+                        resultsHTML += `<p class="warning">Found ${problematicProducts.length} problematic products:</p>`;
+                        problematicProducts.forEach(problem => {
+                            resultsHTML += `<p class="error">- ${problem.name} (${problem.id}): ${problem.issue}</p>`;
+                        });
+                    } else {
+                        resultsHTML += '<p class="success">No problematic products found!</p>';
+                    }
+
+                    debugResults.innerHTML = resultsHTML;
+
+                    // Test a few products with inventory check
+                    logToConsole('Testing inventory check on first 3 products...');
+                    const testProducts = products.slice(0, 3);
+                    testProducts.forEach(product => {
+                        const inventoryCheck = checkInventory(product.id || product._id);
+                        logToConsole(`Product ${product.name}: Inventory check result - Available: ${inventoryCheck.available}, Reason: ${inventoryCheck.reason || 'N/A'}`);
+                    });
+
+                } catch (error) {
+                    debugResults.innerHTML = `<p class="error">Error fetching products: ${error.message}</p>`;
+                    logToConsole(`Error: ${error.message}`, 'error');
+                    console.error('Debug test error:', error);
+                }
+            });
+
+            // Test inventory check function
+            document.getElementById('testInventoryBtn').addEventListener('click', async function() {
+                debugResults.innerHTML = '<p>Testing inventory check function...</p>';
+                logToConsole('Testing inventory check function with mock data...');
+
+                // Create mock product data to test different scenarios
+                const testCases = [
+                    {
+                        name: 'In-stock with count',
+                        product: {
+                            id: 'test1',
+                            name: 'Test Product 1',
+                            stockStatus: 'in-stock',
+                            stockCount: 50,
+                            inStock: true
+                        }
+                    },
+                    {
+                        name: 'In-stock without count',
+                        product: {
+                            id: 'test2',
+                            name: 'Test Product 2',
+                            stockStatus: 'in-stock',
+                            stockCount: 0,
+                            inStock: true
+                        }
+                    },
+                    {
+                        name: 'Out-of-stock',
+                        product: {
+                            id: 'test3',
+                            name: 'Test Product 3',
+                            stockStatus: 'out-of-stock',
+                            stockCount: 0,
+                            inStock: false
+                        }
+                    },
+                    {
+                        name: 'Legacy format with stock',
+                        product: {
+                            id: 'test4',
+                            name: 'Test Product 4',
+                            stockCount: 25,
+                            inStock: true
+                        }
+                    },
+                    {
+                        name: 'Legacy format without stock',
+                        product: {
+                            id: 'test5',
+                            name: 'Test Product 5',
+                            stockCount: 0,
+                            inStock: false
+                        }
+                    }
+                ];
+
+                let resultsHTML = '<h3>Inventory Check Test Results:</h3>';
+
+                testCases.forEach(testCase => {
+                    // Mock the product in our database
+                    window.productDatabase[testCase.product.id] = testCase.product;
+
+                    const inventoryCheck = checkInventory(testCase.product.id);
+                    const expectedAvailable = !(
+                        (testCase.product.stockStatus === 'out-of-stock') ||
+                        (testCase.product.stockCount === 0 && !testCase.product.inStock)
+                    );
+
+                    const status = inventoryCheck.available === expectedAvailable ? 'success' : 'error';
+                    const statusText = inventoryCheck.available === expectedAvailable ? '✓ PASS' : '✗ FAIL';
+
+                    resultsHTML += `
+                        <div class="${status}">
+                            <strong>${testCase.name}:</strong> ${statusText}<br>
+                            Expected: ${expectedAvailable ? 'Available' : 'Not Available'}, Got: ${inventoryCheck.available ? 'Available' : 'Not Available'}<br>
+                            Reason: ${inventoryCheck.reason || 'N/A'}
+                        </div>
+                    `;
+
+                    logToConsole(`${testCase.name}: ${statusText} - Expected: ${expectedAvailable}, Got: ${inventoryCheck.available}`);
+                });
+
+                debugResults.innerHTML = resultsHTML;
+            });
+
+            // Test specific product
+            document.getElementById('testSpecificProductBtn').addEventListener('click', async function() {
+                const productId = document.getElementById('productIdInput').value.trim();
+                if (!productId) {
+                    debugResults.innerHTML = '<p class="error">Please enter a product ID</p>';
+                    return;
+                }
+
+                debugResults.innerHTML = `<p>Testing product ID: ${productId}...</p>`;
+                logToConsole(`Testing specific product: ${productId}`);
+
+                try {
+                    const product = await getProductById(productId);
+                    if (!product) {
+                        debugResults.innerHTML += '<p class="error">Product not found!</p>';
+                        logToConsole('Product not found', 'error');
+                        return;
+                    }
+
+                    // Display product details
+                    let productInfo = `
+                        <div class="product-info">
+                            <h3>${product.name || 'Unnamed Product'}</h3>
+                            <p><strong>ID:</strong> ${product.id || product._id}</p>
+                            <p><strong>Stock Status:</strong> ${product.stockStatus || 'N/A'}</p>
+                            <p><strong>Stock Count:</strong> ${product.stock || product.stockCount || 0}</p>
+                            <p><strong>In Stock:</strong> ${product.inStock !== undefined ? product.inStock : 'N/A'}</p>
+                            <p><strong>Price:</strong> ₵${product.price || 0}</p>
+                            <p><strong>Category:</strong> ${product.category || 'N/A'}</p>
+                        </div>
+                    `;
+
+                    // Test inventory check
+                    const inventoryCheck = checkInventory(product.id || product._id);
+                    productInfo += `
+                        <div class="product-info">
+                            <h4>Inventory Check Result:</h4>
+                            <p><strong>Available:</strong> ${inventoryCheck.available ? '✓ Yes' : '✗ No'}</p>
+                            <p><strong>Stock Count:</strong> ${inventoryCheck.stockCount}</p>
+                            <p><strong>Low Stock:</strong> ${inventoryCheck.lowStock ? '✓ Yes' : '✗ No'}</p>
+                            ${inventoryCheck.reason ? `<p><strong>Reason:</strong> ${inventoryCheck.reason}</p>` : ''}
+                        </div>
+                    `;
+
+                    debugResults.innerHTML = productInfo;
+                    logToConsole(`Product ${product.name}: Inventory available = ${inventoryCheck.available}`);
+
+                } catch (error) {
+                    debugResults.innerHTML += `<p class="error">Error testing product: ${error.message}</p>`;
+                    logToConsole(`Error: ${error.message}`, 'error');
+                    console.error('Specific product test error:', error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

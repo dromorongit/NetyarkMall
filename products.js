@@ -732,6 +732,8 @@ function checkInventory(productId, requestedQuantity = 1) {
     // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
     let inStock;
     if (product.stockStatus) {
+        // If stockStatus is 'in-stock', consider it in stock regardless of stockCount
+        // Only consider it out of stock if stockStatus is 'out-of-stock' OR if stockCount is 0
         inStock = product.stockStatus === 'in-stock' && stockCount > 0;
     } else {
         // Handle legacy format (inStock: boolean)
