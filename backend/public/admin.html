@@ -31,6 +31,7 @@
   <div id="dashboard">
     <div class="tabs">
       <button class="tab-btn active" data-tab="products">Products</button>
+      <button class="tab-btn" data-tab="daily-deals">Daily Deals</button>
       <button class="tab-btn" data-tab="orders">Orders</button>
       <button class="tab-btn" data-tab="messages">Messages</button>
       <button class="tab-btn" data-tab="users">Users</button>
@@ -82,6 +83,7 @@
             <label><input type="checkbox" id="product-new-arrival"> New Arrivals</label>
             <label><input type="checkbox" id="product-fast-selling"> Fast-Selling Items</label>
             <label><input type="checkbox" id="product-shop-category"> Shop by Category</label>
+            <label><input type="checkbox" id="product-daily-deal"> Daily Deal</label>
           </div>
           <div class="stock-status-section">
             <h4>Stock Status</h4>
@@ -92,6 +94,17 @@
         </form>
       </div>
       <div id="products-list"></div>
+    </div>
+
+    <div id="daily-deals-tab" class="tab-content" style="display: none;">
+      <h2>Daily Deals Management</h2>
+      <div class="daily-deals-controls">
+        <h3>Current Daily Deals</h3>
+        <div id="daily-deals-list"></div>
+        <div class="daily-deals-actions">
+          <button id="refresh-daily-deals-btn">Refresh Daily Deals</button>
+        </div>
+      </div>
     </div>
 
     <div id="orders-tab" class="tab-content" style="display: none;">

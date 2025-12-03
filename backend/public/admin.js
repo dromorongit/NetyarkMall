@@ -169,6 +169,11 @@ document.getElementById('product-wholesale').addEventListener('change', function
   }
 });
 
+// Add Daily Deals checkbox handling
+document.getElementById('product-daily-deal').addEventListener('change', function() {
+  // This checkbox doesn't need special handling, just ensure it's included in form submission
+});
+
 document.getElementById('product-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -196,6 +201,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     formData.append('isNewArrival', document.getElementById('product-new-arrival').checked);
     formData.append('isFastSelling', document.getElementById('product-fast-selling').checked);
     formData.append('isShopByCategory', document.getElementById('product-shop-category').checked);
+    formData.append('isDailyDeal', document.getElementById('product-daily-deal').checked);
     // Add stock status field
     const stockStatus = document.querySelector('input[name="stock-status"]:checked').value;
     formData.append('stockStatus', stockStatus);
@@ -253,6 +259,7 @@ async function loadDashboard() {
   loadMessages();
   loadUsers();
   loadProfile();
+  loadDailyDeals();
 }
 
 async function loadProducts() {
@@ -287,6 +294,47 @@ async function loadProducts() {
     `).join('');
   } catch (err) {
     console.error(err);
+  }
+}
+
+async function loadDailyDeals() {
+  try {
+    const res = await authFetch(`${API_BASE}/products/daily-deals`);
+    if (!res) return; // Handle token expiration
+
+    const dailyDeals = await res.json();
+    const list = document.getElementById('daily-deals-list');
+
+    if (!dailyDeals || dailyDeals.length === 0) {
+      list.innerHTML = '<p>No daily deals found.</p>';
+      return;
+    }
+
+    list.innerHTML = dailyDeals.map(p => `
+      <div class="product-item">
+        <h3>${p.name}</h3>
+        <p><strong>Short Desc:</strong> ${p.shortDescription}</p>
+        ${p.longDescription ? `<p><strong>Long Desc:</strong> ${p.longDescription}</p>` : ''}
+        ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
+        ${p.colors && p.colors.length ? `<p><strong>Colors:</strong> ${p.colors.join(', ')}</p>` : ''}
+        ${p.sizes && p.sizes.length ? `<p><strong>Sizes:</strong> ${p.sizes.join(', ')}</p>` : ''}
+        <p><strong>Price:</strong> GHS ${p.price}</p>
+        <p><strong>Stock:</strong> ${p.stock}</p>
+        <p><strong>Category:</strong> ${p.category}</p>
+        <p><strong>Daily Deal:</strong> Yes</p>
+        <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
+        <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
+        <button onclick="editProduct('${p._id}')">Edit</button>
+        <button onclick="deleteProduct('${p._id}')">Delete</button>
+      </div>
+    `).join('');
+
+    // Add refresh button functionality
+    document.getElementById('refresh-daily-deals-btn').addEventListener('click', loadDailyDeals);
+
+  } catch (err) {
+    console.error('Error loading daily deals:', err);
+    document.getElementById('daily-deals-list').innerHTML = '<p>Error loading daily deals. Please try again.</p>';
   }
 }
 

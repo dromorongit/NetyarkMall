@@ -820,7 +820,22 @@ function loadFeaturedDeals() {
     if (inStockDeals.length === 0) {
         container.innerHTML = '<p>No featured deals currently in stock.</p>';
     } else {
-        container.innerHTML = inStockDeals.map(product => createDealCard(product)).join('');
+        // Apply 7% discount to Daily Deals products
+        const dealsWithDiscounts = inStockDeals.map(product => {
+            if (product.isDailyDeal) {
+                // Apply 7% discount to daily deal products
+                const originalPrice = product.price;
+                const discountedPrice = originalPrice * 0.93; // 7% discount
+                return {
+                    ...product,
+                    price: discountedPrice,
+                    originalPrice: originalPrice
+                };
+            }
+            return product;
+        });
+
+        container.innerHTML = dealsWithDiscounts.map(product => createDealCard(product)).join('');
     }
 }
 
@@ -1360,36 +1375,40 @@ function filterDeals(category) {
 }
 
 function startCountdownTimer() {
-    // Set target time to end of day
+    // Set target time to 10 hours from now
     const now = new Date();
-    const targetTime = new Date(now);
-    targetTime.setHours(23, 59, 59, 999);
-    
+    const targetTime = new Date(now.getTime() + 10 * 60 * 60 * 1000); // 10 hours in milliseconds
+
     function updateTimer() {
         const currentTime = new Date();
         const timeLeft = targetTime - currentTime;
-        
+
         if (timeLeft <= 0) {
-            // Reset to next day
-            const nextDay = new Date(targetTime);
-            nextDay.setDate(nextDay.getDate() + 1);
-            targetTime.setTime(nextDay.getTime());
+            // Timer has reached 0, stop the countdown
+            const hoursElement = document.getElementById('hours');
+            const minutesElement = document.getElementById('minutes');
+            const secondsElement = document.getElementById('seconds');
+
+            if (hoursElement) hoursElement.textContent = '00';
+            if (minutesElement) minutesElement.textContent = '00';
+            if (secondsElement) secondsElement.textContent = '00';
+
             return;
         }
-        
+
         const hours = Math.floor(timeLeft / (1000 * 60 * 60));
         const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        
+
         const hoursElement = document.getElementById('hours');
         const minutesElement = document.getElementById('minutes');
         const secondsElement = document.getElementById('seconds');
-        
+
         if (hoursElement) hoursElement.textContent = hours.toString().padStart(2, '0');
         if (minutesElement) minutesElement.textContent = minutes.toString().padStart(2, '0');
         if (secondsElement) secondsElement.textContent = seconds.toString().padStart(2, '0');
     }
-    
+
     updateTimer();
     setInterval(updateTimer, 1000);
 }

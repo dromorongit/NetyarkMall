@@ -88,6 +88,16 @@ router.get('/wholesale', async (req, res) => {
   }
 });
 
+// Get daily deals products (public)
+router.get('/daily-deals', async (req, res) => {
+  try {
+    const products = await Product.find({ isDailyDeal: true });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Get product by id
 router.get('/:id', async (req, res) => {
   try {
