@@ -119,173 +119,18 @@
                     <h2>All Today's Deals</h2>
                     <div class="filter-tabs">
                         <button class="filter-tab active" data-category="all">All Deals</button>
-                        <button class="filter-tab" data-category="electronics">Electronics</button>
-                        <button class="filter-tab" data-category="fashion">Fashion</button>
-                        <button class="filter-tab" data-category="home">Home & Kitchen</button>
-                        <button class="filter-tab" data-category="beauty">Health & Beauty</button>
+                        <button class="filter-tab" data-category="Kitchen Appliances" onclick="window.location.href='kitchen-appliances.html'">Kitchen Appliances</button>
+                        <button class="filter-tab" data-category="Beauty & Personal Care" onclick="window.location.href='beauty-personal-care.html'">Beauty & Personal Care</button>
+                        <button class="filter-tab" data-category="Photography & Content Creation Tools" onclick="window.location.href='photography-content-creation-tools.html'">Photography & Content Creation Tools</button>
+                        <button class="filter-tab" data-category="Nail Supplies" onclick="window.location.href='nail-supplies.html'">Nail Supplies</button>
+                        <button class="filter-tab" data-category="Kids & Babies" onclick="window.location.href='kids-babies.html'">Kids & Babies</button>
+                        <button class="filter-tab" data-category="Home Essentials" onclick="window.location.href='home-essentials.html'">Home Essentials</button>
+                        <button class="filter-tab" data-category="Lighting & Home Decor" onclick="window.location.href='lighting-home-decor.html'">Lighting & Home Decor</button>
                     </div>
                 </div>
 
                 <div class="deals-container" id="allDeals">
-                    <!-- Electronics Deals -->
-                    <div class="deal-card" data-category="electronics">
-                        <div class="deal-badge">40% OFF</div>
-                        <div class="deal-image">
-                            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Smartphone">
-                            <div class="deal-overlay">
-                                <button class="quick-view-btn">Quick View</button>
-                            </div>
-                        </div>
-                        <div class="deal-content">
-                            <h3>Premium Smartphone</h3>
-                            <p>Latest model with advanced features</p>
-                            <div class="price-section">
-                                <span class="original-price">₵2,500</span>
-                                <span class="deal-price">₵1,500</span>
-                                <span class="savings">You save ₵1,000</span>
-                            </div>
-                            <button class="add-to-cart-btn" data-product="smartphone-premium">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                            <div class="deal-timer">
-                                <i class="fas fa-clock"></i>
-                                <span class="time-left">2h 45m left</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="deal-card" data-category="electronics">
-                        <div class="deal-badge">50% OFF</div>
-                        <div class="deal-image">
-                            <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Laptop">
-                            <div class="deal-overlay">
-                                <button class="quick-view-btn">Quick View</button>
-                            </div>
-                        </div>
-                        <div class="deal-content">
-                            <h3>Gaming Laptop</h3>
-                            <p>High-performance laptop for work and gaming</p>
-                            <div class="price-section">
-                                <span class="original-price">₵8,000</span>
-                                <span class="deal-price">₵4,000</span>
-                                <span class="savings">You save ₵4,000</span>
-                            </div>
-                            <button class="add-to-cart-btn" data-product="gaming-laptop">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                            <div class="deal-timer">
-                                <i class="fas fa-clock"></i>
-                                <span class="time-left">5h 20m left</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fashion Deals -->
-                    <div class="deal-card" data-category="fashion">
-                        <div class="deal-badge">30% OFF</div>
-                        <div class="deal-image">
-                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Designer Dress">
-                            <div class="deal-overlay">
-                                <button class="quick-view-btn">Quick View</button>
-                            </div>
-                        </div>
-                        <div class="deal-content">
-                            <h3>Designer Dress</h3>
-                            <p>Elegant dress perfect for special occasions</p>
-                            <div class="price-section">
-                                <span class="original-price">₵800</span>
-                                <span class="deal-price">₵560</span>
-                                <span class="savings">You save ₵240</span>
-                            </div>
-                            <button class="add-to-cart-btn" data-product="designer-dress">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                            <div class="deal-timer">
-                                <i class="fas fa-clock"></i>
-                                <span class="time-left">1h 15m left</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="deal-card" data-category="fashion">
-                        <div class="deal-badge">25% OFF</div>
-                        <div class="deal-image">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Men's Jacket">
-                            <div class="deal-overlay">
-                                <button class="quick-view-btn">Quick View</button>
-                            </div>
-                        </div>
-                        <div class="deal-content">
-                            <h3>Men's Leather Jacket</h3>
-                            <p>Premium quality leather jacket for men</p>
-                            <div class="price-section">
-                                <span class="original-price">₵1,200</span>
-                                <span class="deal-price">₵900</span>
-                                <span class="savings">You save ₵300</span>
-                            </div>
-                            <button class="add-to-cart-btn" data-product="mens-leather-jacket">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                            <div class="deal-timer">
-                                <i class="fas fa-clock"></i>
-                                <span class="time-left">3h 30m left</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Home & Kitchen Deals -->
-                    <div class="deal-card" data-category="home">
-                        <div class="deal-badge">35% OFF</div>
-                        <div class="deal-image">
-                            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Kitchen Set">
-                            <div class="deal-overlay">
-                                <button class="quick-view-btn">Quick View</button>
-                            </div>
-                        </div>
-                        <div class="deal-content">
-                            <h3>Complete Kitchen Set</h3>
-                            <p>Professional-grade cookware and utensils</p>
-                            <div class="price-section">
-                                <span class="original-price">₵1,500</span>
-                                <span class="deal-price">₵975</span>
-                                <span class="savings">You save ₵525</span>
-                            </div>
-                            <button class="add-to-cart-btn" data-product="kitchen-set">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                            <div class="deal-timer">
-                                <i class="fas fa-clock"></i>
-                                <span class="time-left">4h 10m left</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Health & Beauty Deals -->
-                    <div class="deal-card" data-category="beauty">
-                        <div class="deal-badge">45% OFF</div>
-                        <div class="deal-image">
-                            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Skincare Set">
-                            <div class="deal-overlay">
-                                <button class="quick-view-btn">Quick View</button>
-                            </div>
-                        </div>
-                        <div class="deal-content">
-                            <h3>Premium Skincare Set</h3>
-                            <p>Complete skincare routine for all skin types</p>
-                            <div class="price-section">
-                                <span class="original-price">₵600</span>
-                                <span class="deal-price">₵330</span>
-                                <span class="savings">You save ₵270</span>
-                            </div>
-                            <button class="add-to-cart-btn" data-product="skincare-set">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                            <div class="deal-timer">
-                                <i class="fas fa-clock"></i>
-                                <span class="time-left">6h 45m left</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Deals will be populated dynamically by JavaScript -->
                 </div>
             </section>
 

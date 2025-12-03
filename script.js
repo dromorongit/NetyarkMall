@@ -670,6 +670,7 @@ function initializeWholesalePage() {
 
 function initializeDealsPage() {
     loadFeaturedDeals();
+    loadAllDeals();
     setupDealFilters();
     startCountdownTimer();
 }
@@ -836,6 +837,43 @@ function loadFeaturedDeals() {
         });
 
         container.innerHTML = dealsWithDiscounts.map(product => createDealCard(product)).join('');
+    }
+}
+
+async function loadAllDeals() {
+    const container = document.getElementById('allDeals');
+    if (!container) return;
+
+    try {
+        const deals = getAllProducts()
+            .filter(product => product.originalPrice > product.price);
+
+        // Filter out out-of-stock products
+        const inStockDeals = filterInStockProducts(deals);
+
+        if (inStockDeals.length === 0) {
+            container.innerHTML = '<p>No deals currently in stock.</p>';
+        } else {
+            // Apply 7% discount to Daily Deals products
+            const dealsWithDiscounts = inStockDeals.map(product => {
+                if (product.isDailyDeal) {
+                    // Apply 7% discount to daily deal products
+                    const originalPrice = product.price;
+                    const discountedPrice = originalPrice * 0.93; // 7% discount
+                    return {
+                        ...product,
+                        price: discountedPrice,
+                        originalPrice: originalPrice
+                    };
+                }
+                return product;
+            });
+
+            container.innerHTML = dealsWithDiscounts.map(product => createDealCard(product)).join('');
+        }
+    } catch (error) {
+        console.error('Error loading all deals:', error);
+        container.innerHTML = '<p>Error loading deals. Please try again later.</p>';
     }
 }
 
