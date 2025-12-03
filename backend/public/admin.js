@@ -169,22 +169,37 @@ async function loadOrders() {
     });
     const orders = await res.json();
     const list = document.getElementById('orders-list');
+
+    if (orders.length === 0) {
+      list.innerHTML = '<p>No orders found.</p>';
+      return;
+    }
+
     list.innerHTML = orders.map(o => `
       <div class="order-item">
-        <p>User: ${o.user.name}</p>
-        <p>Total: $${o.total}</p>
-        <p>Status: ${o.status}</p>
-        <select onchange="updateOrderStatus('${o._id}', this.value)">
-          <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
-          <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
-          <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-          <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-          <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-        </select>
+        <p><strong>Order ID:</strong> ${o._id}</p>
+        <p><strong>Customer:</strong> ${o.user ? o.user.name : `${o.customer.firstName} ${o.customer.lastName} (Guest)`}</p>
+        <p><strong>Email:</strong> ${o.customer.email}</p>
+        <p><strong>Phone:</strong> ${o.customer.phone}</p>
+        <p><strong>Total:</strong> ₵${o.total.toLocaleString()}</p>
+        <p><strong>Status:</strong> ${o.status}</p>
+        <p><strong>Items:</strong> ${o.products.length} item(s)</p>
+        <p><strong>Date:</strong> ${new Date(o.createdAt).toLocaleDateString()}</p>
+        <div class="order-actions">
+          <select onchange="updateOrderStatus('${o._id}', this.value)">
+            <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
+            <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+            <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+            <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+          <button onclick="viewOrderDetails('${o._id}')">View Details</button>
+        </div>
       </div>
     `).join('');
   } catch (err) {
-    console.error(err);
+    console.error('Error loading orders:', err);
+    document.getElementById('orders-list').innerHTML = '<p>Error loading orders. Please try again.</p>';
   }
 }
 
@@ -349,8 +364,76 @@ async function updateOrderStatus(id, status) {
       },
       body: JSON.stringify({ status })
     });
+    loadOrders(); // Refresh the orders list
   } catch (err) {
     console.error(err);
+  }
+}
+
+async function viewOrderDetails(orderId) {
+  try {
+    const res = await fetch(`${API_BASE}/orders/${orderId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch order details');
+    }
+
+    const order = await res.json();
+
+    // Create a modal to show order details
+    const modal = document.createElement('div');
+    modal.className = 'order-details-modal';
+    modal.innerHTML = `
+      <div class="order-details-content">
+        <div class="order-details-header">
+          <h2>Order Details - ${order._id}</h2>
+          <button onclick="this.closest('.order-details-modal').remove()">&times;</button>
+        </div>
+        <div class="order-details-body">
+          <div class="order-info-section">
+            <h3>Customer Information</h3>
+            <p><strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}</p>
+            <p><strong>Email:</strong> ${order.customer.email}</p>
+            <p><strong>Phone:</strong> ${order.customer.phone}</p>
+          </div>
+
+          <div class="order-info-section">
+            <h3>Shipping Information</h3>
+            <p><strong>Address:</strong> ${order.shipping.address}</p>
+            <p><strong>City:</strong> ${order.shipping.city}</p>
+            <p><strong>Region:</strong> ${order.shipping.region}</p>
+            <p><strong>Zone:</strong> ${order.shipping.zone}</p>
+            <p><strong>Method:</strong> ${order.shipping.method}</p>
+          </div>
+
+          <div class="order-info-section">
+            <h3>Order Items</h3>
+            ${order.products.map(item => `
+              <div class="order-item-detail">
+                <p><strong>Product ID:</strong> ${item.product}</p>
+                <p><strong>Quantity:</strong> ${item.quantity}</p>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="order-info-section">
+            <h3>Order Summary</h3>
+            <p><strong>Total:</strong> ₵${order.total.toLocaleString()}</p>
+            <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+            <p><strong>Status:</strong> ${order.status}</p>
+            <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+  } catch (err) {
+    console.error('Error viewing order details:', err);
+    alert('Error loading order details: ' + err.message);
   }
 }
 
