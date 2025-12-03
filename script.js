@@ -1207,27 +1207,63 @@ function createWholesaleProductCard(product) {
 
 function createDealCard(product) {
     const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    const productId = product.id || product._id;
+    const stockCount = product.stockCount || product.stock || 0;
+    const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+    const available = product.stockStatus === 'in-stock' && stockCount > 0;
+    const lowStock = available && stockCount <= 5;
+
+    const stockStatus = !available ? 'out-of-stock' :
+                        lowStock ? 'low-stock' : 'in-stock';
+
+    const stockText = !available ? 'Out of Stock' :
+                    (lowStock && stockCount > 0) ? `Only ${stockCount} left` : '';
 
     return `
-        <div class="deal-card" data-product-id="${product.id}">
-            <div class="deal-badge">${discount}% OFF</div>
-            <div class="deal-image">
+        <div class="product-card deal-card ${stockStatus}" data-product-id="${productId}">
+            ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
+            <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
-                <div class="deal-overlay">
-                    <button class="quick-view-btn">Quick View</button>
+                <div class="product-overlay">
+                    <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
+                    <button class="add-to-cart-btn" ${!available ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${!available ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
                 </div>
             </div>
-            <div class="deal-content">
-                <h3>${product.name}</h3>
-                <p>${product.description}</p>
-                <div class="price-section">
-                    <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>
-                    <span class="deal-price">₵${product.price.toLocaleString()}</span>
-                    <span class="savings">You save ₵${(product.originalPrice - product.price).toLocaleString()}</span>
+            <div class="product-info">
+                <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
+                ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
+                <p class="product-description">${product.shortDescription || product.description || 'No description available'}</p>
+                ${product.colors && product.colors.length > 0 ? `<p class="product-colors">Colors: ${product.colors.join(', ')}</p>` : ''}
+                ${product.sizes && product.sizes.length > 0 ? `<p class="product-sizes">Sizes: ${product.sizes.join(', ')}</p>` : ''}
+                <div class="product-rating">
+                    <div class="stars">
+                        ${generateStarRating(product.rating || 0)}
+                    </div>
+                    <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
                 </div>
-                <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
-                    <i class="fas fa-shopping-cart"></i> Add to Cart
-                </button>
+                <div class="product-price">
+                    <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
+                    ${product.originalPrice > product.price ?
+                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                </div>
+                <div class="product-card-actions">
+                    <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                    <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                    <div class="product-actions">
+                        <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
+                            <i class="fas fa-balance-scale"></i>
+                        </button>
+                        <button class="action-btn wishlist-btn" onclick="toggleWishlist('${productId}')" title="Wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     `;
