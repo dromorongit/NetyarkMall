@@ -191,7 +191,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     formData.append('isWholesale', document.getElementById('product-wholesale').checked);
     formData.append('minOrderQty', parseInt(document.getElementById('product-moq').value) || 1);
     if (document.getElementById('product-wholesale').checked) {
-      formData.append('wholesalePrice', Math.round(parseFloat(document.getElementById('product-wholesale-price').value) * 100) / 100 || 0);
+      formData.append('wholesalePrice', parseFloat(document.getElementById('product-wholesale-price').value) || 0);
     }
     formData.append('isNewArrival', document.getElementById('product-new-arrival').checked);
     formData.append('isFastSelling', document.getElementById('product-fast-selling').checked);
