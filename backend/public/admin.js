@@ -49,7 +49,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     colors.forEach(color => formData.append('colors', color));
     const sizes = document.getElementById('product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
     sizes.forEach(size => formData.append('sizes', size));
-    formData.append('price', parseFloat(document.getElementById('product-price').value));
+    formData.append('price', Math.round(parseFloat(document.getElementById('product-price').value) * 100) / 100);
     formData.append('stock', parseInt(document.getElementById('product-stock').value));
     formData.append('category', document.getElementById('product-category').value);
     formData.append('image', document.getElementById('product-image').files[0]);
@@ -60,7 +60,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     formData.append('isWholesale', document.getElementById('product-wholesale').checked);
     formData.append('minOrderQty', parseInt(document.getElementById('product-moq').value) || 1);
     if (document.getElementById('product-wholesale').checked) {
-      formData.append('wholesalePrice', parseFloat(document.getElementById('product-wholesale-price').value) || 0);
+      formData.append('wholesalePrice', Math.round(parseFloat(document.getElementById('product-wholesale-price').value) * 100) / 100 || 0);
     }
     formData.append('isNewArrival', document.getElementById('product-new-arrival').checked);
     formData.append('isFastSelling', document.getElementById('product-fast-selling').checked);
@@ -358,7 +358,7 @@ document.getElementById('edit-product-form').addEventListener('submit', async (e
     brand: document.getElementById('edit-product-brand').value,
     colors: document.getElementById('edit-product-colors').value.split(',').map(c => c.trim()).filter(c => c),
     sizes: document.getElementById('edit-product-sizes').value.split(',').map(s => s.trim()).filter(s => s),
-    price: parseFloat(document.getElementById('edit-product-price').value),
+    price: Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100,
     stock: parseInt(document.getElementById('edit-product-stock').value),
     category: document.getElementById('edit-product-category').value,
     stockStatus: document.querySelector('input[name="edit-stock-status"]:checked').value

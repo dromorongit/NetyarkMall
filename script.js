@@ -974,9 +974,9 @@ function createWholesaleProductCard(product) {
                     <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
                 </div>
                 <div class="product-price">
-                    <span class="current-price">₵${(product.wholesalePrice || 0).toLocaleString()}</span>
+                    <span class="current-price">₵${Math.round(product.wholesalePrice || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
-                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                        `<span class="original-price">₵${Math.round(product.originalPrice).toLocaleString()}</span>` : ''}
                     <div class="wholesale-savings">
                         <small>Wholesale pricing</small>
                     </div>
