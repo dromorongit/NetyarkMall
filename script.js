@@ -103,7 +103,7 @@ function initializeCart() {
     updateCartCount();
 }
 
-async function addToCart(productId, quantity = 1) {
+async function addToCart(productId, quantity = 1, sourcePage = null) {
     const product = await getProductById(productId);
     if (!product) {
         console.error('Product not found:', productId);
@@ -120,7 +120,8 @@ async function addToCart(productId, quantity = 1) {
         minOrderQty: product.minOrderQty,
         category: product.category,
         isNewArrival: product.isNewArrival,
-        isFastSelling: product.isFastSelling
+        isFastSelling: product.isFastSelling,
+        sourcePage: sourcePage
     });
 
     // Check inventory
@@ -146,18 +147,23 @@ async function addToCart(productId, quantity = 1) {
         }
         existingItem.quantity = newQuantity;
     } else {
-        // Only include wholesale properties if the product is actually wholesale
+        // Determine if this should be treated as a wholesale purchase based on source page
+        // If added from wholesale page, use wholesale attributes; otherwise treat as regular
+        const isWholesalePurchase = sourcePage === 'wholesale' || (sourcePage === null && product.isWholesale === true);
+
+        // Create cart item with context-aware wholesale behavior
         const cartItem = {
             id: productId,
             name: product.name,
-            price: product.price,
+            price: isWholesalePurchase && product.wholesalePrice ? product.wholesalePrice : product.price,
             image: product.image,
             quantity: quantity,
-            isWholesale: product.isWholesale === true
+            isWholesale: isWholesalePurchase,
+            sourcePage: sourcePage // Track where this item was added from
         };
 
-        // Only add MOQ for actual wholesale products
-        if (cartItem.isWholesale) {
+        // Only add MOQ for items treated as wholesale purchases
+        if (isWholesalePurchase) {
             cartItem.moq = product.moq || product.minOrderQty || 1;
         }
 
@@ -167,7 +173,9 @@ async function addToCart(productId, quantity = 1) {
             productName: product.name,
             isWholesale: cartItem.isWholesale,
             moq: cartItem.moq,
-            quantity: quantity
+            quantity: quantity,
+            sourcePage: cartItem.sourcePage,
+            priceUsed: cartItem.price
         });
 
         cart.push(cartItem);
@@ -276,25 +284,26 @@ function updateCartQuantity(productId, quantity) {
             currentQuantity: item.quantity,
             isWholesale: item.isWholesale,
             moq: item.moq,
-            minOrderQty: item.minOrderQty
+            minOrderQty: item.minOrderQty,
+            sourcePage: item.sourcePage
         });
 
         if (quantity <= 0) {
             removeFromCart(productId);
         } else {
-            // Only apply MOQ restrictions to actual wholesale items
-            if (item.isWholesale === true) {
+            // Only apply MOQ restrictions to items that were added from wholesale page
+            if (item.isWholesale === true && item.sourcePage === 'wholesale') {
                 const moq = item.moq || item.minOrderQty || 1;
-                console.log('DEBUG: Wholesale item - checking MOQ:', { moq, quantity });
+                console.log('DEBUG: Wholesale item (added from wholesale page) - checking MOQ:', { moq, quantity });
                 if (quantity < moq) {
                     console.log('DEBUG: MOQ restriction applied - quantity too low');
                     showNotification(`Cannot reduce quantity below MOQ of ${moq} for wholesale items.`, 'warning');
                     return;
                 }
             } else {
-                console.log('DEBUG: Non-wholesale item - allowing quantity change to:', quantity);
+                console.log('DEBUG: Non-wholesale context item - allowing quantity change to:', quantity);
             }
-            // For non-wholesale items, allow any quantity >= 1
+            // For items not added from wholesale page, allow any quantity >= 1
             item.quantity = quantity;
             saveCart();
             updateCartCount();
@@ -388,17 +397,21 @@ function updateCartDisplay() {
                     quantity: item.quantity,
                     moq: moq,
                     canDecrease: canDecrease,
-                    canIncrease: canIncrease
+                    canIncrease: canIncrease,
+                    sourcePage: item.sourcePage
                 });
 
+                // Only show wholesale indicators for items added from wholesale page
+                const showWholesaleIndicators = isWholesale && item.sourcePage === 'wholesale';
+
                 cartHTML += `
-                    <div class="cart-item ${isWholesale ? 'wholesale-item' : ''}" data-product-id="${item.id}">
+                    <div class="cart-item ${showWholesaleIndicators ? 'wholesale-item' : ''}" data-product-id="${item.id}">
                         <div class="item-image">
                             <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(item.image) : item.image}" alt="${item.name}">
                         </div>
                         <div class="item-details">
                             <h3>${item.name}</h3>
-                            ${isWholesale ? `<small class="wholesale-indicator">Wholesale - MOQ: ${moq}</small>` : ''}
+                            ${showWholesaleIndicators ? `<small class="wholesale-indicator">Wholesale - MOQ: ${moq}</small>` : ''}
                             <p class="item-price">₵${item.price.toLocaleString()}</p>
                         </div>
                         <div class="item-quantity">
@@ -1290,7 +1303,10 @@ document.addEventListener('click', function(e) {
                 const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
                 addWholesaleToCart(productId, quantity);
             } else {
-                addToCart(productId);
+                // Determine source page based on current URL
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                const sourcePage = currentPage === 'wholesale.html' ? 'wholesale' : null;
+                addToCart(productId, 1, sourcePage);
             }
         }
     }
