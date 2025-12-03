@@ -515,7 +515,23 @@ async function getFastSellingItems() {
 // Get products by ID
 async function getProductById(id) {
     const products = await getAllProducts();
-    return products.find(product => product.id === id || product._id === id);
+    const product = products.find(product => product.id === id || product._id === id);
+
+    // Debug logging
+    if (product) {
+        console.log('getProductById Debug:', {
+            productId: id,
+            productName: product.name,
+            stockStatus: product.stockStatus,
+            stock: product.stock,
+            stockCount: product.stockCount,
+            inStock: product.inStock
+        });
+    } else {
+        console.log('getProductById Debug: Product not found for ID:', id);
+    }
+
+    return product;
 }
 
 // Get category data for the homepage category grid
@@ -713,6 +729,16 @@ function checkInventory(productId, requestedQuantity = 1) {
 
     const stockCount = product.stock || product.stockCount || 0;
     const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+
+    // Debug logging
+    console.log('checkInventory Debug:', {
+        productId: productId,
+        productName: product?.name,
+        stockStatus: product?.stockStatus,
+        stockCount: stockCount,
+        inStock: inStock,
+        requestedQuantity: requestedQuantity
+    });
 
     if (!inStock) return { available: false, reason: 'Out of stock' };
 

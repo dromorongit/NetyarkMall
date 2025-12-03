@@ -912,6 +912,16 @@ function createWholesaleProductCard(product) {
     const inventoryStatus = typeof checkInventory === 'function' ?
         checkInventory(productId) : { available: inStock, stockCount: stockCount };
 
+    // Debug logging
+    console.log('Wholesale Product Debug:', {
+        productId: productId,
+        productName: product.name,
+        stockStatus: product.stockStatus,
+        stockCount: stockCount,
+        inStock: inStock,
+        inventoryStatus: inventoryStatus
+    });
+
     const stockStatus = !inventoryStatus.available ? 'out-of-stock' : '';
     const stockText = !inventoryStatus.available ? 'Out of Stock' : (inventoryStatus.lowStock && inventoryStatus.stockCount > 0) ? `Only ${inventoryStatus.stockCount} left` : '';
 
