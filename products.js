@@ -515,7 +515,15 @@ async function getFastSellingItems() {
 // Get products by ID
 async function getProductById(id) {
     const products = await getAllProducts();
-    const product = products.find(product => product.id === id || product._id === id);
+
+    // Debug: log all product IDs to see what we're working with
+    console.log('getProductById: Available product IDs:', products.map(p => p.id || p._id));
+
+    // Enhanced product finding with better matching
+    const product = products.find(product => {
+        const productId = product.id || product._id;
+        return productId && productId.toString() === id.toString();
+    });
 
     // Debug logging
     if (product) {
@@ -529,6 +537,12 @@ async function getProductById(id) {
         });
     } else {
         console.log('getProductById Debug: Product not found for ID:', id);
+        console.log('Available products:', products.map(p => ({
+            id: p.id || p._id,
+            name: p.name,
+            stockStatus: p.stockStatus,
+            stock: p.stock
+        })));
     }
 
     return product;
@@ -722,40 +736,64 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // Inventory Management
-function checkInventory(productId, requestedQuantity = 1) {
+async function checkInventory(productId, requestedQuantity = 1) {
     // Mock inventory check - in real app, this would call API
-    const product = getProductById(productId);
-    if (!product) return { available: false, reason: 'Product not found' };
+    const product = await getProductById(productId);
+    if (!product) {
+        console.error('checkInventory: Product not found for ID:', productId);
+        return { available: false, reason: 'Product not found' };
+    }
 
-    const stockCount = product.stock || product.stockCount || 0;
+    // Handle both 'stock' and 'stockCount' fields from API
+    const stockCount = product.stock !== undefined ? product.stock : (product.stockCount !== undefined ? product.stockCount : 0);
+
+    // Debug logging for stock information
+    console.log('checkInventory - Raw product data:', {
+        _id: product._id,
+        id: product.id,
+        name: product.name,
+        stockStatus: product.stockStatus,
+        stock: product.stock,
+        stockCount: product.stockCount,
+        inStock: product.inStock
+    });
 
     // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
     let inStock;
     if (product.stockStatus) {
-        // If stockStatus is 'in-stock', consider it in stock regardless of stockCount
-        // Only consider it out of stock if stockStatus is 'out-of-stock' OR if stockCount is 0
-        inStock = product.stockStatus === 'in-stock' && stockCount > 0;
-    } else {
+        // Primary logic: if stockStatus is 'in-stock', it's available
+        // Only consider out of stock if explicitly marked as 'out-of-stock'
+        inStock = product.stockStatus === 'in-stock';
+    } else if (product.inStock !== undefined) {
         // Handle legacy format (inStock: boolean)
-        inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+        inStock = product.inStock;
+    } else {
+        // Fallback to stock count if no other indicators
+        inStock = stockCount > 0;
     }
 
     // Debug logging
-    console.log('checkInventory Debug:', {
+    console.log('checkInventory Decision:', {
         productId: productId,
-        productName: product?.name,
-        stockStatus: product?.stockStatus,
+        productName: product.name,
+        stockStatus: product.stockStatus,
         stockCount: stockCount,
         inStock: inStock,
-        requestedQuantity: requestedQuantity
+        requestedQuantity: requestedQuantity,
+        finalDecision: inStock ? 'AVAILABLE' : 'NOT AVAILABLE'
     });
 
-    if (!inStock) return { available: false, reason: 'Out of stock' };
+    if (!inStock) {
+        console.warn(`Product ${product.name} (${productId}) is not in stock. Status: ${product.stockStatus}, Count: ${stockCount}`);
+        return { available: false, reason: 'Out of stock' };
+    }
 
     if (stockCount < requestedQuantity) {
+        console.warn(`Product ${product.name} (${productId}) has insufficient stock. Available: ${stockCount}, Requested: ${requestedQuantity}`);
         return { available: false, reason: 'Insufficient stock' };
     }
 
+    console.log(`Product ${product.name} (${productId}) is available with ${stockCount} items in stock`);
     return {
         available: true,
         stockCount: stockCount,
