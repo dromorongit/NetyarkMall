@@ -812,28 +812,30 @@ function loadFeaturedDeals() {
     const container = document.getElementById('featuredDeals');
     if (!container) return;
 
-    const deals = getAllProducts()
+    // First filter for products marked as daily deals
+    const dailyDeals = getAllProducts()
+        .filter(product => product.isDailyDeal === true);
+
+    // Then filter for products that have a discount (originalPrice > price)
+    const dealsWithDiscount = dailyDeals
         .filter(product => product.originalPrice > product.price);
 
     // Filter out out-of-stock products
-    const inStockDeals = filterInStockProducts(deals).slice(0, 3);
+    const inStockDeals = filterInStockProducts(dealsWithDiscount).slice(0, 3);
 
     if (inStockDeals.length === 0) {
         container.innerHTML = '<p>No featured deals currently in stock.</p>';
     } else {
         // Apply 7% discount to Daily Deals products
         const dealsWithDiscounts = inStockDeals.map(product => {
-            if (product.isDailyDeal) {
-                // Apply 7% discount to daily deal products
-                const originalPrice = product.price;
-                const discountedPrice = originalPrice * 0.93; // 7% discount
-                return {
-                    ...product,
-                    price: discountedPrice,
-                    originalPrice: originalPrice
-                };
-            }
-            return product;
+            // Apply 7% discount to daily deal products
+            const originalPrice = product.price;
+            const discountedPrice = originalPrice * 0.93; // 7% discount
+            return {
+                ...product,
+                price: discountedPrice,
+                originalPrice: originalPrice
+            };
         });
 
         container.innerHTML = dealsWithDiscounts.map(product => createDealCard(product)).join('');
@@ -845,6 +847,7 @@ async function loadAllDeals() {
     if (!container) return;
 
     try {
+        // Get all products with discounts
         const deals = getAllProducts()
             .filter(product => product.originalPrice > product.price);
 
