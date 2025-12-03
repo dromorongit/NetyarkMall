@@ -294,10 +294,12 @@ function updateCartQuantity(productId, quantity) {
             // Only apply MOQ restrictions to items that were added from wholesale page
             if (item.isWholesale === true && item.sourcePage === 'wholesale') {
                 const moq = item.moq || item.minOrderQty || 1;
-                console.log('DEBUG: Wholesale item (added from wholesale page) - checking MOQ:', { moq, quantity });
-                if (quantity < moq) {
-                    console.log('DEBUG: MOQ restriction applied - quantity too low');
-                    showNotification(`Cannot reduce quantity below MOQ of ${moq} for wholesale items.`, 'warning');
+                console.log('DEBUG: Wholesale item (added from wholesale page) - checking MOQ:', { moq, quantity, currentQuantity: item.quantity });
+
+                // For wholesale items added from wholesale page, prevent ANY quantity reduction
+                if (quantity < item.quantity) {
+                    console.log('DEBUG: Wholesale item quantity reduction attempted - preventing');
+                    showNotification(`Cannot reduce quantity for wholesale items added from wholesale page.`, 'warning');
                     return;
                 }
             } else {
@@ -388,7 +390,7 @@ function updateCartDisplay() {
                 const moq = isWholesale ? (item.moq || item.minOrderQty || 1) : 1;
                 // Only restrict quantity changes for items added from wholesale page
                 const isWholesaleFromWholesalePage = isWholesale && item.sourcePage === 'wholesale';
-                const canDecrease = !isWholesaleFromWholesalePage || (isWholesaleFromWholesalePage && item.quantity > moq);
+                const canDecrease = !isWholesaleFromWholesalePage;
                 const canIncrease = true; // Always allow increasing quantity
 
                 // Debug logging
