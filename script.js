@@ -134,15 +134,22 @@ async function addToCart(productId, quantity = 1) {
         }
         existingItem.quantity = newQuantity;
     } else {
-        cart.push({
+        // Only include wholesale properties if the product is actually wholesale
+        const cartItem = {
             id: productId,
             name: product.name,
             price: product.price,
             image: product.image,
             quantity: quantity,
-            isWholesale: product.isWholesale || false,
-            moq: product.isWholesale ? (product.moq || product.minOrderQty || 1) : 1
-        });
+            isWholesale: product.isWholesale === true
+        };
+
+        // Only add MOQ for actual wholesale products
+        if (cartItem.isWholesale) {
+            cartItem.moq = product.moq || product.minOrderQty || 1;
+        }
+
+        cart.push(cartItem);
     }
 
     saveCart();
@@ -243,12 +250,15 @@ function updateCartQuantity(productId, quantity) {
         if (quantity <= 0) {
             removeFromCart(productId);
         } else {
-            // For wholesale items, prevent reducing below MOQ
-            const moq = item.moq || item.minOrderQty || 1;
-            if (item.isWholesale && quantity < moq) {
-                showNotification(`Cannot reduce quantity below MOQ of ${moq} for wholesale items.`, 'warning');
-                return;
+            // Only apply MOQ restrictions to actual wholesale items
+            if (item.isWholesale === true) {
+                const moq = item.moq || item.minOrderQty || 1;
+                if (quantity < moq) {
+                    showNotification(`Cannot reduce quantity below MOQ of ${moq} for wholesale items.`, 'warning');
+                    return;
+                }
             }
+            // For non-wholesale items, allow any quantity >= 1
             item.quantity = quantity;
             saveCart();
             updateCartCount();
@@ -326,7 +336,7 @@ function updateCartDisplay() {
         } else {
             let cartHTML = '';
             cart.forEach(item => {
-                const isWholesale = item.isWholesale;
+                const isWholesale = item.isWholesale === true;
                 const moq = isWholesale ? (item.moq || item.minOrderQty || 1) : 1;
                 const canDecrease = !isWholesale || item.quantity > moq;
 
