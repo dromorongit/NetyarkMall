@@ -149,66 +149,82 @@ async function addToCart(productId, quantity = 1) {
 }
 
 async function addWholesaleToCart(productId, quantity = null) {
-    const product = await getProductById(productId);
-    if (!product || !product.isWholesale) {
-        showNotification('Product not found or not a wholesale item.', 'error');
-        return;
-    }
+    try {
+        console.log('addWholesaleToCart called with:', { productId, quantity });
 
-    const moq = product.moq || product.minOrderQty || 1;
-    const addQuantity = quantity || moq;
-
-    // Validate quantity meets minimum order quantity
-    if (addQuantity < moq) {
-        showNotification(`Minimum order quantity is ${moq}.`, 'error');
-        return;
-    }
-
-    const existingItem = cart.find(item => item.id === productId);
-
-    if (existingItem) {
-        // For wholesale, add the specified quantity
-        const newQuantity = existingItem.quantity + addQuantity;
-
-        // Check inventory
-        const inventoryCheck = typeof checkInventory === 'function' ?
-            checkInventory(productId, newQuantity) : { available: product.inStock };
-
-        if (!inventoryCheck.available) {
-            showNotification(inventoryCheck.reason || 'Cannot add more items. Insufficient stock.', 'error');
+        const product = await getProductById(productId);
+        if (!product || !product.isWholesale) {
+            console.error('Product not found or not wholesale:', productId);
+            showNotification('Product not found or not a wholesale item.', 'error');
             return;
         }
 
-        existingItem.quantity = newQuantity;
-        showNotification(`Added ${addQuantity} more ${product.name} to cart!`, 'success');
-    } else {
-        // First time adding wholesale item
+        console.log('Found product:', { name: product.name, isWholesale: product.isWholesale });
 
-        // Check inventory for the quantity
-        const inventoryCheck = typeof checkInventory === 'function' ?
-            checkInventory(productId, addQuantity) : { available: product.inStock };
+        const moq = product.moq || product.minOrderQty || 1;
+        const addQuantity = quantity || moq;
 
-        if (!inventoryCheck.available) {
-            showNotification(inventoryCheck.reason || 'Cannot add item. Insufficient stock.', 'error');
+        console.log('Quantity info:', { moq, addQuantity });
+
+        // Validate quantity meets minimum order quantity
+        if (addQuantity < moq) {
+            showNotification(`Minimum order quantity is ${moq}.`, 'error');
             return;
         }
 
-        cart.push({
-            id: productId,
-            name: product.name,
-            price: product.wholesalePrice || product.price,
-            image: product.image,
-            quantity: addQuantity,
-            isWholesale: true,
-            moq: moq
-        });
+        const existingItem = cart.find(item => item.id === productId);
 
-        showNotification(`${product.name} added to cart with quantity ${addQuantity}!`, 'success');
+        if (existingItem) {
+            // For wholesale, add the specified quantity
+            const newQuantity = existingItem.quantity + addQuantity;
+
+            // Check inventory
+            const inventoryCheck = typeof checkInventory === 'function' ?
+                checkInventory(productId, newQuantity) : { available: product.inStock };
+
+            console.log('Inventory check for existing item:', inventoryCheck);
+
+            if (!inventoryCheck.available) {
+                showNotification(inventoryCheck.reason || 'Cannot add more items. Insufficient stock.', 'error');
+                return;
+            }
+
+            existingItem.quantity = newQuantity;
+            showNotification(`Added ${addQuantity} more ${product.name} to cart!`, 'success');
+        } else {
+            // First time adding wholesale item
+
+            // Check inventory for the quantity
+            const inventoryCheck = typeof checkInventory === 'function' ?
+                checkInventory(productId, addQuantity) : { available: product.inStock };
+
+            console.log('Inventory check for new item:', inventoryCheck);
+
+            if (!inventoryCheck.available) {
+                showNotification(inventoryCheck.reason || 'Cannot add item. Insufficient stock.', 'error');
+                return;
+            }
+
+            cart.push({
+                id: productId,
+                name: product.name,
+                price: product.wholesalePrice || product.price,
+                image: product.image,
+                quantity: addQuantity,
+                isWholesale: true,
+                moq: moq
+            });
+
+            showNotification(`${product.name} added to cart with quantity ${addQuantity}!`, 'success');
+        }
+
+        saveCart();
+        updateCartCount();
+        updateCartDisplay();
+    } catch (error) {
+        console.error('Error in addWholesaleToCart:', error);
+        showNotification('Error adding item to cart. Please try again.', 'error');
     }
-
-    saveCart();
-    updateCartCount();
-    updateCartDisplay();
 }
 
 function removeFromCart(productId) {
@@ -914,6 +930,8 @@ function createWholesaleProductCard(product) {
     console.log('Wholesale Product Debug:', {
         productId: productId,
         productName: product.name,
+        wholesalePrice: product.wholesalePrice,
+        regularPrice: product.price,
         stockStatus: product.stockStatus,
         stockCount: stockCount,
         inStock: inStock,
@@ -923,6 +941,15 @@ function createWholesaleProductCard(product) {
     const stockStatus = !inventoryStatus.available ? 'out-of-stock' : '';
     const stockText = !inventoryStatus.available ? 'Out of Stock' : (inventoryStatus.lowStock && inventoryStatus.stockCount > 0) ? `Only ${inventoryStatus.stockCount} left` : '';
 
+    // Debug logging for stock status
+    console.log('Wholesale Product Stock Debug for product', productId, ':', {
+        inventoryStatus: inventoryStatus,
+        stockStatus: stockStatus,
+        stockCount: stockCount,
+        inStock: inStock,
+        productStockStatus: product.stockStatus
+    });
+
     return `
         <div class="product-card wholesale-card ${stockStatus}" data-product-id="${productId}">
             <div class="product-badge wholesale">WHOLESALE</div>
@@ -930,8 +957,8 @@ function createWholesaleProductCard(product) {
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="addWholesaleToCart('${productId}')">
+                    <button class="quick-view-btn" onclick="console.log('Quick View button clicked for product:', '${productId}'); quickView('${productId}')" style="position: relative; z-index: 10;">Quick View</button>
+                    <button class="add-to-cart-btn" onclick="console.log('Overlay Add to Cart button clicked for product:', '${productId}'); addWholesaleToCart('${productId}', ${moq})" style="position: relative; z-index: 10;">
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                 </div>
@@ -949,7 +976,7 @@ function createWholesaleProductCard(product) {
                     <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
                 </div>
                 <div class="product-price">
-                    <span class="current-price">₵${(product.wholesalePrice || product.price || 0).toLocaleString()}</span>
+                    <span class="current-price">₵${(product.wholesalePrice || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                     <div class="wholesale-savings">
@@ -960,15 +987,15 @@ function createWholesaleProductCard(product) {
                     <div class="wholesale-quantity-controls" style="margin-bottom: 10px;">
                         <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity (Min: ${moq}):</label>
                         <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
-                            <button class="quantity-btn decrease" onclick="adjustWholesaleQuantity('${productId}', -1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">-</button>
+                            <button class="quantity-btn decrease" onclick="console.log('Decrease button clicked for product:', '${productId}'); adjustWholesaleQuantity('${productId}', -1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; z-index: 10;">-</button>
                             <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="1" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;">
-                            <button class="quantity-btn increase" onclick="adjustWholesaleQuantity('${productId}', 1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">+</button>
+                            <button class="quantity-btn increase" onclick="console.log('Increase button clicked for product:', '${productId}'); adjustWholesaleQuantity('${productId}', 1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; z-index: 10;">+</button>
                         </div>
                     </div>
-                    <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))">
+                    <button class="btn btn-primary add-to-cart-btn" onclick="console.log('Add to Cart button clicked for product:', '${productId}'); addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))" style="position: relative; z-index: 10;">
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
-                    <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
+                    <button class="btn btn-outline view-details-btn" onclick="console.log('View Details button clicked for product:', '${productId}'); viewProductDetails('${productId}')" style="position: relative; z-index: 10;">
                         <i class="fas fa-eye"></i> View Details
                     </button>
                     <div class="product-actions">
@@ -1502,8 +1529,21 @@ function viewProduct(productId) {
 }
 
 function viewProductDetails(productId) {
-    // Redirect to product detail page
-    window.location.href = `product.html?id=${productId}`;
+    try {
+        console.log('viewProductDetails called with productId:', productId);
+        if (!productId) {
+            console.error('No productId provided');
+            showNotification('Invalid product ID.', 'error');
+            return;
+        }
+
+        // Redirect to product detail page
+        console.log('Redirecting to product details page for:', productId);
+        window.location.href = `product.html?id=${productId}`;
+    } catch (error) {
+        console.error('Error in viewProductDetails:', error);
+        showNotification('Error viewing product details. Please try again.', 'error');
+    }
 }
 
 // Toggle wishlist function
@@ -1537,26 +1577,38 @@ function updateWishlistButtons() {
 }
 
 function adjustWholesaleQuantity(productId, delta) {
-    const quantityInput = document.getElementById(`wholesale-qty-${productId}`);
-    if (!quantityInput) return;
+    try {
+        console.log('adjustWholesaleQuantity called with:', { productId, delta });
 
-    const currentValue = parseInt(quantityInput.value) || 0;
-    const minValue = parseInt(quantityInput.min) || 1;
-    const newValue = Math.max(minValue, currentValue + delta);
-
-    quantityInput.value = newValue;
-
-    // Remove readonly attribute to make the field editable
-    quantityInput.removeAttribute('readonly');
-
-    // Also allow manual input changes
-    quantityInput.addEventListener('change', function() {
-        const manualValue = parseInt(this.value) || minValue;
-        if (manualValue < minValue) {
-            this.value = minValue;
-            showNotification(`Minimum order quantity is ${minValue}.`, 'warning');
+        const quantityInput = document.getElementById(`wholesale-qty-${productId}`);
+        if (!quantityInput) {
+            console.error('Quantity input not found for product:', productId);
+            return;
         }
-    });
+
+        const currentValue = parseInt(quantityInput.value) || 0;
+        const minValue = parseInt(quantityInput.min) || 1;
+        const newValue = Math.max(minValue, currentValue + delta);
+
+        console.log('Quantity adjustment:', { currentValue, minValue, newValue });
+
+        quantityInput.value = newValue;
+
+        // Remove readonly attribute to make the field editable
+        quantityInput.removeAttribute('readonly');
+
+        // Also allow manual input changes
+        quantityInput.addEventListener('change', function() {
+            const manualValue = parseInt(this.value) || minValue;
+            if (manualValue < minValue) {
+                this.value = minValue;
+                showNotification(`Minimum order quantity is ${minValue}.`, 'warning');
+            }
+        });
+    } catch (error) {
+        console.error('Error in adjustWholesaleQuantity:', error);
+        showNotification('Error adjusting quantity. Please try again.', 'error');
+    }
 }
 
 // Product comparison functionality
