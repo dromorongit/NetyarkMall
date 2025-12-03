@@ -12,7 +12,8 @@ const messageSchema = new mongoose.Schema({
   isRead: { type: Boolean, default: false },
   status: { type: String, enum: ['open', 'closed'], default: 'open' },
   response: { type: String }, // Admin response
-  responseTimestamp: { type: Date } // When response was sent
+  responseTimestamp: { type: Date }, // When response was sent
+  responseShown: { type: Boolean, default: false } // Track if response has been shown to user
 });
 
 module.exports = mongoose.model('Message', messageSchema);

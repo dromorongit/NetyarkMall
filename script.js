@@ -2680,6 +2680,9 @@ function closeChatModal() {
         liveChatModal.classList.remove('show');
         document.body.style.overflow = 'auto';
     }
+
+    // Stop polling when chat is closed to conserve resources
+    stopAllResponsePolling();
 }
 
 async function sendMessage() {
@@ -2729,22 +2732,8 @@ async function sendMessage() {
             // Update activity
             lastChatActivity = Date.now();
 
-            // Simulate support response after delay (in real implementation, this would come from admin)
-            setTimeout(() => {
-                const responses = [
-                    "Thank you for your message! Our support team will get back to you shortly.",
-                    "I understand your concern. Let me connect you with a specialist.",
-                    "Thanks for reaching out! How else can I assist you today?",
-                    "We're here to help! Is there anything specific you'd like to know about our products?",
-                    "Thank you for your patience. A support agent will respond soon.",
-                    "I appreciate you contacting us. Let me help you with that.",
-                    "Thanks for your message! We're working on getting you a response.",
-                    "I see you've reached out. Our team is reviewing your message now."
-                ];
-
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage('support', randomResponse);
-            }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+            // Start polling for admin responses
+            startResponsePolling(conversationId);
         } else {
             console.error('Failed to send message');
         }
@@ -2753,6 +2742,53 @@ async function sendMessage() {
     }
 }
 
+// Add polling mechanism for admin responses
+let pollingIntervals = {};
+
+// Function to start polling for admin responses
+function startResponsePolling(conversationId) {
+    // Clear any existing polling for this conversation
+    if (pollingIntervals[conversationId]) {
+        clearInterval(pollingIntervals[conversationId]);
+    }
+
+    // Start new polling interval
+    pollingIntervals[conversationId] = setInterval(async () => {
+        try {
+            const response = await fetch(`https://netyarkmall-production.up.railway.app/api/messages/conversation/${conversationId}/check-responses`);
+            if (response.ok) {
+                const data = await response.json();
+
+                // Check if there's a new admin response
+                if (data.hasNewResponses && data.response) {
+                    // Add the admin response to the UI
+                    addMessage('support', data.response);
+
+                    // Mark response as shown in the backend
+                    await fetch(`https://netyarkmall-production.up.railway.app/api/messages/mark-shown/${conversationId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    // Stop polling for this conversation since we got the response
+                    clearInterval(pollingIntervals[conversationId]);
+                    delete pollingIntervals[conversationId];
+
+                    // Show notification
+                    showChatNotification();
+                }
+            }
+        } catch (error) {
+            console.error('Error polling for responses:', error);
+        }
+    }, 10000); // Poll every 10 seconds
+}
+
+// Function to stop all polling
+function stopAllResponsePolling() {
+    Object.values(pollingIntervals).forEach(interval => clearInterval(interval));
+    pollingIntervals = {};
+}
 function addMessage(type, content) {
     const chatMessagesContainer = document.getElementById('chatMessages');
     if (!chatMessagesContainer) return;
@@ -3182,4 +3218,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // Test refresh button
     const refreshTestResult = testRefreshButton();
     console.log('Refresh button test result:', refreshTestResult);
+
+    // Test live chat polling mechanism
+    if (typeof startResponsePolling === 'function') {
+        console.log('Live chat polling mechanism initialized successfully');
+    }
 });
+
+// Test function for live chat polling
+function testLiveChatPolling() {
+    // Create a mock conversation ID for testing
+    const testConversationId = 'test_conv_123';
+
+    // Test that polling interval is created
+    startResponsePolling(testConversationId);
+
+    if (pollingIntervals[testConversationId]) {
+        console.log('✅ Polling interval created successfully for conversation:', testConversationId);
+
+        // Clean up
+        clearInterval(pollingIntervals[testConversationId]);
+        delete pollingIntervals[testConversationId];
+
+        return true;
+    } else {
+        console.log('❌ Failed to create polling interval');
+        return false;
+    }
+}
