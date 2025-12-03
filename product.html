@@ -351,19 +351,23 @@
                         </div>
 
                         <div class="product-price-section">
-                            ${isWholesale && wholesalePrice ? `
-                                <div class="price-display">
-                                    <span class="current-price wholesale-price">₵${wholesalePrice.toLocaleString()}</span>
-                                    <span class="regular-price">₵${product.price.toLocaleString()}</span>
-                                    <span class="wholesale-label">Wholesale Price</span>
-                                </div>
-                            ` : `
-                                <div class="price-display">
+                            <div class="price-display">
+                                ${isWholesale && wholesalePrice ? `
+                                    <div class="price-comparison">
+                                        <span class="regular-price-label">Regular Price:</span>
+                                        <span class="regular-price">₵${product.price.toLocaleString()}</span>
+                                        <div class="wholesale-price-section">
+                                            <span class="wholesale-price-label">Wholesale Price:</span>
+                                            <span class="wholesale-price">₵${wholesalePrice.toLocaleString()}</span>
+                                            <span class="wholesale-label">Save ${(Math.round(((product.price - wholesalePrice) / product.price) * 100))}%</span>
+                                        </div>
+                                    </div>
+                                ` : `
                                     <span class="current-price">₵${product.price.toLocaleString()}</span>
                                     ${product.originalPrice > product.price ?
                                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
-                                </div>
-                            `}
+                                `}
+                            </div>
                         </div>
 
                         <div class="product-stock-status">
@@ -394,28 +398,30 @@
                         ` : ''}
 
                         <div class="product-actions">
-                            ${!isWholesale ? `
-                                <div class="quantity-selector">
-                                    <label for="productQuantity">Quantity:</label>
-                                    <div class="quantity-controls">
-                                        <button class="quantity-btn" onclick="changeQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
-                                        <input type="number" id="productQuantity" value="1" min="1" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
-                                        <button class="quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                            <div class="primary-actions">
+                                ${!isWholesale ? `
+                                    <div class="quantity-selector">
+                                        <label for="productQuantity">Quantity:</label>
+                                        <div class="quantity-controls">
+                                            <button class="quantity-btn" onclick="changeQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
+                                            <input type="number" id="productQuantity" value="1" min="1" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
+                                            <button class="quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                        </div>
                                     </div>
-                                </div>
-                                <button class="btn btn-primary add-to-cart-btn" ${!inStock ? 'disabled' : ''}>
-                                    <i class="fas fa-shopping-cart"></i> Add to Cart
-                                </button>
-                            ` : `
-                                <button class="btn btn-secondary wholesale-btn" onclick="window.location.href='wholesale.html'">
-                                    <i class="fas fa-boxes"></i> View Wholesale Options
-                                </button>
-                            `}
+                                    <button class="btn btn-primary add-to-cart-btn" ${!inStock ? 'disabled' : ''}>
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-secondary wholesale-btn" onclick="window.location.href='wholesale.html'">
+                                        <i class="fas fa-boxes"></i> View Wholesale Options
+                                    </button>
+                                `}
+                            </div>
                             <div class="secondary-actions">
-                                <button class="btn btn-outline" onclick="addToCompare('${productId}')">
+                                <button class="btn btn-outline action-btn" onclick="addToCompare('${productId}')">
                                     <i class="fas fa-balance-scale"></i> Compare
                                 </button>
-                                <button class="btn btn-outline wishlist-btn" onclick="toggleWishlist('${productId}')">
+                                <button class="btn btn-outline action-btn wishlist-btn" onclick="toggleWishlist('${productId}')">
                                     <i class="far fa-heart"></i> Add to Wishlist
                                 </button>
                             </div>
@@ -476,9 +482,78 @@
                                 <span class="spec-value">${moq}</span>
                             </div>
                         ` : ''}
-                        <div class="spec-item">
-                            <span class="spec-label">Rating:</span>
-                            <span class="spec-value">${product.rating || 0}/5 (${product.reviews || 0} reviews)</span>
+                    </div>
+                </div>
+
+                <!-- Product Reviews & Ratings -->
+                <div class="product-reviews-section">
+                    <h2>Customer Reviews & Ratings</h2>
+                    <div class="reviews-header">
+                        <div class="overall-rating">
+                            <div class="rating-display">
+                                <div class="big-stars">
+                                    ${generateStarRating(product.rating || 0)}
+                                </div>
+                                <div class="rating-summary">
+                                    <span class="rating-number">${product.rating || 0}</span>
+                                    <span class="rating-out-of">out of 5</span>
+                                    <span class="total-reviews">(${product.reviews || 0} reviews)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-actions">
+                            <button class="btn btn-primary write-review-btn">
+                                <i class="fas fa-pen"></i> Write a Review
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="rating-breakdown">
+                        <div class="rating-bars">
+                            <div class="rating-bar-item">
+                                <span class="star-count">5 stars</span>
+                                <div class="rating-bar">
+                                    <div class="rating-bar-fill" style="width: ${product.rating >= 5 ? '100' : Math.max(0, (product.rating - 4) * 100)}%"></div>
+                                </div>
+                                <span class="percentage">${product.rating >= 5 ? '100' : Math.max(0, Math.round((product.rating - 4) * 100))}%</span>
+                            </div>
+                            <div class="rating-bar-item">
+                                <span class="star-count">4 stars</span>
+                                <div class="rating-bar">
+                                    <div class="rating-bar-fill" style="width: ${product.rating >= 4 ? '100' : Math.max(0, (product.rating - 3) * 100)}%"></div>
+                                </div>
+                                <span class="percentage">${product.rating >= 4 ? '100' : Math.max(0, Math.round((product.rating - 3) * 100))}%</span>
+                            </div>
+                            <div class="rating-bar-item">
+                                <span class="star-count">3 stars</span>
+                                <div class="rating-bar">
+                                    <div class="rating-bar-fill" style="width: ${product.rating >= 3 ? '100' : Math.max(0, (product.rating - 2) * 100)}%"></div>
+                                </div>
+                                <span class="percentage">${product.rating >= 3 ? '100' : Math.max(0, Math.round((product.rating - 2) * 100))}%</span>
+                            </div>
+                            <div class="rating-bar-item">
+                                <span class="star-count">2 stars</span>
+                                <div class="rating-bar">
+                                    <div class="rating-bar-fill" style="width: ${product.rating >= 2 ? '100' : Math.max(0, (product.rating - 1) * 100)}%"></div>
+                                </div>
+                                <span class="percentage">${product.rating >= 2 ? '100' : Math.max(0, Math.round((product.rating - 1) * 100))}%</span>
+                            </div>
+                            <div class="rating-bar-item">
+                                <span class="star-count">1 star</span>
+                                <div class="rating-bar">
+                                    <div class="rating-bar-fill" style="width: ${product.rating >= 1 ? '100' : Math.max(0, product.rating * 100)}%"></div>
+                                </div>
+                                <span class="percentage">${product.rating >= 1 ? '100' : Math.max(0, Math.round(product.rating * 100))}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reviews-list" id="reviewsList">
+                        <!-- Reviews will be loaded here -->
+                        <div class="no-reviews">
+                            <i class="fas fa-comments"></i>
+                            <h3>No reviews yet</h3>
+                            <p>Be the first to review this product!</p>
                         </div>
                     </div>
                 </div>
