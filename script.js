@@ -2138,15 +2138,6 @@ function initializeCartPage() {
 function initializeCheckoutPage() {
     console.log('Initializing checkout page...');
 
-    // Check if user is logged in
-    if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
-        showNotification('Please log in to proceed with checkout.', 'warning');
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 2000);
-        return;
-    }
-
     // Check if cart is empty
     if (cart.length === 0) {
         showNotification('Your cart is empty. Redirecting to shop...', 'warning');
@@ -2435,24 +2426,21 @@ async function processCheckoutOrder(form) {
 
         console.log('Submitting order:', orderData);
 
-        // Get auth token
+        // Get auth token (optional for guest checkout)
         const token = localStorage.getItem('token');
-        if (!token) {
-            showNotification('Please log in to place an order.', 'error');
-            hideLoading();
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 2000);
-            return;
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        // Add authorization header if user is logged in
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
         // Submit order to backend
         const response = await fetch('https://netyarkmall-production.up.railway.app/api/orders', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: headers,
             body: JSON.stringify(orderData)
         });
 
@@ -2465,11 +2453,21 @@ async function processCheckoutOrder(form) {
             updateCartCount();
 
             // Show success message
-            showNotification('Order placed successfully! You will receive a confirmation email shortly.', 'success');
+            const isLoggedIn = localStorage.getItem('token') !== null;
+            const successMessage = isLoggedIn
+                ? 'Order placed successfully! You can track your order in your profile.'
+                : 'Order placed successfully! You will receive a confirmation email shortly.';
 
-            // Redirect to order confirmation or profile
+            showNotification(successMessage, 'success');
+
+            // Redirect based on login status
             setTimeout(() => {
-                window.location.href = 'profile.html?tab=orders';
+                if (isLoggedIn) {
+                    window.location.href = 'profile.html?tab=orders';
+                } else {
+                    // For guest users, redirect to home with success message
+                    window.location.href = 'index.html?order=success';
+                }
             }, 3000);
 
         } else {
