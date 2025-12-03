@@ -850,7 +850,7 @@ function createProductCard(product) {
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="addToCart('${productId}')" ${!available ? 'disabled' : ''}>
+                    <button class="add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> ${!available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
                 </div>
@@ -873,7 +873,7 @@ function createProductCard(product) {
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-card-actions">
-                    <button class="btn btn-primary add-to-cart-btn" onclick="addToCart('${productId}')" ${!available ? 'disabled' : ''}>
+                    <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                     <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
@@ -957,7 +957,7 @@ function createWholesaleProductCard(product) {
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="console.log('Quick View button clicked for product:', '${productId}'); quickView('${productId}')" style="position: relative; z-index: 10;">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="console.log('Overlay Add to Cart button clicked for product:', '${productId}'); addWholesaleToCart('${productId}', ${moq})" style="position: relative; z-index: 10;">
+                    <button class="add-to-cart-btn" style="position: relative; z-index: 10;">
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                 </div>
@@ -991,7 +991,7 @@ function createWholesaleProductCard(product) {
                             <button class="quantity-btn increase" onclick="console.log('Increase button clicked for product:', '${productId}'); adjustWholesaleQuantity('${productId}', 1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; z-index: 20; position: relative; pointer-events: auto;">+</button>
                         </div>
                     </div>
-                    <button class="btn btn-primary add-to-cart-btn" onclick="console.log('Add to Cart button clicked for product:', '${productId}'); addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))" style="position: relative; z-index: 20; pointer-events: auto;">
+                    <button class="btn btn-primary add-to-cart-btn" style="position: relative; z-index: 20; pointer-events: auto;">
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                     <button class="btn btn-outline view-details-btn" onclick="console.log('View Details button clicked for product:', '${productId}'); viewProductDetails('${productId}')" style="position: relative; z-index: 10;">
@@ -1222,9 +1222,16 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         const button = e.target.classList.contains('add-to-cart-btn') ? e.target : e.target.closest('.add-to-cart-btn');
         const productId = button.getAttribute('data-product') || button.closest('[data-product-id]')?.getAttribute('data-product-id');
-        
+
         if (productId) {
-            addToCart(productId);
+            const isWholesale = button.closest('.wholesale-card') !== null;
+            if (isWholesale) {
+                const quantityInput = button.closest('.product-card').querySelector(`#wholesale-qty-${productId}`);
+                const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                addWholesaleToCart(productId, quantity);
+            } else {
+                addToCart(productId);
+            }
         }
     }
 });
