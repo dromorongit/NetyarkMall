@@ -149,7 +149,7 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
     } else {
         // Determine if this should be treated as a wholesale purchase based on source page
         // If added from wholesale page, use wholesale attributes; otherwise treat as regular
-        const isWholesalePurchase = sourcePage === 'wholesale' || (sourcePage === null && product.isWholesale === true);
+        const isWholesalePurchase = sourcePage === 'wholesale';
 
         // Create cart item with context-aware wholesale behavior
         const cartItem = {
@@ -386,8 +386,10 @@ function updateCartDisplay() {
             cart.forEach(item => {
                 const isWholesale = item.isWholesale === true;
                 const moq = isWholesale ? (item.moq || item.minOrderQty || 1) : 1;
-                const canDecrease = !isWholesale || (isWholesale && item.quantity > moq);
-                const canIncrease = true; // Always allow increasing quantity for non-wholesale items
+                // Only restrict quantity changes for items added from wholesale page
+                const isWholesaleFromWholesalePage = isWholesale && item.sourcePage === 'wholesale';
+                const canDecrease = !isWholesaleFromWholesalePage || (isWholesaleFromWholesalePage && item.quantity > moq);
+                const canIncrease = true; // Always allow increasing quantity
 
                 // Debug logging
                 console.log('Cart item debug:', {
@@ -398,11 +400,12 @@ function updateCartDisplay() {
                     moq: moq,
                     canDecrease: canDecrease,
                     canIncrease: canIncrease,
-                    sourcePage: item.sourcePage
+                    sourcePage: item.sourcePage,
+                    isWholesaleFromWholesalePage: isWholesaleFromWholesalePage
                 });
 
                 // Only show wholesale indicators for items added from wholesale page
-                const showWholesaleIndicators = isWholesale && item.sourcePage === 'wholesale';
+                const showWholesaleIndicators = isWholesaleFromWholesalePage;
 
                 cartHTML += `
                     <div class="cart-item ${showWholesaleIndicators ? 'wholesale-item' : ''}" data-product-id="${item.id}">
