@@ -728,7 +728,15 @@ function checkInventory(productId, requestedQuantity = 1) {
     if (!product) return { available: false, reason: 'Product not found' };
 
     const stockCount = product.stock || product.stockCount || 0;
-    const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+
+    // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
+    let inStock;
+    if (product.stockStatus) {
+        inStock = product.stockStatus === 'in-stock' && stockCount > 0;
+    } else {
+        // Handle legacy format (inStock: boolean)
+        inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
+    }
 
     // Debug logging
     console.log('checkInventory Debug:', {
