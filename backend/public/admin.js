@@ -435,7 +435,7 @@ async function viewOrderDetails(orderId) {
             <h3>Order Items</h3>
             ${(order.products && order.products.length > 0) ? order.products.map(item => `
               <div class="order-item-detail">
-                <p><strong>Product ID:</strong> ${item.product || 'N/A'}</p>
+                <p><strong>Product:</strong> ${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</p>
                 <p><strong>Quantity:</strong> ${item.quantity || 0}</p>
               </div>
             `).join('') : '<p>No items found</p>'}
