@@ -8,6 +8,7 @@ const productSchema = new mongoose.Schema({
   colors: { type: [String] }, // array of colors
   sizes: { type: [String] }, // array of sizes
   price: { type: Number, required: true }, // in GHS
+  originalPrice: { type: Number }, // original price before discount (for daily deals)
   stock: { type: Number, required: true, default: 0 },
   category: { type: String, required: true },
   image: { type: String }, // URL or path

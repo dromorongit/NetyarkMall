@@ -186,6 +186,10 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     const sizes = document.getElementById('product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
     sizes.forEach(size => formData.append('sizes', size));
     formData.append('price', Math.round(parseFloat(document.getElementById('product-price').value) * 100) / 100);
+    const originalPrice = document.getElementById('product-original-price').value;
+    if (originalPrice) {
+      formData.append('originalPrice', Math.round(parseFloat(originalPrice) * 100) / 100);
+    }
     formData.append('stock', parseInt(document.getElementById('product-stock').value));
     formData.append('category', document.getElementById('product-category').value);
     formData.append('image', document.getElementById('product-image').files[0]);

@@ -812,16 +812,58 @@ function loadFeaturedDeals() {
     const container = document.getElementById('featuredDeals');
     if (!container) return;
 
+    // Debug: Log all products to see what we're working with
+    const allProducts = getAllProducts();
+    console.log('DEBUG: Total products available:', allProducts.length);
+    console.log('DEBUG: Sample products:', allProducts.slice(0, 3).map(p => ({
+        id: p.id,
+        name: p.name,
+        isDailyDeal: p.isDailyDeal,
+        price: p.price,
+        originalPrice: p.originalPrice,
+        stockStatus: p.stockStatus
+    })));
+
     // First filter for products marked as daily deals
-    const dailyDeals = getAllProducts()
-        .filter(product => product.isDailyDeal === true);
+    const dailyDeals = allProducts.filter(product => product.isDailyDeal === true);
+    console.log('DEBUG: Daily deals found:', dailyDeals.length);
+    console.log('DEBUG: Daily deals details:', dailyDeals.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        originalPrice: p.originalPrice,
+        isDailyDeal: p.isDailyDeal
+    })));
 
     // Then filter for products that have a discount (originalPrice > price)
-    const dealsWithDiscount = dailyDeals
-        .filter(product => product.originalPrice > product.price);
+    // OR products that don't have originalPrice set (for backward compatibility)
+    const dealsWithDiscount = dailyDeals.filter(product => {
+        const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+        const noOriginalPrice = !product.originalPrice; // Allow products without originalPrice
+        const isValidDeal = hasDiscount || noOriginalPrice;
+
+        console.log('DEBUG: Checking discount for product:', {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            originalPrice: product.originalPrice,
+            hasDiscount: hasDiscount,
+            noOriginalPrice: noOriginalPrice,
+            isValidDeal: isValidDeal
+        });
+        return isValidDeal;
+    });
+    console.log('DEBUG: Daily deals with discounts:', dealsWithDiscount.length);
 
     // Filter out out-of-stock products
     const inStockDeals = filterInStockProducts(dealsWithDiscount).slice(0, 3);
+    console.log('DEBUG: In-stock daily deals ready to display:', inStockDeals.length);
+    console.log('DEBUG: Final deals to display:', inStockDeals.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        originalPrice: p.originalPrice
+    })));
 
     if (inStockDeals.length === 0) {
         container.innerHTML = '<p>No featured deals currently in stock.</p>';
@@ -848,8 +890,13 @@ async function loadAllDeals() {
 
     try {
         // Get all products with discounts
+        // OR products that don't have originalPrice set (for backward compatibility)
         const deals = getAllProducts()
-            .filter(product => product.originalPrice > product.price);
+            .filter(product => {
+                const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+                const noOriginalPrice = !product.originalPrice; // Allow products without originalPrice
+                return hasDiscount || noOriginalPrice;
+            });
 
         // Filter out out-of-stock products
         const inStockDeals = filterInStockProducts(deals);
