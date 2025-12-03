@@ -46,10 +46,31 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token, user: { id: user._id, name: user.name, role: user.role } });
+    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, refreshToken, user: { id: user._id, name: user.name, role: user.role } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+// Token refresh endpoint
+router.post('/refresh-token', async (req, res) => {
+const { refreshToken } = req.body;
+if (!refreshToken) return res.status(401).json({ message: 'Refresh token required' });
+
+try {
+  const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.id);
+  if (!user) return res.status(404).json({ message: 'User not found' });
+
+  // Generate new tokens
+  const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const newRefreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+  res.json({ token: newToken, refreshToken: newRefreshToken });
+} catch (err) {
+  res.status(401).json({ message: 'Invalid refresh token' });
+}
 });
 
 // Check if superadmin exists

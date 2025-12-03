@@ -1,19 +1,150 @@
 const API_BASE = '/api'; // Adjust if needed
 
+// Token management system
 let token = localStorage.getItem('token');
+let refreshToken = localStorage.getItem('refreshToken');
+let tokenExpiration = localStorage.getItem('tokenExpiration') ? new Date(localStorage.getItem('tokenExpiration')) : null;
+
+// Set token expiration (1 hour from now)
+function setTokenExpiration() {
+    const expiration = new Date();
+    expiration.setHours(expiration.getHours() + 1);
+    localStorage.setItem('tokenExpiration', expiration.toISOString());
+    tokenExpiration = expiration;
+}
+
+// Check if token is expired or about to expire
+function isTokenExpired() {
+    if (!tokenExpiration) return true;
+    const now = new Date();
+    // Consider token expired if it will expire in the next 5 minutes
+    return now >= new Date(tokenExpiration.getTime() - 5 * 60 * 1000);
+}
+
+// Refresh token automatically
+async function refreshAuthToken() {
+    if (!refreshToken || isTokenExpired()) {
+        try {
+            const res = await fetch(`${API_BASE}/auth/refresh-token`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ refreshToken })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                token = data.token;
+                refreshToken = data.refreshToken;
+                localStorage.setItem('token', token);
+                localStorage.setItem('refreshToken', refreshToken);
+                setTokenExpiration();
+                console.log('Token refreshed successfully');
+                return true;
+            } else {
+                console.error('Failed to refresh token');
+                return false;
+            }
+        } catch (err) {
+            console.error('Error refreshing token:', err);
+            return false;
+        }
+    }
+    return true;
+}
+
+// Wrapped fetch with automatic token refresh
+async function authFetch(url, options = {}) {
+    // Check and refresh token if needed
+    if (isTokenExpired()) {
+        const refreshSuccess = await refreshAuthToken();
+        if (!refreshSuccess) {
+            // Token refresh failed, redirect to login
+            showNotification('Session expired. Please log in again.', 'error');
+            setTimeout(() => {
+                window.location.href = 'admin-login.html';
+            }, 2000);
+            return null;
+        }
+    }
+
+    // Add authorization header
+    const headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401) {
+            // Token might be invalid, try to refresh once more
+            const refreshSuccess = await refreshAuthToken();
+            if (refreshSuccess) {
+                // Retry with new token
+                headers['Authorization'] = `Bearer ${token}`;
+                return await fetch(url, { ...options, headers });
+            } else {
+                // Still unauthorized, redirect to login
+                showNotification('Session expired. Please log in again.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'admin-login.html';
+                }, 2000);
+                return null;
+            }
+        }
+
+        return response;
+    } catch (error) {
+        console.error('Auth fetch error:', error);
+        showNotification('Network error. Please check your connection.', 'error');
+        return null;
+    }
+}
+
+// Show notification helper
+function showNotification(message, type = 'error') {
+    const notification = document.createElement('div');
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.padding = '15px';
+    notification.style.borderRadius = '5px';
+    notification.style.backgroundColor = type === 'error' ? '#ffebee' : '#e8f5e9';
+    notification.style.color = type === 'error' ? '#d32f2f' : '#2e7d32';
+    notification.style.border = type === 'error' ? '1px solid #d32f2f' : '1px solid #2e7d32';
+    notification.style.zIndex = '10000';
+    notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
 
 // Check if user is logged in
 if (!token) {
   window.location.href = 'admin-login.html';
 } else {
+  // Initialize token management
+  if (refreshToken) {
+    setTokenExpiration();
+  }
   loadDashboard();
 }
 
 
 document.getElementById('logout-btn').addEventListener('click', () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
   localStorage.removeItem('user');
+  localStorage.removeItem('tokenExpiration');
   token = null;
+  refreshToken = null;
+  tokenExpiration = null;
   window.location.href = 'admin-login.html';
 });
 
@@ -69,14 +200,11 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     const stockStatus = document.querySelector('input[name="stock-status"]:checked').value;
     formData.append('stockStatus', stockStatus);
     try {
-      const res = await fetch(`${API_BASE}/products`, {
+      const res = await authFetch(`${API_BASE}/products`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData
       });
-      if (res.ok) {
+      if (res && res.ok) {
         loadProducts();
         document.getElementById('product-form').reset();
         document.getElementById('product-moq').value = '1';
@@ -129,9 +257,9 @@ async function loadDashboard() {
 
 async function loadProducts() {
   try {
-    const res = await fetch(`${API_BASE}/products`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await authFetch(`${API_BASE}/products`);
+    if (!res) return; // Handle token expiration
+
     const products = await res.json();
     const list = document.getElementById('products-list');
     list.innerHTML = products.map(p => `
@@ -165,9 +293,8 @@ async function loadProducts() {
 async function loadOrders() {
   try {
     console.log('Loading orders...');
-    const res = await fetch(`${API_BASE}/orders`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await authFetch(`${API_BASE}/orders`);
+    if (!res) return; // Handle token expiration
 
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -218,7 +345,7 @@ async function loadOrders() {
             <button onclick="viewOrderDetails('${o._id || ''}')">View Details</button>
           </div>
         </div>
-      `;
+        `;
     }).join('');
   } catch (err) {
     console.error('Error loading orders:', err);
@@ -228,9 +355,9 @@ async function loadOrders() {
 
 async function loadMessages() {
   try {
-    const res = await fetch(`${API_BASE}/messages`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await authFetch(`${API_BASE}/messages`);
+    if (!res) return; // Handle token expiration
+
     const messages = await res.json();
 
     // Group messages by conversation
@@ -274,7 +401,7 @@ async function loadMessages() {
             <button onclick="respondToMessage('${convId}')">Send Response</button>
           </div>
         </div>
-      `;
+        `;
     }).join('');
   } catch (err) {
     console.error(err);
@@ -392,10 +519,11 @@ async function deleteProduct(id) {
   if (confirm('Delete this product?')) {
     try {
       console.log('Deleting product:', id);
-      const response = await fetch(`${API_BASE}/products/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await authFetch(`${API_BASE}/products/${id}`, {
+        method: 'DELETE'
       });
+      if (!response) return; // Handle token expiration
+
       console.log('Delete response status:', response.status);
       if (response.ok) {
         console.log('Product deleted successfully');
@@ -582,9 +710,9 @@ async function closeConversation(conversationId) {
 
 async function loadUsers() {
   try {
-    const res = await fetch(`${API_BASE}/auth/users`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await authFetch(`${API_BASE}/auth/users`);
+    if (!res) return; // Handle token expiration
+
     const users = await res.json();
     const list = document.getElementById('users-list');
     list.innerHTML = users.map(u => `

@@ -35,6 +35,7 @@
         const data = await res.json();
         if (res.ok) {
           localStorage.setItem('token', data.token);
+          localStorage.setItem('refreshToken', data.refreshToken);
           localStorage.setItem('user', JSON.stringify(data.user));
           window.location.href = 'admin.html';
         } else {
