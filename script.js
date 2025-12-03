@@ -111,6 +111,18 @@ async function addToCart(productId, quantity = 1) {
         return;
     }
 
+    // Debug logging for product wholesale status
+    console.log('DEBUG: Product data for cart addition:', {
+        productId: productId,
+        productName: product.name,
+        isWholesale: product.isWholesale,
+        moq: product.moq,
+        minOrderQty: product.minOrderQty,
+        category: product.category,
+        isNewArrival: product.isNewArrival,
+        isFastSelling: product.isFastSelling
+    });
+
     // Check inventory
     const inventoryCheck = typeof checkInventory === 'function' ?
         await checkInventory(productId, quantity) : { available: product.inStock };
@@ -148,6 +160,15 @@ async function addToCart(productId, quantity = 1) {
         if (cartItem.isWholesale) {
             cartItem.moq = product.moq || product.minOrderQty || 1;
         }
+
+        // Debug logging for cart item creation
+        console.log('DEBUG: Cart item being created:', {
+            productId: productId,
+            productName: product.name,
+            isWholesale: cartItem.isWholesale,
+            moq: cartItem.moq,
+            quantity: quantity
+        });
 
         cart.push(cartItem);
     }
@@ -245,25 +266,43 @@ function removeFromCart(productId) {
 }
 
 function updateCartQuantity(productId, quantity) {
+    console.log('DEBUG: updateCartQuantity called with:', { productId, quantity });
+
     const item = cart.find(item => item.id === productId);
     if (item) {
+        console.log('DEBUG: Found cart item:', {
+            itemId: item.id,
+            itemName: item.name,
+            currentQuantity: item.quantity,
+            isWholesale: item.isWholesale,
+            moq: item.moq,
+            minOrderQty: item.minOrderQty
+        });
+
         if (quantity <= 0) {
             removeFromCart(productId);
         } else {
             // Only apply MOQ restrictions to actual wholesale items
             if (item.isWholesale === true) {
                 const moq = item.moq || item.minOrderQty || 1;
+                console.log('DEBUG: Wholesale item - checking MOQ:', { moq, quantity });
                 if (quantity < moq) {
+                    console.log('DEBUG: MOQ restriction applied - quantity too low');
                     showNotification(`Cannot reduce quantity below MOQ of ${moq} for wholesale items.`, 'warning');
                     return;
                 }
+            } else {
+                console.log('DEBUG: Non-wholesale item - allowing quantity change to:', quantity);
             }
             // For non-wholesale items, allow any quantity >= 1
             item.quantity = quantity;
             saveCart();
             updateCartCount();
             updateCartDisplay();
+            console.log('DEBUG: Quantity updated successfully to:', quantity);
         }
+    } else {
+        console.log('DEBUG: Cart item not found for productId:', productId);
     }
 }
 
