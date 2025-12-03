@@ -427,9 +427,14 @@ async function getInStockProducts() {
     console.log('Falling back to filtering all products for in-stock items');
     const products = await getAllProducts();
     console.log('All products for in-stock filtering:', products.length);
-    const inStockProducts = products.filter(product =>
-        product.stockStatus === 'in-stock' || (product.stock && product.stock > 0)
-    );
+    const inStockProducts = products.filter(product => {
+        // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
+        if (product.stockStatus) {
+            return product.stockStatus === 'in-stock' && (product.stock > 0);
+        }
+        // Handle legacy format (inStock: boolean)
+        return product.inStock !== undefined ? product.inStock : (product.stock && product.stock > 0);
+    });
     console.log('In-stock products found:', inStockProducts.length, 'products');
     return inStockProducts;
 }
@@ -457,9 +462,14 @@ async function getOutOfStockProducts() {
     console.log('Falling back to filtering all products for out-of-stock items');
     const products = await getAllProducts();
     console.log('All products for out-of-stock filtering:', products.length);
-    const outOfStockProducts = products.filter(product =>
-        product.stockStatus === 'out-of-stock' || (product.stock !== undefined && product.stock <= 0)
-    );
+    const outOfStockProducts = products.filter(product => {
+        // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
+        if (product.stockStatus) {
+            return product.stockStatus === 'out-of-stock' || (product.stock <= 0);
+        }
+        // Handle legacy format (inStock: boolean)
+        return product.inStock !== undefined ? !product.inStock : (product.stock !== undefined && product.stock <= 0);
+    });
     console.log('Out-of-stock products found:', outOfStockProducts.length, 'products');
     return outOfStockProducts;
 }

@@ -649,6 +649,13 @@ function filterInStockProducts(products) {
     return products.filter(product => {
         // Check if product has stock information
         const stockCount = product.stockCount || product.stock || 0;
+
+        // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
+        if (product.stockStatus) {
+            return product.stockStatus === 'in-stock' && stockCount > 0;
+        }
+
+        // Handle legacy format (inStock: boolean)
         const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
 
         // Check inventory status if checkInventory function is available
