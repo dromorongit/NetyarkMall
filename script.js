@@ -440,16 +440,11 @@ function updateCartDisplay() {
 
             if (cartItemCountElement) cartItemCountElement.textContent = cart.length;
 
-            // Update pricing with shipping calculation
+            // Update pricing without shipping calculation
             const subtotal = getCartTotal();
-            const selectedShipping = document.querySelector('input[name="shipping"]:checked');
-            const shippingMethod = selectedShipping ? selectedShipping.value : 'standard';
-            const shippingCost = typeof calculateShipping === 'function' ?
-                calculateShipping(cart, 'accra', shippingMethod) : 50; // Default shipping
-            const total = subtotal + shippingCost;
+            const total = subtotal; // No shipping cost added
 
             if (subtotalElement) subtotalElement.textContent = `₵${subtotal.toLocaleString()}`;
-            if (shippingElement) shippingElement.textContent = `₵${shippingCost.toLocaleString()}`;
             if (taxElement) taxElement.textContent = `₵0.00`;
             if (totalElement) totalElement.textContent = `₵${total.toLocaleString()}`;
 
