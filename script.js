@@ -1455,10 +1455,17 @@ document.addEventListener('click', function(e) {
 
         if (productId) {
             const isWholesale = button.closest('.wholesale-card') !== null;
+            const isDeal = button.closest('.deal-card') !== null;
+
             if (isWholesale) {
                 const quantityInput = button.closest('.product-card').querySelector(`#wholesale-qty-${productId}`);
                 const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
                 addWholesaleToCart(productId, quantity);
+            } else if (isDeal) {
+                // For deals page, use 'deals' as source page to preserve discounted pricing
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                const sourcePage = currentPage === 'deals.html' ? 'deals' : null;
+                addToCart(productId, 1, sourcePage);
             } else {
                 // Determine source page based on current URL
                 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -1514,9 +1521,51 @@ function filterDeals(category) {
 }
 
 function startCountdownTimer() {
-    // Set target time to 10 hours from now
-    const now = new Date();
-    const targetTime = new Date(now.getTime() + 10 * 60 * 60 * 1000); // 10 hours in milliseconds
+    // Check if we have a stored timer end time
+    const storedTimerData = localStorage.getItem('dealsTimer');
+    let targetTime;
+
+    if (storedTimerData) {
+        try {
+            const timerData = JSON.parse(storedTimerData);
+            const storedEndTime = new Date(timerData.endTime);
+
+            // Check if the stored timer is from today
+            const now = new Date();
+            const isSameDay = now.getDate() === storedEndTime.getDate() &&
+                            now.getMonth() === storedEndTime.getMonth() &&
+                            now.getFullYear() === storedEndTime.getFullYear();
+
+            if (isSameDay && storedEndTime > now) {
+                // Use the stored timer if it's from today and still valid
+                targetTime = storedEndTime;
+            } else {
+                // Create new timer for today
+                targetTime = new Date(now.getTime() + 10 * 60 * 60 * 1000);
+                localStorage.setItem('dealsTimer', JSON.stringify({
+                    endTime: targetTime.toISOString(),
+                    startDate: now.toISOString().split('T')[0]
+                }));
+            }
+        } catch (error) {
+            console.error('Error parsing stored timer data:', error);
+            // Fallback to new timer
+            const now = new Date();
+            targetTime = new Date(now.getTime() + 10 * 60 * 60 * 1000);
+            localStorage.setItem('dealsTimer', JSON.stringify({
+                endTime: targetTime.toISOString(),
+                startDate: now.toISOString().split('T')[0]
+            }));
+        }
+    } else {
+        // No stored timer, create new one
+        const now = new Date();
+        targetTime = new Date(now.getTime() + 10 * 60 * 60 * 1000);
+        localStorage.setItem('dealsTimer', JSON.stringify({
+            endTime: targetTime.toISOString(),
+            startDate: now.toISOString().split('T')[0]
+        }));
+    }
 
     function updateTimer() {
         const currentTime = new Date();
