@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Netyark Mall | Complete Your Order</title>
+    <meta name="description" content="Complete your purchase at Netyark Mall. Secure checkout with multiple payment options.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="Netyark.jfif" alt="Netyark Mall Logo">
+                    <div class="logo-text">
+                        <h1>Netyark Mall</h1>
+                        <p>Shop At Your Own Comfort</p>
+                    </div>
+                </div>
+
+                <nav class="nav">
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <input type="text" id="globalSearch" placeholder="Search products...">
+                            <button class="search-btn" id="searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                    <button class="mobile-search-btn" id="mobileSearchBtn" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="mobile-menu-btn" aria-label="Toggle mobile menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="dropdown">
+                            <a href="categories.html" class="nav-link dropdown-toggle">Categories <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="kitchen-appliances.html">Kitchen Appliances</a></li>
+                                <li><a href="beauty-personal-care.html">Beauty & Personal Care</a></li>
+                                <li><a href="photography-content-creation-tools.html">Photography & Content Creation Tools</a></li>
+                                <li><a href="nail-supplies.html">Nail Supplies</a></li>
+                                <li><a href="kids-babies.html">Kids & Babies</a></li>
+                                <li><a href="home-essentials.html">Home Essentials</a></li>
+                                <li><a href="lighting-home-decor.html">Lighting & Home Decor</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="wholesale.html" class="nav-link">Wholesale</a></li>
+                        <li><a href="about.html" class="nav-link">About Us</a></li>
+                        <li><a href="deals.html" class="nav-link">Deals of the Day</a></li>
+                        <li><a href="cart.html" class="nav-link cart-link">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a></li>
+                        <li><a href="contact.html" class="nav-link">Contact</a></li>
+                        <li><a href="login.html" class="nav-link">Login</a></li>
+                        <li><a href="register.html" class="nav-link">Register</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar (expandable) -->
+        <div class="mobile-search-container" id="mobileSearchContainer">
+            <div class="mobile-search-input-group">
+                <input type="text" id="mobileGlobalSearch" placeholder="Search products, brands, categories...">
+                <button class="mobile-search-close" id="mobileSearchClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-search-results" id="mobileSearchResults"></div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Checkout</h1>
+            <p>Complete your order securely</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="checkout-container">
+                <form id="checkoutForm" class="checkout-form">
+                    <div class="checkout-sections">
+                        <!-- Order Summary -->
+                        <div class="checkout-section order-summary-section">
+                            <h2>Order Summary</h2>
+                            <div class="checkout-items" id="checkoutItems">
+                                <!-- Items will be populated by JavaScript -->
+                            </div>
+                            <div class="checkout-totals">
+                                <div class="checkout-row"><span>Subtotal:</span><span id="checkoutSubtotal">₵0.00</span></div>
+                                <div class="checkout-row"><span>Shipping:</span><span id="checkoutShipping">₵50.00</span></div>
+                                <div class="checkout-row"><span>Tax (12%):</span><span id="checkoutTax">₵0.00</span></div>
+                                <div class="checkout-row total"><span>Total:</span><span id="checkoutTotal">₵0.00</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Shipping & Billing Information -->
+                        <div class="checkout-section">
+                            <h2>Shipping & Billing Information</h2>
+
+                            <div class="form-section">
+                                <h3>Personal Information</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="firstName">First Name *</label>
+                                        <input type="text" id="firstName" name="firstName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastName">Last Name *</label>
+                                        <input type="text" id="lastName" name="lastName" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="email">Email Address *</label>
+                                        <input type="email" id="email" name="email" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone">Phone Number *</label>
+                                        <input type="tel" id="phone" name="phone" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3>Shipping Address</h3>
+                                <div class="form-group">
+                                    <label for="address">Delivery Address *</label>
+                                    <textarea id="address" name="address" rows="3" required placeholder="Enter your full delivery address"></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city">City *</label>
+                                        <input type="text" id="city" name="city" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="region">Region *</label>
+                                        <select id="region" name="region" required>
+                                            <option value="">Select Region</option>
+                                            <option value="greater-accra">Greater Accra</option>
+                                            <option value="central">Central</option>
+                                            <option value="western">Western</option>
+                                            <option value="eastern">Eastern</option>
+                                            <option value="volta">Volta</option>
+                                            <option value="northern">Northern</option>
+                                            <option value="upper-east">Upper East</option>
+                                            <option value="upper-west">Upper West</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3>Shipping Options</h3>
+                                <div class="form-group">
+                                    <label for="shippingZone">Delivery Location:</label>
+                                    <select id="shippingZone" name="shippingZone" class="filter-select">
+                                        <option value="accra">Accra Metropolitan</option>
+                                        <option value="greater-accra">Greater Accra</option>
+                                        <option value="eastern">Eastern Region</option>
+                                        <option value="central">Central Region</option>
+                                        <option value="western">Western Region</option>
+                                        <option value="volta">Volta Region</option>
+                                        <option value="northern">Northern Region</option>
+                                        <option value="upper-east">Upper East Region</option>
+                                        <option value="upper-west">Upper West Region</option>
+                                    </select>
+                                </div>
+                                <div class="shipping-options" id="shippingOptions">
+                                    <!-- Shipping options will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3>Payment Method</h3>
+                                <div class="payment-methods">
+                                    <div class="payment-option">
+                                        <input type="radio" id="card" name="paymentMethod" value="card" required>
+                                        <label for="card">
+                                            <i class="fas fa-credit-card"></i>
+                                            <div class="payment-details">
+                                                <div class="payment-name">Credit/Debit Card</div>
+                                                <div class="payment-desc">Visa, Mastercard, American Express</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="payment-option">
+                                        <input type="radio" id="mobile-money" name="paymentMethod" value="mobile-money">
+                                        <label for="mobile-money">
+                                            <i class="fas fa-mobile-alt"></i>
+                                            <div class="payment-details">
+                                                <div class="payment-name">Mobile Money</div>
+                                                <div class="payment-desc">MTN Mobile Money, Vodafone Cash, AirtelTigo Money</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="payment-option">
+                                        <input type="radio" id="cash" name="paymentMethod" value="cash">
+                                        <label for="cash">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <div class="payment-details">
+                                                <div class="payment-name">Cash on Delivery</div>
+                                                <div class="payment-desc">Pay when you receive your order</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Actions -->
+                    <div class="checkout-actions">
+                        <a href="cart.html" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back to Cart
+                        </a>
+                        <button type="submit" class="btn btn-primary checkout-submit-btn">
+                            <i class="fas fa-lock"></i> Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Netyark Mall</h3>
+                    <p>Your premier shopping destination in Santa Maria, Accra. We offer quality products at competitive prices with excellent customer service.</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Santa Maria, Accra, Ghana</p>
+                        <p><i class="fas fa-envelope"></i> info@netyarkmall.com</p>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact.html">Help Center</a></li>
+                        <li><a href="#">Track Your Order</a></li>
+                        <li><a href="#">Quality Policy</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="wholesale.html">Wholesale</a></li>
+                        <li><a href="deals.html">Deals of the Day</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="categories.html">All Categories</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for the latest deals and offers.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/share/1AHrj3BQnW/?mibextid" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/netyark_mall/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@netyark_mall/" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Netyark Mall. All rights reserved.</p>
+                    <div class="legal-links">
+                        <a href="#">Terms & Conditions</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Live Chat Icon -->
+    <div class="live-chat-icon" id="liveChatIcon">
+        <i class="fas fa-comments"></i>
+        <div class="notification-badge" id="chatNotificationBadge" style="display: none;">1</div>
+    </div>
+
+    <!-- Live Chat Modal -->
+    <div class="live-chat-modal" id="liveChatModal">
+        <div class="chat-header">
+            <h3>Chat with Netyark Mall</h3>
+            <button class="chat-close" id="chatClose">&times;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message support">
+                <strong>Netyark Support</strong><br>
+                Hi there! 👋 Welcome to Netyark Mall! How can we help you today?
+            </div>
+            <div class="message timestamp" id="chatTimestamp">
+                Just now
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here...">
+                <button class="chat-send-btn" id="chatSendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Notification -->
+    <div class="chat-notification" id="chatNotification">
+        <h4>💬 Need Help?</h4>
+        <p>Chat with our support team for faster responses to your questions!</p>
+        <div class="notification-actions">
+            <button class="notification-btn primary" id="openChatBtn">Start Chat</button>
+            <button class="notification-btn secondary" id="dismissNotificationBtn">Later</button>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="tab-item" data-tab="home">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="categories.html" class="tab-item" data-tab="categories">
+            <i class="fas fa-th-large"></i>
+            <span>Categories</span>
+        </a>
+        <a href="wholesale.html" class="tab-item" data-tab="wholesale">
+            <i class="fas fa-boxes"></i>
+            <span>Wholesale</span>
+        </a>
+        <a href="deals.html" class="tab-item" data-tab="deals">
+            <i class="fas fa-tags"></i>
+            <span>Deals</span>
+        </a>
+        <a href="cart.html" class="tab-item" data-tab="cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Cart</span>
+            <span class="tab-badge" id="cartTabBadge" style="display: none;">0</span>
+        </a>
+        <a href="profile.html" class="tab-item" data-tab="profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>

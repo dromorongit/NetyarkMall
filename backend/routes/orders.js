@@ -26,8 +26,15 @@ router.get('/my', auth, async (req, res) => {
 
 // Create order (user)
 router.post('/', auth, async (req, res) => {
-  const { products, total } = req.body;
-  const order = new Order({ user: req.user._id, products, total });
+  const { products, total, customer, shipping, paymentMethod } = req.body;
+  const order = new Order({
+    user: req.user._id,
+    products,
+    total,
+    customer,
+    shipping,
+    paymentMethod
+  });
   try {
     await order.save();
     res.status(201).json(order);

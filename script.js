@@ -82,6 +82,9 @@ document.addEventListener('DOMContentLoaded', function() {
         case 'cart.html':
             initializeCartPage();
             break;
+        case 'checkout.html':
+            initializeCheckoutPage();
+            break;
         case 'contact.html':
             initializeContactPage();
             break;
@@ -2124,20 +2127,55 @@ function initializeCartPage() {
         });
     }
 
-    // Checkout button
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', function() {
-            if (cart.length === 0) {
-                showNotification('Your cart is empty!', 'error');
-                return;
-            }
-            initiateCheckout();
-        });
-    }
+    // Checkout button - now redirects to checkout page
+    // (handled by HTML link)
 
     // Suggested products
     loadSuggestedProducts();
+}
+
+// Checkout page initialization
+function initializeCheckoutPage() {
+    console.log('Initializing checkout page...');
+
+    // Check if user is logged in
+    if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
+        showNotification('Please log in to proceed with checkout.', 'warning');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+        return;
+    }
+
+    // Check if cart is empty
+    if (cart.length === 0) {
+        showNotification('Your cart is empty. Redirecting to shop...', 'warning');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+        return;
+    }
+
+    // Load cart items into checkout summary
+    loadCheckoutItems();
+
+    // Initialize shipping options
+    updateShippingOptions();
+
+    // Handle shipping zone change
+    const shippingZone = document.getElementById('shippingZone');
+    if (shippingZone) {
+        shippingZone.addEventListener('change', updateShippingOptions);
+    }
+
+    // Handle form submission
+    const checkoutForm = document.getElementById('checkoutForm');
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            processCheckoutOrder(this);
+        });
+    }
 }
 
 function initiateCheckout() {
@@ -2318,6 +2356,134 @@ function processCheckout(form) {
 
     // Close modal
     form.closest('.checkout-modal').remove();
+}
+
+// Load checkout items into the checkout summary
+function loadCheckoutItems() {
+    const checkoutItemsContainer = document.getElementById('checkoutItems');
+    if (!checkoutItemsContainer) return;
+
+    let html = '';
+    let subtotal = 0;
+
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+
+        html += `
+            <div class="checkout-item">
+                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(item.image) : item.image}" alt="${item.name}">
+                <div class="checkout-item-details">
+                    <h4>${item.name}</h4>
+                    <p>Quantity: ${item.quantity}</p>
+                    <p>₵${item.price.toLocaleString()} each</p>
+                </div>
+                <div class="checkout-item-total">₵${itemTotal.toLocaleString()}</div>
+            </div>
+        `;
+    });
+
+    checkoutItemsContainer.innerHTML = html;
+
+    // Update totals
+    const shippingCost = 50; // Default shipping
+    const tax = subtotal * 0.12;
+    const total = subtotal + shippingCost + tax;
+
+    document.getElementById('checkoutSubtotal').textContent = `₵${subtotal.toLocaleString()}`;
+    document.getElementById('checkoutShipping').textContent = `₵${shippingCost.toLocaleString()}`;
+    document.getElementById('checkoutTax').textContent = `₵${tax.toLocaleString()}`;
+    document.getElementById('checkoutTotal').textContent = `₵${total.toLocaleString()}`;
+}
+
+// Process checkout order submission
+async function processCheckoutOrder(form) {
+    try {
+        showLoading();
+
+        const formData = new FormData(form);
+        const selectedShipping = document.querySelector('input[name="shipping"]:checked');
+
+        // Calculate totals
+        const subtotal = getCartTotal();
+        const shippingCost = 50; // Default shipping cost
+        const tax = subtotal * 0.12;
+        const total = subtotal + shippingCost + tax;
+
+        // Prepare order data
+        const orderData = {
+            products: cart.map(item => ({
+                product: item.id,
+                quantity: item.quantity
+            })),
+            total: total,
+            customer: {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email'),
+                phone: formData.get('phone')
+            },
+            shipping: {
+                address: formData.get('address'),
+                city: formData.get('city'),
+                region: formData.get('region'),
+                zone: formData.get('shippingZone') || 'accra',
+                method: selectedShipping ? selectedShipping.value : 'standard'
+            },
+            paymentMethod: formData.get('paymentMethod')
+        };
+
+        console.log('Submitting order:', orderData);
+
+        // Get auth token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showNotification('Please log in to place an order.', 'error');
+            hideLoading();
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+            return;
+        }
+
+        // Submit order to backend
+        const response = await fetch('https://netyarkmall-production.up.railway.app/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        if (response.ok) {
+            const order = await response.json();
+            console.log('Order created successfully:', order);
+
+            // Clear cart
+            clearCart();
+            updateCartCount();
+
+            // Show success message
+            showNotification('Order placed successfully! You will receive a confirmation email shortly.', 'success');
+
+            // Redirect to order confirmation or profile
+            setTimeout(() => {
+                window.location.href = 'profile.html?tab=orders';
+            }, 3000);
+
+        } else {
+            const error = await response.json();
+            console.error('Order submission failed:', error);
+            showNotification(error.message || 'Failed to place order. Please try again.', 'error');
+        }
+
+    } catch (error) {
+        console.error('Error processing checkout:', error);
+        showNotification('An error occurred while processing your order. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
 }
 
 // Live Chat Functionality
