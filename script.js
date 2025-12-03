@@ -931,8 +931,8 @@ function createWholesaleProductCard(product) {
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
                     <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
-                    <button class="add-to-cart-btn" onclick="addWholesaleToCart('${productId}')" ${!inventoryStatus.available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
+                    <button class="add-to-cart-btn" onclick="addWholesaleToCart('${productId}')">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                 </div>
             </div>
@@ -960,13 +960,13 @@ function createWholesaleProductCard(product) {
                     <div class="wholesale-quantity-controls" style="margin-bottom: 10px;">
                         <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity (Min: ${moq}):</label>
                         <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
-                            <button class="quantity-btn decrease" onclick="adjustWholesaleQuantity('${productId}', -1)" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">-</button>
-                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="1" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;" ${!inventoryStatus.available ? 'disabled' : ''}>
-                            <button class="quantity-btn increase" onclick="adjustWholesaleQuantity('${productId}', 1)" ${!inventoryStatus.available ? 'disabled' : ''} style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">+</button>
+                            <button class="quantity-btn decrease" onclick="adjustWholesaleQuantity('${productId}', -1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">-</button>
+                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="1" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;">
+                            <button class="quantity-btn increase" onclick="adjustWholesaleQuantity('${productId}', 1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer;">+</button>
                         </div>
                     </div>
-                    <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))" ${!inventoryStatus.available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> ${!inventoryStatus.available ? 'Out of Stock' : 'Add to Cart'}
+                    <button class="btn btn-primary add-to-cart-btn" onclick="addWholesaleToCart('${productId}', parseInt(document.getElementById('wholesale-qty-${productId}').value))">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                     <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
                         <i class="fas fa-eye"></i> View Details
