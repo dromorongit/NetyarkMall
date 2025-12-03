@@ -232,15 +232,50 @@ async function loadMessages() {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const messages = await res.json();
+
+    // Group messages by conversation
+    const conversations = {};
+    messages.forEach(m => {
+      if (!conversations[m.conversationId]) {
+        conversations[m.conversationId] = [];
+      }
+      conversations[m.conversationId].push(m);
+    });
+
     const list = document.getElementById('messages-list');
-    list.innerHTML = messages.map(m => `
-      <div class="message-item">
-        <p><strong>${m.sender}:</strong> ${m.message}</p>
-        <p>Response: ${m.response || 'No response yet'}</p>
-        <textarea placeholder="Respond" id="response-${m._id}"></textarea>
-        <button onclick="respondToMessage('${m._id}')">Respond</button>
-      </div>
-    `).join('');
+    list.innerHTML = Object.entries(conversations).map(([convId, msgs]) => {
+      const latestMsg = msgs[msgs.length - 1];
+      const senderInfo = msgs.find(m => m.sender !== 'admin') || latestMsg;
+      const status = latestMsg.status || 'open';
+
+      return `
+        <div class="conversation-item" data-conversation-id="${convId}">
+          <div class="conversation-header">
+            <h4>${senderInfo.senderName || senderInfo.sender} (${senderInfo.senderEmail || 'No email'})</h4>
+            <span class="conversation-status ${status}">${status}</span>
+            <button class="close-conversation-btn" onclick="closeConversation('${convId}')">Close</button>
+          </div>
+          <div class="conversation-messages">
+            ${msgs.map(m => `
+              <div class="message-bubble ${m.sender === 'admin' ? 'admin-message' : 'user-message'}">
+                <p><strong>${m.sender === 'admin' ? 'You (Admin)' : m.senderName || m.sender}:</strong> ${m.message}</p>
+                <small>${new Date(m.timestamp).toLocaleString()}</small>
+                ${m.response ? `
+                  <div class="response-bubble">
+                    <p><strong>Response:</strong> ${m.response}</p>
+                    <small>Responded: ${new Date(m.responseTimestamp).toLocaleString()}</small>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+          <div class="conversation-actions">
+            <textarea placeholder="Type your response..." id="response-${convId}"></textarea>
+            <button onclick="respondToMessage('${convId}')">Send Response</button>
+          </div>
+        </div>
+      `;
+    }).join('');
   } catch (err) {
     console.error(err);
   }
@@ -460,20 +495,88 @@ async function viewOrderDetails(orderId) {
   }
 }
 
-async function respondToMessage(id) {
-  const response = document.getElementById(`response-${id}`).value;
+async function respondToMessage(conversationId) {
+  const response = document.getElementById(`response-${conversationId}`).value;
+  if (!response) {
+    alert('Please enter a response');
+    return;
+  }
+
   try {
-    await fetch(`${API_BASE}/messages/${id}/respond`, {
+    // Get the latest message in this conversation to respond to
+    const res = await fetch(`${API_BASE}/messages/conversation/${conversationId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const messages = await res.json();
+    if (messages.length === 0) {
+      alert('No messages found in this conversation');
+      return;
+    }
+
+    const latestMessage = messages[messages.length - 1];
+
+    // Send the response
+    await fetch(`${API_BASE}/messages/${latestMessage._id}/respond`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ response })
+      body: JSON.stringify({
+        response,
+        sender: 'admin',
+        senderId: JSON.parse(localStorage.getItem('user')).id,
+        senderName: JSON.parse(localStorage.getItem('user')).name,
+        conversationId
+      })
     });
+
+    // Clear the response field
+    document.getElementById(`response-${conversationId}`).value = '';
+
+    // Refresh messages
     loadMessages();
+
+    // Notify the user (this would be implemented on the frontend)
+    console.log('Response sent, should notify user:', conversationId);
+
   } catch (err) {
     console.error(err);
+    alert('Error sending response');
+  }
+}
+
+async function closeConversation(conversationId) {
+  try {
+    // Get the latest message in this conversation to close
+    const res = await fetch(`${API_BASE}/messages/conversation/${conversationId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const messages = await res.json();
+    if (messages.length === 0) {
+      alert('No messages found in this conversation');
+      return;
+    }
+
+    const latestMessage = messages[messages.length - 1];
+
+    // Close the conversation
+    await fetch(`${API_BASE}/messages/${latestMessage._id}/close`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    // Refresh messages
+    loadMessages();
+
+  } catch (err) {
+    console.error(err);
+    alert('Error closing conversation');
   }
 }
 
