@@ -251,7 +251,8 @@ async function addWholesaleToCart(productId, quantity = null) {
                 image: product.image,
                 quantity: addQuantity,
                 isWholesale: true,
-                moq: moq
+                moq: moq,
+                sourcePage: 'wholesale' // Track that this item was added from wholesale page
             });
 
             showNotification(`${product.name} added to cart with quantity ${addQuantity}!`, 'success');
@@ -296,10 +297,10 @@ function updateCartQuantity(productId, quantity) {
                 const moq = item.moq || item.minOrderQty || 1;
                 console.log('DEBUG: Wholesale item (added from wholesale page) - checking MOQ:', { moq, quantity, currentQuantity: item.quantity });
 
-                // For wholesale items added from wholesale page, prevent ANY quantity reduction
-                if (quantity < item.quantity) {
-                    console.log('DEBUG: Wholesale item quantity reduction attempted - preventing');
-                    showNotification(`Cannot reduce quantity for wholesale items added from wholesale page.`, 'warning');
+                // For wholesale items added from wholesale page, prevent quantity reduction below MOQ
+                if (quantity < moq) {
+                    console.log('DEBUG: Wholesale item quantity reduction below MOQ attempted - preventing');
+                    showNotification(`Cannot reduce quantity below minimum order quantity (${moq}) for wholesale items.`, 'warning');
                     return;
                 }
             } else {
@@ -390,7 +391,7 @@ function updateCartDisplay() {
                 const moq = isWholesale ? (item.moq || item.minOrderQty || 1) : 1;
                 // Only restrict quantity changes for items added from wholesale page
                 const isWholesaleFromWholesalePage = isWholesale && item.sourcePage === 'wholesale';
-                const canDecrease = !isWholesaleFromWholesalePage;
+                const canDecrease = !isWholesaleFromWholesalePage || item.quantity > (item.moq || item.minOrderQty || 1);
                 const canIncrease = true; // Always allow increasing quantity
 
                 // Debug logging
@@ -403,7 +404,9 @@ function updateCartDisplay() {
                     canDecrease: canDecrease,
                     canIncrease: canIncrease,
                     sourcePage: item.sourcePage,
-                    isWholesaleFromWholesalePage: isWholesaleFromWholesalePage
+                    isWholesaleFromWholesalePage: isWholesaleFromWholesalePage,
+                    moqCheck: item.moq || item.minOrderQty || 1,
+                    canDecreaseCheck: !isWholesaleFromWholesalePage || item.quantity > (item.moq || item.minOrderQty || 1)
                 });
 
                 // Only show wholesale indicators for items added from wholesale page
