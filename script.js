@@ -938,7 +938,8 @@ function createWholesaleProductCard(product) {
 
     // Debug logging for stock status
     console.log('Wholesale Product Stock Debug for product', productId, ':', {
-        inventoryStatus: inventoryStatus,
+        available: available,
+        lowStock: lowStock,
         stockStatus: stockStatus,
         stockCount: stockCount,
         inStock: inStock,
