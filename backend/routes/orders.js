@@ -8,8 +8,22 @@ const router = express.Router();
 // Get all orders (admin only)
 router.get('/', auth, adminAuth, async (req, res) => {
   try {
+    console.log('Fetching orders for admin:', req.user._id, req.user.role);
     const orders = await Order.find().populate('user').populate('products.product');
+    console.log('Orders found:', orders.length);
     res.json(orders);
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get single order by ID (admin only)
+router.get('/:id', auth, adminAuth, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('user').populate('products.product');
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(order);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

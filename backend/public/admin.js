@@ -164,39 +164,62 @@ async function loadProducts() {
 
 async function loadOrders() {
   try {
+    console.log('Loading orders...');
     const res = await fetch(`${API_BASE}/orders`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
     const orders = await res.json();
+    console.log('Orders received:', orders);
+
     const list = document.getElementById('orders-list');
 
-    if (orders.length === 0) {
+    if (!orders || orders.length === 0) {
       list.innerHTML = '<p>No orders found.</p>';
       return;
     }
 
-    list.innerHTML = orders.map(o => `
-      <div class="order-item">
-        <p><strong>Order ID:</strong> ${o._id}</p>
-        <p><strong>Customer:</strong> ${o.user ? o.user.name : `${o.customer.firstName} ${o.customer.lastName} (Guest)`}</p>
-        <p><strong>Email:</strong> ${o.customer.email}</p>
-        <p><strong>Phone:</strong> ${o.customer.phone}</p>
-        <p><strong>Total:</strong> ₵${o.total.toLocaleString()}</p>
-        <p><strong>Status:</strong> ${o.status}</p>
-        <p><strong>Items:</strong> ${o.products.length} item(s)</p>
-        <p><strong>Date:</strong> ${new Date(o.createdAt).toLocaleDateString()}</p>
-        <div class="order-actions">
-          <select onchange="updateOrderStatus('${o._id}', this.value)">
-            <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
-            <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
-            <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-            <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-            <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
-          <button onclick="viewOrderDetails('${o._id}')">View Details</button>
+    list.innerHTML = orders.map(o => {
+      // Safe access to customer data
+      const customerName = o.user ? o.user.name :
+        (o.customer && o.customer.firstName && o.customer.lastName) ?
+        `${o.customer.firstName} ${o.customer.lastName} (Guest)` :
+        'Unknown Customer';
+
+      const customerEmail = (o.customer && o.customer.email) ? o.customer.email : 'N/A';
+      const customerPhone = (o.customer && o.customer.phone) ? o.customer.phone : 'N/A';
+      const orderTotal = o.total ? o.total.toLocaleString() : '0';
+      const orderStatus = o.status || 'pending';
+      const itemCount = o.products ? o.products.length : 0;
+      const orderDate = o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'Unknown';
+
+      return `
+        <div class="order-item">
+          <p><strong>Order ID:</strong> ${o._id || 'N/A'}</p>
+          <p><strong>Customer:</strong> ${customerName}</p>
+          <p><strong>Email:</strong> ${customerEmail}</p>
+          <p><strong>Phone:</strong> ${customerPhone}</p>
+          <p><strong>Total:</strong> ₵${orderTotal}</p>
+          <p><strong>Status:</strong> ${orderStatus}</p>
+          <p><strong>Items:</strong> ${itemCount} item(s)</p>
+          <p><strong>Date:</strong> ${orderDate}</p>
+          <div class="order-actions">
+            <select onchange="updateOrderStatus('${o._id || ''}', this.value)">
+              <option value="pending" ${orderStatus === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="processing" ${orderStatus === 'processing' ? 'selected' : ''}>Processing</option>
+              <option value="shipped" ${orderStatus === 'shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="delivered" ${orderStatus === 'delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="cancelled" ${orderStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+            <button onclick="viewOrderDetails('${o._id || ''}')">View Details</button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (err) {
     console.error('Error loading orders:', err);
     document.getElementById('orders-list').innerHTML = '<p>Error loading orders. Please try again.</p>';
@@ -394,36 +417,36 @@ async function viewOrderDetails(orderId) {
         <div class="order-details-body">
           <div class="order-info-section">
             <h3>Customer Information</h3>
-            <p><strong>Name:</strong> ${order.customer.firstName} ${order.customer.lastName}</p>
-            <p><strong>Email:</strong> ${order.customer.email}</p>
-            <p><strong>Phone:</strong> ${order.customer.phone}</p>
+            <p><strong>Name:</strong> ${(order.customer && order.customer.firstName && order.customer.lastName) ? `${order.customer.firstName} ${order.customer.lastName}` : 'N/A'}</p>
+            <p><strong>Email:</strong> ${(order.customer && order.customer.email) ? order.customer.email : 'N/A'}</p>
+            <p><strong>Phone:</strong> ${(order.customer && order.customer.phone) ? order.customer.phone : 'N/A'}</p>
           </div>
 
           <div class="order-info-section">
             <h3>Shipping Information</h3>
-            <p><strong>Address:</strong> ${order.shipping.address}</p>
-            <p><strong>City:</strong> ${order.shipping.city}</p>
-            <p><strong>Region:</strong> ${order.shipping.region}</p>
-            <p><strong>Zone:</strong> ${order.shipping.zone}</p>
-            <p><strong>Method:</strong> ${order.shipping.method}</p>
+            <p><strong>Address:</strong> ${(order.shipping && order.shipping.address) ? order.shipping.address : 'N/A'}</p>
+            <p><strong>City:</strong> ${(order.shipping && order.shipping.city) ? order.shipping.city : 'N/A'}</p>
+            <p><strong>Region:</strong> ${(order.shipping && order.shipping.region) ? order.shipping.region : 'N/A'}</p>
+            <p><strong>Zone:</strong> ${(order.shipping && order.shipping.zone) ? order.shipping.zone : 'N/A'}</p>
+            <p><strong>Method:</strong> ${(order.shipping && order.shipping.method) ? order.shipping.method : 'N/A'}</p>
           </div>
 
           <div class="order-info-section">
             <h3>Order Items</h3>
-            ${order.products.map(item => `
+            ${(order.products && order.products.length > 0) ? order.products.map(item => `
               <div class="order-item-detail">
-                <p><strong>Product ID:</strong> ${item.product}</p>
-                <p><strong>Quantity:</strong> ${item.quantity}</p>
+                <p><strong>Product ID:</strong> ${item.product || 'N/A'}</p>
+                <p><strong>Quantity:</strong> ${item.quantity || 0}</p>
               </div>
-            `).join('')}
+            `).join('') : '<p>No items found</p>'}
           </div>
 
           <div class="order-info-section">
             <h3>Order Summary</h3>
-            <p><strong>Total:</strong> ₵${order.total.toLocaleString()}</p>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
-            <p><strong>Status:</strong> ${order.status}</p>
-            <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+            <p><strong>Total:</strong> ₵${(order.total || 0).toLocaleString()}</p>
+            <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
+            <p><strong>Status:</strong> ${order.status || 'pending'}</p>
+            <p><strong>Order Date:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown'}</p>
           </div>
         </div>
       </div>
