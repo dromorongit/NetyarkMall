@@ -110,7 +110,7 @@ async function addToCart(productId, quantity = 1) {
 
     // Check inventory
     const inventoryCheck = typeof checkInventory === 'function' ?
-        checkInventory(productId, quantity) : { available: product.inStock };
+        await checkInventory(productId, quantity) : { available: product.inStock };
 
     if (!inventoryCheck.available) {
         showNotification(inventoryCheck.reason || 'Product is out of stock.', 'error');
@@ -123,7 +123,7 @@ async function addToCart(productId, quantity = 1) {
         const newQuantity = existingItem.quantity + quantity;
         // Check if new total exceeds available stock
         const stockCheck = typeof checkInventory === 'function' ?
-            checkInventory(productId, newQuantity) : { available: true };
+            await checkInventory(productId, newQuantity) : { available: true };
 
         if (!stockCheck.available) {
             showNotification('Cannot add more items. Insufficient stock.', 'error');
@@ -180,7 +180,7 @@ async function addWholesaleToCart(productId, quantity = null) {
 
             // Check inventory
             const inventoryCheck = typeof checkInventory === 'function' ?
-                checkInventory(productId, newQuantity) : { available: product.inStock };
+                await checkInventory(productId, newQuantity) : { available: product.inStock };
 
             console.log('Inventory check for existing item:', inventoryCheck);
 
@@ -196,7 +196,7 @@ async function addWholesaleToCart(productId, quantity = null) {
 
             // Check inventory for the quantity
             const inventoryCheck = typeof checkInventory === 'function' ?
-                checkInventory(productId, addQuantity) : { available: product.inStock };
+                await checkInventory(productId, addQuantity) : { available: product.inStock };
 
             console.log('Inventory check for new item:', inventoryCheck);
 
@@ -674,14 +674,8 @@ function filterInStockProducts(products) {
         // Handle legacy format (inStock: boolean)
         const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
 
-        // Check inventory status if checkInventory function is available
-        if (typeof checkInventory === 'function') {
-            const inventoryStatus = checkInventory(product.id || product._id);
-            return inventoryStatus.available;
-        }
-
-        // Fallback to basic stock check
-        return inStock;
+        // Check inventory status directly from product data
+        return product.stockStatus === 'in-stock' && stockCount > 0;
     });
 }
 
@@ -836,15 +830,15 @@ function createProductCard(product) {
 
     const isProductInWishlist = typeof window.isInWishlist === 'function' && window.isInWishlist(productId);
 
-    // Check inventory status
-    const inventoryStatus = typeof checkInventory === 'function' ?
-        checkInventory(productId) : { available: inStock, stockCount: stockCount };
+    // Check inventory status directly from product data
+    const available = product.stockStatus === 'in-stock' && stockCount > 0;
+    const lowStock = available && stockCount <= 5; // Consider low stock if 5 or fewer items
 
-    const stockStatus = !inventoryStatus.available ? 'out-of-stock' :
-                       inventoryStatus.lowStock ? 'low-stock' : 'in-stock';
+    const stockStatus = !available ? 'out-of-stock' :
+                        lowStock ? 'low-stock' : 'in-stock';
 
-    const stockText = !inventoryStatus.available ? 'Out of Stock' :
-                     (inventoryStatus.lowStock && inventoryStatus.stockCount > 0) ? `Only ${inventoryStatus.stockCount} left` : '';
+    const stockText = !available ? 'Out of Stock' :
+                      (lowStock && stockCount > 0) ? `Only ${stockCount} left` : '';
 
     return `
         <div class="product-card ${stockStatus}" data-product-id="${productId}">
@@ -922,9 +916,9 @@ function createWholesaleProductCard(product) {
 
     const isProductInWishlist = typeof window.isInWishlist === 'function' && window.isInWishlist(productId);
 
-    // Check inventory status
-    const inventoryStatus = typeof checkInventory === 'function' ?
-        checkInventory(productId) : { available: inStock, stockCount: stockCount };
+    // Check inventory status directly from product data
+    const available = product.stockStatus === 'in-stock' && stockCount > 0;
+    const lowStock = available && stockCount <= 5; // Consider low stock if 5 or fewer items
 
     // Debug logging
     console.log('Wholesale Product Debug:', {
@@ -935,11 +929,12 @@ function createWholesaleProductCard(product) {
         stockStatus: product.stockStatus,
         stockCount: stockCount,
         inStock: inStock,
-        inventoryStatus: inventoryStatus
+        available: available,
+        lowStock: lowStock
     });
 
-    const stockStatus = !inventoryStatus.available ? 'out-of-stock' : '';
-    const stockText = !inventoryStatus.available ? 'Out of Stock' : (inventoryStatus.lowStock && inventoryStatus.stockCount > 0) ? `Only ${inventoryStatus.stockCount} left` : '';
+    const stockStatus = !available ? 'out-of-stock' : '';
+    const stockText = !available ? 'Out of Stock' : (lowStock && stockCount > 0) ? `Only ${stockCount} left` : '';
 
     // Debug logging for stock status
     console.log('Wholesale Product Stock Debug for product', productId, ':', {

@@ -249,14 +249,8 @@ function filterInStockProducts(products) {
         // Handle legacy format (inStock: boolean)
         const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
 
-        // Check inventory status if checkInventory function is available
-        if (typeof checkInventory === 'function') {
-            const inventoryStatus = checkInventory(product.id || product._id);
-            return inventoryStatus.available;
-        }
-
-        // Fallback to basic stock check
-        return inStock;
+        // Check inventory status directly from product data
+        return product.stockStatus === 'in-stock' && stockCount > 0;
     });
 }
 
