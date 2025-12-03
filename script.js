@@ -832,9 +832,7 @@ function createProductCard(product) {
 
     return `
         <div class="product-card ${stockStatus}" data-product-id="${productId}">
-            ${isNew ? '<div class="product-badge new">New</div>' : ''}
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
-            ${stockText && stockText !== 'In Stock' ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
@@ -929,7 +927,6 @@ function createWholesaleProductCard(product) {
         <div class="product-card wholesale-card ${stockStatus}" data-product-id="${productId}">
             <div class="product-badge wholesale">WHOLESALE</div>
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
-            ${stockText && stockText !== 'In Stock' ? `<div class="stock-indicator ${stockStatus}">${stockText}</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
