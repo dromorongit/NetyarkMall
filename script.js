@@ -2153,7 +2153,6 @@ function updateShippingOptions() {
                     <div class="shipping-details">
                         <div class="shipping-name">${option.name}</div>
                         <div class="shipping-meta">
-                            <span class="shipping-cost">₵${option.cost.toLocaleString()}</span>
                             <span class="shipping-time">${option.description}</span>
                             <span class="shipping-date">Est. delivery: ${option.estimatedDelivery}</span>
                         </div>
@@ -2178,16 +2177,16 @@ function getDefaultShippingOptions() {
             method: 'standard',
             name: 'Standard Delivery',
             cost: 50,
-            description: '3-5 business days',
-            estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            description: '1-2 business days',
+            estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
             available: true
         },
         {
             method: 'express',
             name: 'Express Delivery',
             cost: 125,
-            description: '1-2 business days',
-            estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            description: '4-7 hours',
+            estimatedDelivery: new Date(Date.now() + 0.5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
             available: true
         }
     ];
