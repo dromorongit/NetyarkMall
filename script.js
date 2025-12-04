@@ -170,9 +170,10 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
         // For deals, use the discounted price that was shown on the deals page
         let finalPrice = product.price;
         if (isDealPurchase && product.originalPrice) {
-            // Apply the same 7% discount that was applied on the deals page
-            finalPrice = product.originalPrice * 0.93;
-            console.log('DEBUG: Applying deal discount - original:', product.originalPrice, 'discounted:', finalPrice);
+            // Use the already discounted price from the deals page
+            // The deals page already applies the 7% discount, so we just use that price
+            finalPrice = product.price;
+            console.log('DEBUG: Using deal discounted price - original:', product.originalPrice, 'discounted:', finalPrice);
         } else if (isWholesalePurchase && product.wholesalePrice) {
             finalPrice = product.wholesalePrice;
         }
@@ -452,7 +453,15 @@ function updateCartDisplay() {
                         <div class="item-details">
                             <h3>${item.name}</h3>
                             ${showWholesaleIndicators ? `<small class="wholesale-indicator">Wholesale - MOQ: ${moq}</small>` : ''}
-                            <p class="item-price">₵${item.price.toLocaleString()}</p>
+                            ${item.isDeal && item.originalPrice ? `
+                                <div class="deal-price-container">
+                                    <p class="item-price deal-price">₵${item.price.toLocaleString()}</p>
+                                    <p class="original-price">₵${item.originalPrice.toLocaleString()}</p>
+                                    <small class="deal-badge">Deal</small>
+                                </div>
+                            ` : `
+                                <p class="item-price">₵${item.price.toLocaleString()}</p>
+                            `}
                         </div>
                         <div class="item-quantity">
                             <button class="quantity-btn decrease" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})" ${!canDecrease ? 'disabled' : ''}>-</button>

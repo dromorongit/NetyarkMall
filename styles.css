@@ -1342,6 +1342,29 @@ a:hover {
     margin: 0;
 }
 
+.deal-price-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.deal-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.deal-badge {
+    background: var(--error);
+    color: var(--white);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .item-quantity {
     display: flex;
     align-items: center;
