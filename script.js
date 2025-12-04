@@ -236,8 +236,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
 
         // For deals, apply the discounted price (7% off)
         let finalPrice = product.price;
-        if (isDealPurchase || product.isDailyDeal) {
-            // Apply 7% discount for daily deals
+        if (isDealPurchase) {
+            // Apply 7% discount for products added from deals page
             finalPrice = product.price * 0.93;
             console.log('DEBUG: Applying deal discount - original:', product.price, 'discounted:', finalPrice);
         } else if (isWholesalePurchase && product.wholesalePrice) {
@@ -249,13 +249,13 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             id: productId,
             name: product.name,
             price: finalPrice,
-            originalPrice: (isDealPurchase || product.isDailyDeal) ? product.price : product.originalPrice, // Store original price for reference
+            originalPrice: isDealPurchase ? product.price : product.originalPrice, // Store original price for reference
             image: product.image,
             quantity: quantity,
             isWholesale: isWholesalePurchase,
-            isDeal: isDealPurchase || product.isDailyDeal, // Track if this is a deal item
+            isDeal: isDealPurchase, // Track if this is a deal item
             sourcePage: sourcePage, // Track where this item was added from
-            discountPercentage: (isDealPurchase || product.isDailyDeal) ? 7 : 0 // 7% discount for deals
+            discountPercentage: isDealPurchase ? 7 : 0 // 7% discount for deals
         };
 
         // Only add MOQ for items treated as wholesale purchases
