@@ -645,11 +645,12 @@ async function getCategoryData() {
 async function searchProducts(query) {
     const products = await getAllProducts();
     const lowercaseQuery = query.toLowerCase();
-    return products.filter(product =>
-        product.name.toLowerCase().includes(lowercaseQuery) ||
-        product.description.toLowerCase().includes(lowercaseQuery) ||
-        product.category.toLowerCase().includes(lowercaseQuery)
-    );
+    return products.filter(product => {
+        const description = product.description || product.shortDescription || product.longDescription || '';
+        return product.name.toLowerCase().includes(lowercaseQuery) ||
+               description.toLowerCase().includes(lowercaseQuery) ||
+               product.category.toLowerCase().includes(lowercaseQuery);
+    });
 }
 
 // Get suggested products for cart page
