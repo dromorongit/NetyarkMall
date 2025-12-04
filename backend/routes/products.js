@@ -131,9 +131,32 @@ router.post('/', auth, adminAuth, upload.fields([
 });
 
 // Update product
-router.put('/:id', auth, adminAuth, async (req, res) => {
+router.put('/:id', auth, adminAuth, upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'additionalMedia', maxCount: 10 }
+]), async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const productData = req.body;
+
+    // Handle image upload
+    if (req.files && req.files.image && req.files.image[0]) {
+      productData.image = '/uploads/' + req.files.image[0].filename;
+    }
+
+    // Handle additional media uploads
+    if (req.files && req.files.additionalMedia) {
+      productData.additionalMedia = req.files.additionalMedia.map(file => '/uploads/' + file.filename);
+    }
+
+    // Handle array fields that come as comma-separated strings
+    if (productData.colors && typeof productData.colors === 'string') {
+      productData.colors = productData.colors.split(',').map(c => c.trim()).filter(c => c);
+    }
+    if (productData.sizes && typeof productData.sizes === 'string') {
+      productData.sizes = productData.sizes.split(',').map(s => s.trim()).filter(s => s);
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (err) {

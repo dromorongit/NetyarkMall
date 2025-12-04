@@ -512,6 +512,21 @@ async function editProduct(id) {
       }
     });
 
+    // Handle image preview
+    const currentImagePreview = document.getElementById('current-image-preview');
+    if (product.image) {
+      currentImagePreview.innerHTML = `
+        <p><strong>Current Image:</strong></p>
+        <img src="${product.image}" alt="Current product image" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">Upload a new image to replace the current one</p>
+      `;
+    } else {
+      currentImagePreview.innerHTML = '<p style="font-size: 12px; color: #666;">No image currently set</p>';
+    }
+
+    // Clear the file input
+    document.getElementById('edit-product-image').value = '';
+
     // Show the edit modal
     document.getElementById('edit-product-modal').style.display = 'block';
 
@@ -530,40 +545,49 @@ document.getElementById('edit-product-form').addEventListener('submit', async (e
   e.preventDefault();
 
   const productId = document.getElementById('edit-product-id').value;
-  const productData = {
-    name: document.getElementById('edit-product-name').value,
-    shortDescription: document.getElementById('edit-product-short-description').value,
-    longDescription: document.getElementById('edit-product-long-description').value,
-    brand: document.getElementById('edit-product-brand').value,
-    colors: document.getElementById('edit-product-colors').value.split(',').map(c => c.trim()).filter(c => c),
-    sizes: document.getElementById('edit-product-sizes').value.split(',').map(s => s.trim()).filter(s => s),
-    price: Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100,
-    stock: parseInt(document.getElementById('edit-product-stock').value),
-    category: document.getElementById('edit-product-category').value,
-    stockStatus: document.querySelector('input[name="edit-stock-status"]:checked').value
-  };
+  const formData = new FormData();
+
+  // Add basic product data
+  formData.append('name', document.getElementById('edit-product-name').value);
+  formData.append('shortDescription', document.getElementById('edit-product-short-description').value);
+  formData.append('longDescription', document.getElementById('edit-product-long-description').value);
+  formData.append('brand', document.getElementById('edit-product-brand').value);
+
+  // Handle colors and sizes arrays
+  const colors = document.getElementById('edit-product-colors').value.split(',').map(c => c.trim()).filter(c => c);
+  colors.forEach(color => formData.append('colors', color));
+
+  const sizes = document.getElementById('edit-product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
+  sizes.forEach(size => formData.append('sizes', size));
+
+  formData.append('price', Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100);
+  formData.append('stock', parseInt(document.getElementById('edit-product-stock').value));
+  formData.append('category', document.getElementById('edit-product-category').value);
+  formData.append('stockStatus', document.querySelector('input[name="edit-stock-status"]:checked').value);
+
+  // Handle image upload
+  const imageFile = document.getElementById('edit-product-image').files[0];
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
 
   try {
-    const response = await fetch(`${API_BASE}/products/${productId}`, {
+    const response = await authFetch(`${API_BASE}/products/${productId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(productData)
+      body: formData
     });
 
-    if (response.ok) {
-      alert('Product updated successfully!');
+    if (response && response.ok) {
+      showNotification('Product updated successfully!', 'success');
       closeEditModal();
       loadProducts();
     } else {
       const errorData = await response.json();
-      alert('Failed to update product: ' + (errorData.message || 'Unknown error'));
+      showNotification('Failed to update product: ' + (errorData.message || 'Unknown error'), 'error');
     }
   } catch (err) {
     console.error('Error updating product:', err);
-    alert('Error updating product: ' + err.message);
+    showNotification('Error updating product: ' + err.message, 'error');
   }
 });
 
