@@ -263,6 +263,9 @@
     <script src="script.js"></script>
     <script src="auth.js"></script>
     <script>
+        // API Base URL - configure for your admin system domain
+        const API_BASE = 'https://netyarkmall-production.up.railway.app/api';
+
         // Product detail page specific functionality
         document.addEventListener('DOMContentLoaded', function() {
             initializeProductDetailPage();
@@ -286,6 +289,7 @@
 
                 displayProductDetails(product);
                 loadRelatedProducts(product.category, productId);
+                loadProductReviews(productId);
                 updateBreadcrumb(product);
             } catch (error) {
                 console.error('Error loading product:', error);
@@ -595,7 +599,7 @@
 
                     <div class="reviews-list" id="reviewsList">
                         <!-- Reviews will be loaded here -->
-                        <div class="no-reviews">
+                        <div class="no-reviews" id="noReviewsMessage">
                             <i class="fas fa-comments"></i>
                             <h3>No reviews yet</h3>
                             <p>Be the first to review this product!</p>
@@ -815,20 +819,36 @@
             }
         }
 
-        // Mock function for submitting rating (replace with actual API call)
+        // Function for submitting rating to API
         async function submitProductRating(ratingData) {
-            // Simulate API call
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    // In a real implementation, this would send data to your backend
-                    console.log('Rating submitted:', ratingData);
-                    // Store in localStorage for demo purposes
-                    const ratings = JSON.parse(localStorage.getItem('productRatings') || '[]');
-                    ratings.push(ratingData);
-                    localStorage.setItem('productRatings', JSON.stringify(ratings));
-                    resolve(true);
-                }, 1000);
-            });
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showNotification('Please log in to submit a review', 'error');
+                    return false;
+                }
+
+                const response = await fetch(`${API_BASE}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(ratingData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Rating submitted successfully:', result);
+                    return true;
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to submit rating');
+                }
+            } catch (error) {
+                console.error('Error submitting rating:', error);
+                throw error;
+            }
         }
 
         // Notification system for rating feedback
@@ -861,6 +881,60 @@
                     notification.remove();
                 }
             }, 5000);
+        }
+
+        // Function to load and display product reviews
+        async function loadProductReviews(productId) {
+            try {
+                const response = await fetch(`${API_BASE}/reviews/${productId}`);
+                if (response.ok) {
+                    const reviews = await response.json();
+                    displayProductReviews(reviews);
+                } else {
+                    console.error('Failed to load reviews:', response.status);
+                    // Show no reviews message
+                    document.getElementById('noReviewsMessage').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                // Show no reviews message
+                document.getElementById('noReviewsMessage').style.display = 'block';
+            }
+        }
+
+        // Function to display reviews
+        function displayProductReviews(reviews) {
+            const reviewsList = document.getElementById('reviewsList');
+            const noReviewsMessage = document.getElementById('noReviewsMessage');
+
+            if (!reviews || reviews.length === 0) {
+                noReviewsMessage.style.display = 'block';
+                return;
+            }
+
+            noReviewsMessage.style.display = 'none';
+
+            const reviewsHtml = reviews.map(review => {
+                const reviewDate = new Date(review.createdAt).toLocaleDateString();
+                return `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <strong>${review.userName || 'Anonymous'}</strong>
+                                <div class="review-rating">
+                                    ${generateStarRating(review.rating)}
+                                </div>
+                            </div>
+                            <div class="review-date">${reviewDate}</div>
+                        </div>
+                        ${review.title ? `<div class="review-title">${review.title}</div>` : ''}
+                        <div class="review-content">${review.review}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Insert reviews before the no-reviews message
+            noReviewsMessage.insertAdjacentHTML('beforebegin', reviewsHtml);
         }
 
         // Initialize rating system when DOM is loaded

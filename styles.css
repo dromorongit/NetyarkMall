@@ -862,7 +862,9 @@ a:hover {
     overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
-    margin-bottom: 1rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-card:hover,
@@ -2280,6 +2282,8 @@ a:hover {
     .product-grid {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 1rem;
+        display: grid;
+        width: 100%;
     }
     
     .category-grid {
@@ -2340,6 +2344,8 @@ a:hover {
     .product-grid {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 1rem;
+        display: grid;
+        width: 100%;
     }
 
     .section-title {
@@ -4827,11 +4833,13 @@ a:hover {
         background: var(--card-bg);
         border-radius: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin-bottom: 1rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         transform: translateZ(0); /* Hardware acceleration */
         width: 100%;
         max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .app-card:hover,
@@ -4949,6 +4957,15 @@ a:hover {
         width: 100%;
         max-width: 100%;
         overflow-x: hidden;
+    }
+
+    /* Ensure product cards fit properly in mobile grid */
+    .product-grid .product-card {
+        width: 100%;
+        min-height: 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
     }
 
     /* Fix search input width */

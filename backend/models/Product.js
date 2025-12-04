@@ -21,6 +21,8 @@ const productSchema = new mongoose.Schema({
   isShopByCategory: { type: Boolean, default: false },
   isDailyDeal: { type: Boolean, default: false },
   stockStatus: { type: String, enum: ['in-stock', 'out-of-stock'], default: 'in-stock' },
+  rating: { type: Number, default: 0, min: 0, max: 5 },
+  reviews: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
 

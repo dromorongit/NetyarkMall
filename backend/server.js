@@ -35,6 +35,9 @@ app.use('/api/orders', orderRoutes);
 const messageRoutes = require('./routes/messages');
 app.use('/api/messages', messageRoutes);
 
+const reviewRoutes = require('./routes/reviews');
+app.use('/api/reviews', reviewRoutes);
+
 app.get('/', async (req, res) => {
   try {
     const superadmin = await User.findOne({ role: 'superadmin' });
