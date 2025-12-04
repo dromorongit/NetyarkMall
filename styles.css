@@ -4492,6 +4492,320 @@ a:hover {
     }
 }
 
+/* Category Pages Styling - Modern and Professional */
+
+/* Category Header Enhancement */
+.category-header {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #006600 50%, var(--primary-orange) 100%);
+    color: var(--white);
+    padding: 120px 0 80px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-top: 80px;
+}
+
+.category-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="10" cy="50" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="30" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.category-header .container {
+    position: relative;
+    z-index: 2;
+}
+
+.category-header h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+}
+
+.category-header p {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    font-weight: 400;
+    max-width: 600px;
+    margin: 0 auto;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Category Filters Section */
+.category-filters {
+    background: var(--white);
+    padding: 3rem 0;
+    margin: 2rem 0;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 0 0 16px 16px;
+}
+
+.filter-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 0 2rem;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 128, 0, 0.1);
+}
+
+.filter-section h3 {
+    color: var(--primary-green);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.filter-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+    border-radius: 2px;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--dark-gray);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.filter-select {
+    padding: 0.875rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: var(--white);
+    color: var(--dark-gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.filter-select:hover {
+    border-color: var(--primary-green);
+    box-shadow: 0 4px 12px rgba(0, 128, 0, 0.15);
+}
+
+/* Products Section Enhancement */
+.products-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark-gray);
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+.section-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+    border-radius: 2px;
+}
+
+.product-count {
+    color: var(--medium-gray);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.product-count span {
+    color: var(--primary-green);
+    font-weight: 700;
+}
+
+/* Enhanced Product Grid */
+.product-grid {
+    margin: 2rem 0;
+    gap: 2.5rem;
+}
+
+/* Load More Section */
+.load-more-section {
+    text-align: center;
+    margin-top: 3rem;
+    padding: 2rem 0;
+}
+
+.load-more-section .btn {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(0, 128, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.load-more-section .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 128, 0, 0.3);
+}
+
+/* Category Description Section */
+.category-description {
+    background: linear-gradient(135deg, var(--white) 0%, #f8f9fa 100%);
+    padding: 5rem 0;
+    margin: 4rem 0;
+    border-radius: 20px;
+    margin: 4rem 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 128, 0, 0.05);
+}
+
+.description-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 2rem;
+}
+
+.description-content h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--dark-gray);
+    margin-bottom: 2rem;
+    position: relative;
+    display: inline-block;
+}
+
+.description-content h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+    border-radius: 2px;
+}
+
+.description-content p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--medium-gray);
+    margin-bottom: 2rem;
+    font-weight: 400;
+}
+
+/* Category-Specific Styling */
+
+/* Beauty & Personal Care */
+.category-beauty .category-header {
+    background: linear-gradient(135deg, #ff69b4 0%, #ffb6c1 30%, #ffc0cb 70%, #ff1493 100%);
+}
+
+.category-beauty .category-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="beauty" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.2)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.2)"/><path d="M50 10 Q60 30 50 50 Q40 30 50 10" stroke="rgba(255,255,255,0.1)" stroke-width="1" fill="none"/></pattern></defs><rect width="100" height="100" fill="url(%23beauty)"/></svg>');
+}
+
+/* Kids & Babies */
+.category-kids .category-header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 30%, #ffb74d 70%, #ff9800 100%);
+}
+
+.category-kids .category-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="kids" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="1.5" fill="rgba(255,255,255,0.25)"/><circle cx="85" cy="85" r="1.5" fill="rgba(255,255,255,0.25)"/><path d="M20 50 Q50 20 80 50 Q50 80 20 50" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none"/></pattern></defs><rect width="100" height="100" fill="url(%23kids)"/></svg>');
+}
+
+/* Kitchen Appliances */
+.category-kitchen .category-header {
+    background: linear-gradient(135deg, #ff7043 0%, #ff8a65 30%, #ffab91 70%, #ff5722 100%);
+}
+
+.category-kitchen .category-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="kitchen" width="100" height="100" patternUnits="userSpaceOnUse"><rect x="10" y="10" width="8" height="8" rx="1" fill="rgba(255,255,255,0.2)"/><rect x="82" y="82" width="8" height="8" rx="1" fill="rgba(255,255,255,0.2)"/><circle cx="50" cy="50" r="3" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23kitchen)"/></svg>');
+}
+
+/* Home Essentials */
+.category-home .category-header {
+    background: linear-gradient(135deg, #66bb6a 0%, #81c784 30%, #a5d6a7 70%, #4caf50 100%);
+}
+
+.category-home .category-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="home" width="100" height="100" patternUnits="userSpaceOnUse"><polygon points="50,10 90,40 70,40 70,90 30,90 30,40 10,40" fill="rgba(255,255,255,0.15)"/><circle cx="50" cy="60" r="2" fill="rgba(255,255,255,0.2)"/></pattern></defs><rect width="100" height="100" fill="url(%23home)"/></svg>');
+}
+
+/* Lighting & Home Decor */
+.category-lighting .category-header {
+    background: linear-gradient(135deg, #ab47bc 0%, #ba68c8 30%, #ce93d8 70%, #9c27b0 100%);
+}
+
+.category-lighting .category-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="lighting" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="20" r="3" fill="rgba(255,255,255,0.25)"/><path d="M50 23 L50 80" stroke="rgba(255,255,255,0.2)" stroke-width="2"/><circle cx="35" cy="35" r="1" fill="rgba(255,255,255,0.15)"/><circle cx="65" cy="45" r="1" fill="rgba(255,255,255,0.15)"/></pattern></defs><rect width="100" height="100" fill="url(%23lighting)"/></svg>');
+}
+
+/* Nail Supplies */
+.category-nail .category-header {
+    background: linear-gradient(135deg, #ec407a 0%, #f06292 30%, #f8bbd9 70%, #e91e63 100%);
+}
+
+.category-nail .category-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="nail" width="100" height="100" patternUnits="userSpaceOnUse"><ellipse cx="50" cy="50" rx="8" ry="3" fill="rgba(255,255,255,0.2)"/><circle cx="30" cy="30" r="1.5" fill="rgba(255,255,255,0.15)"/><circle cx="70" cy="70" r="1.5" fill="rgba(255,255,255,0.15)"/></pattern></defs><rect width="100" height="100" fill="url(%23nail)"/></svg>');
+}
+
+/* Photography & Content Creation */
+.category-photography .category-header {
+    background: linear-gradient(135deg, #29b6f6 0%, #4fc3f7 30%, #81d4fa 70%, #03a9f4 100%);
+}
+
+.category-photography .category-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="photo" width="100" height="100" patternUnits="userSpaceOnUse"><rect x="20" y="20" width="60" height="40" rx="3" fill="rgba(255,255,255,0.15)"/><circle cx="35" cy="35" r="2" fill="rgba(255,255,255,0.2)"/><circle cx="65" cy="45" r="2" fill="rgba(255,255,255,0.2)"/></pattern></defs><rect width="100" height="100" fill="url(%23photo)"/></svg>');
+}
+
 /* Mobile App Enhancements */
 @media (max-width: 768px) {
     /* Prevent horizontal overflow */
