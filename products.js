@@ -46,9 +46,9 @@ async function fetchProducts(forceRefresh = false) {
     console.error('Error fetching products:', error);
   }
 
-  // Return empty array if API fails - no fallback to legacy products
-  console.log('API failed, returning empty array');
-  return [];
+  // Fallback to legacy product database if API fails
+  console.log('API failed, falling back to legacy product database');
+  return flattenLegacyProducts();
 }
 
 // Fetch wholesale products from API
@@ -322,6 +322,43 @@ const productDatabase = {
     // Wholesale Products - removed hardcoded products
     wholesale: []
 };
+
+// Helper function to flatten legacy product database
+function flattenLegacyProducts() {
+    const flattened = [];
+    Object.keys(productDatabase).forEach(category => {
+        if (Array.isArray(productDatabase[category])) {
+            productDatabase[category].forEach(product => {
+                flattened.push({
+                    ...product,
+                    category: category,
+                    // Ensure we have both id and _id for compatibility
+                    _id: product.id,
+                    // Add default values for API fields
+                    stockStatus: product.inStock ? 'in-stock' : 'out-of-stock',
+                    stock: product.stockCount || 0,
+                    stockCount: product.stockCount || 0,
+                    isNewArrival: product.isNew || false,
+                    isFastSelling: false,
+                    isDailyDeal: false,
+                    isWholesale: false,
+                    moq: 1,
+                    minOrderQty: 1,
+                    wholesalePrice: null,
+                    brand: product.brand || '',
+                    longDescription: product.description,
+                    shortDescription: product.description,
+                    additionalMedia: product.images ? product.images.slice(1) : [], // First image is main, rest are additional
+                    colors: product.variants?.colors || [],
+                    sizes: product.variants?.storage || [], // Using storage as sizes for compatibility
+                    variants: product.variants || {}
+                });
+            });
+        }
+    });
+    console.log('Flattened legacy products:', flattened.length, 'items');
+    return flattened;
+}
 
 // Get all products as a flat array
 async function getAllProducts() {
