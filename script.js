@@ -104,9 +104,16 @@ function initializeCart() {
 }
 
 async function addToCart(productId, quantity = 1, sourcePage = null) {
+    console.log('DEBUG: addToCart called with:', { productId, quantity, sourcePage });
+
+    // Add debug logging to see if we can fetch the product
+    console.log('DEBUG: About to call getProductById for:', productId);
+
     const product = await getProductById(productId);
+    console.log('DEBUG: getProductById returned:', product);
+
     if (!product) {
-        console.error('Product not found:', productId);
+        console.error('DEBUG: Product not found:', productId);
         showNotification('Product not found.', 'error');
         return;
     }
@@ -115,6 +122,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
     console.log('DEBUG: Product data for cart addition:', {
         productId: productId,
         productName: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice,
         isWholesale: product.isWholesale,
         moq: product.moq,
         minOrderQty: product.minOrderQty,
@@ -128,6 +137,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
     const inventoryCheck = typeof checkInventory === 'function' ?
         await checkInventory(productId, quantity) : { available: product.inStock };
 
+    console.log('DEBUG: Inventory check result:', inventoryCheck);
+
     if (!inventoryCheck.available) {
         showNotification(inventoryCheck.reason || 'Product is out of stock.', 'error');
         return;
@@ -136,6 +147,7 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
     const existingItem = cart.find(item => item.id === productId);
 
     if (existingItem) {
+        console.log('DEBUG: Found existing cart item, updating quantity');
         const newQuantity = existingItem.quantity + quantity;
         // Check if new total exceeds available stock
         const stockCheck = typeof checkInventory === 'function' ?
@@ -147,18 +159,34 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
         }
         existingItem.quantity = newQuantity;
     } else {
+        console.log('DEBUG: Creating new cart item');
         // Determine if this should be treated as a wholesale purchase based on source page
         // If added from wholesale page, use wholesale attributes; otherwise treat as regular
         const isWholesalePurchase = sourcePage === 'wholesale';
+        const isDealPurchase = sourcePage === 'deals';
+
+        console.log('DEBUG: Purchase type detection - isWholesalePurchase:', isWholesalePurchase, 'isDealPurchase:', isDealPurchase);
+
+        // For deals, use the discounted price that was shown on the deals page
+        let finalPrice = product.price;
+        if (isDealPurchase && product.originalPrice) {
+            // Apply the same 7% discount that was applied on the deals page
+            finalPrice = product.originalPrice * 0.93;
+            console.log('DEBUG: Applying deal discount - original:', product.originalPrice, 'discounted:', finalPrice);
+        } else if (isWholesalePurchase && product.wholesalePrice) {
+            finalPrice = product.wholesalePrice;
+        }
 
         // Create cart item with context-aware wholesale behavior
         const cartItem = {
             id: productId,
             name: product.name,
-            price: isWholesalePurchase && product.wholesalePrice ? product.wholesalePrice : product.price,
+            price: finalPrice,
+            originalPrice: product.originalPrice, // Store original price for reference
             image: product.image,
             quantity: quantity,
             isWholesale: isWholesalePurchase,
+            isDeal: isDealPurchase, // Track if this is a deal item
             sourcePage: sourcePage // Track where this item was added from
         };
 
@@ -172,13 +200,17 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             productId: productId,
             productName: product.name,
             isWholesale: cartItem.isWholesale,
+            isDeal: cartItem.isDeal,
             moq: cartItem.moq,
             quantity: quantity,
             sourcePage: cartItem.sourcePage,
-            priceUsed: cartItem.price
+            originalPrice: cartItem.originalPrice,
+            finalPrice: cartItem.price,
+            discountApplied: isDealPurchase ? (product.originalPrice - finalPrice) : 0
         });
 
         cart.push(cartItem);
+        console.log('DEBUG: Cart after adding item:', cart);
     }
 
     saveCart();
@@ -1453,25 +1485,42 @@ document.addEventListener('click', function(e) {
         const button = e.target.classList.contains('add-to-cart-btn') ? e.target : e.target.closest('.add-to-cart-btn');
         const productId = button.getAttribute('data-product') || button.closest('[data-product-id]')?.getAttribute('data-product-id');
 
+        // Debug logging for add to cart clicks
+        console.log('DEBUG: Add to Cart button clicked', {
+            target: e.target,
+            button: button,
+            productId: productId,
+            isWholesale: button.closest('.wholesale-card') !== null,
+            isDeal: button.closest('.deal-card') !== null,
+            currentPage: window.location.pathname.split('/').pop() || 'index.html'
+        });
+
         if (productId) {
             const isWholesale = button.closest('.wholesale-card') !== null;
             const isDeal = button.closest('.deal-card') !== null;
 
+            console.log('DEBUG: Product detection - isWholesale:', isWholesale, 'isDeal:', isDeal);
+
             if (isWholesale) {
                 const quantityInput = button.closest('.product-card').querySelector(`#wholesale-qty-${productId}`);
                 const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                console.log('DEBUG: Adding wholesale product:', productId, 'quantity:', quantity);
                 addWholesaleToCart(productId, quantity);
             } else if (isDeal) {
                 // For deals page, use 'deals' as source page to preserve discounted pricing
                 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
                 const sourcePage = currentPage === 'deals.html' ? 'deals' : null;
+                console.log('DEBUG: Adding deal product:', productId, 'from page:', currentPage, 'sourcePage:', sourcePage);
                 addToCart(productId, 1, sourcePage);
             } else {
                 // Determine source page based on current URL
                 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
                 const sourcePage = currentPage === 'wholesale.html' ? 'wholesale' : null;
+                console.log('DEBUG: Adding regular product:', productId, 'from page:', currentPage, 'sourcePage:', sourcePage);
                 addToCart(productId, 1, sourcePage);
             }
+        } else {
+            console.error('DEBUG: No productId found for add to cart button');
         }
     }
 });
