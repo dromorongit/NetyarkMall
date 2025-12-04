@@ -2126,13 +2126,6 @@ function adjustWholesaleQuantity(productId, delta) {
     try {
         console.log('adjustWholesaleQuantity called with:', { productId, delta });
 
-        // For wholesale, only allow increasing quantity (delta should be positive)
-        if (delta < 0) {
-            console.log('Wholesale quantity decrease attempted - ignoring');
-            showNotification('Wholesale quantities can only be increased.', 'info');
-            return;
-        }
-
         const quantityInput = document.getElementById(`wholesale-qty-${productId}`);
         if (!quantityInput) {
             console.error('Quantity input not found for product:', productId);
@@ -2143,7 +2136,13 @@ function adjustWholesaleQuantity(productId, delta) {
         const minValue = parseInt(quantityInput.min) || 1;
         const newValue = Math.max(minValue, currentValue + delta);
 
-        console.log('Quantity adjustment:', { currentValue, minValue, newValue });
+        console.log('Quantity adjustment:', { currentValue, minValue, newValue, delta });
+
+        // Prevent decreasing below MOQ
+        if (newValue < minValue) {
+            showNotification(`Cannot decrease below minimum order quantity (${minValue}).`, 'warning');
+            return;
+        }
 
         quantityInput.value = newValue;
 
