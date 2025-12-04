@@ -166,6 +166,16 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
         const isDealPurchase = sourcePage === 'deals';
 
         console.log('DEBUG: Purchase type detection - isWholesalePurchase:', isWholesalePurchase, 'isDealPurchase:', isDealPurchase);
+        console.log('DEBUG: Product data for pricing decision:', {
+            productId: productId,
+            productName: product.name,
+            currentPrice: product.price,
+            originalPrice: product.originalPrice,
+            wholesalePrice: product.wholesalePrice,
+            isWholesale: product.isWholesale,
+            isDailyDeal: product.isDailyDeal,
+            sourcePage: sourcePage
+        });
 
         // For deals, use the discounted price that was shown on the deals page
         let finalPrice = product.price;
@@ -188,7 +198,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             quantity: quantity,
             isWholesale: isWholesalePurchase,
             isDeal: isDealPurchase, // Track if this is a deal item
-            sourcePage: sourcePage // Track where this item was added from
+            sourcePage: sourcePage, // Track where this item was added from
+            discountPercentage: isDealPurchase && product.originalPrice ? Math.round(((product.originalPrice - finalPrice) / product.originalPrice) * 100) : 0
         };
 
         // Only add MOQ for items treated as wholesale purchases
@@ -442,6 +453,18 @@ function updateCartDisplay() {
                     canDecreaseCheck: !isWholesaleFromWholesalePage || item.quantity > (item.moq || item.minOrderQty || 1)
                 });
 
+                // Debug logging for deal items
+                console.log('DEBUG: Deal item display check:', {
+                    itemId: item.id,
+                    itemName: item.name,
+                    isDeal: item.isDeal,
+                    hasOriginalPrice: item.originalPrice,
+                    currentPrice: item.price,
+                    originalPrice: item.originalPrice,
+                    showWholesaleIndicators: showWholesaleIndicators,
+                    willShowDealPrice: item.isDeal && item.originalPrice
+                });
+
                 // Only show wholesale indicators for items added from wholesale page
                 const showWholesaleIndicators = isWholesaleFromWholesalePage;
 
@@ -457,7 +480,7 @@ function updateCartDisplay() {
                                 <div class="deal-price-container">
                                     <p class="item-price deal-price">₵${item.price.toLocaleString()}</p>
                                     <p class="original-price">₵${item.originalPrice.toLocaleString()}</p>
-                                    <small class="deal-badge">Deal</small>
+                                    <small class="deal-badge">Deal - ${item.discountPercentage || 0}% OFF</small>
                                 </div>
                             ` : `
                                 <p class="item-price">₵${item.price.toLocaleString()}</p>
@@ -1046,8 +1069,43 @@ async function loadSuggestedProducts() {
     if (!container) return;
 
     try {
+        // Add diagnostic logging to check if getSuggestedProducts is available
+        console.log('DEBUG: loadSuggestedProducts called');
+        console.log('DEBUG: getSuggestedProducts function available:', typeof getSuggestedProducts === 'function');
+        console.log('DEBUG: window.getSuggestedProducts function available:', typeof window.getSuggestedProducts === 'function');
+
+        if (typeof getSuggestedProducts !== 'function') {
+            console.error('DEBUG: getSuggestedProducts is not defined - checking script loading order');
+            console.log('DEBUG: Available global functions:', Object.keys(window).filter(key => key.includes('get')).join(', '));
+
+            // Fallback: use window.getSuggestedProducts if available
+            if (typeof window.getSuggestedProducts === 'function') {
+                console.log('DEBUG: Using window.getSuggestedProducts as fallback');
+                getSuggestedProducts = window.getSuggestedProducts;
+            } else {
+                // If still not available, provide a simple fallback implementation
+                console.warn('DEBUG: No getSuggestedProducts function available - using fallback');
+                const getSuggestedProductsFallback = async (currentProductIds = []) => {
+                    try {
+                        const allProducts = await getAllProducts();
+                        return allProducts
+                            .filter(product => !currentProductIds.includes(product.id))
+                            .sort(() => 0.5 - Math.random()) // Shuffle
+                            .slice(0, 4);
+                    } catch (error) {
+                        console.error('Fallback getSuggestedProducts failed:', error);
+                        return [];
+                    }
+                };
+                getSuggestedProducts = getSuggestedProductsFallback;
+            }
+        }
+
         const currentProductIds = cart.map(item => item.id);
+        console.log('DEBUG: Current product IDs in cart:', currentProductIds);
+
         const suggestions = await getSuggestedProducts(currentProductIds);
+        console.log('DEBUG: Suggested products received:', suggestions.length);
         container.innerHTML = suggestions.map(product => createProductCard(product)).join('');
     } catch (error) {
         console.error('Error loading suggested products:', error);

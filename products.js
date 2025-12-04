@@ -634,18 +634,45 @@ function calculateDiscount(originalPrice, currentPrice) {
 }
 // Helper function to get full image URL
 function getFullImageUrl(imagePath) {
-    if (imagePath && imagePath.startsWith('/uploads/')) {
-        // Remove '/api' from API_BASE for uploads since backend serves them directly at /uploads
-        const baseUrl = API_BASE.replace('/api', '');
-        const fullUrl = `${baseUrl}${imagePath}`;
-        console.log('Constructed image URL:', fullUrl, 'from path:', imagePath);
-        return fullUrl;
-    }
-    // Handle undefined or invalid image paths
     if (!imagePath || imagePath === 'undefined' || imagePath === '') {
         console.log('Using default placeholder image for invalid path:', imagePath);
         return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'; // Default placeholder image
     }
+
+    if (imagePath.startsWith('/uploads/')) {
+        // Handle uploads path - try multiple base URLs to handle different deployment scenarios
+        const baseUrls = [
+            'https://netyarkmall-production.up.railway.app', // Production
+            'https://dromorongit.github.io', // GitHub Pages (from error)
+            API_BASE.replace('/api', '') // API base without /api
+        ];
+
+        // Try each base URL until we find one that works
+        for (const baseUrl of baseUrls) {
+            const fullUrl = `${baseUrl}${imagePath}`;
+            console.log('Trying image URL:', fullUrl);
+
+            // Simple check to see if URL looks valid
+            if (baseUrl && !baseUrl.endsWith('/')) {
+                return fullUrl;
+            }
+        }
+
+        // Fallback to first base URL
+        return `${baseUrls[0]}${imagePath}`;
+    }
+
+    // Handle relative paths
+    if (imagePath.startsWith('./') || imagePath.startsWith('../')) {
+        // For relative paths, return as-is since they should work in the current context
+        return imagePath;
+    }
+
+    // Handle full URLs (http/https)
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+
     console.log('Returning image path as-is:', imagePath);
     return imagePath;
 }
