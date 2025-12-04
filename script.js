@@ -100,7 +100,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Cart Management
 function initializeCart() {
+    console.log('DEBUG: initializeCart called');
+    console.log('DEBUG: Current cart from localStorage:', JSON.parse(localStorage.getItem('cart')) || []);
+    console.log('DEBUG: Cart variable before updateCartCount:', cart);
     updateCartCount();
+    console.log('DEBUG: Cart variable after updateCartCount:', cart);
 }
 
 async function addToCart(productId, quantity = 1, sourcePage = null) {
@@ -411,7 +415,11 @@ function updateCartDisplay() {
     const shippingCalculator = document.getElementById('shippingCalculator');
 
     if (cartItemsContainer) {
+        console.log('DEBUG: updateCartDisplay - cartItemsContainer found');
+        console.log('DEBUG: updateCartDisplay - cart length:', cart.length);
+
         if (cart.length === 0) {
+            console.log('DEBUG: updateCartDisplay - showing empty cart message');
             cartItemsContainer.innerHTML = `
                 <div class="empty-cart-message" id="emptyCartMessage">
                     <div class="empty-cart-content">
@@ -429,6 +437,7 @@ function updateCartDisplay() {
             if (totalElement) totalElement.textContent = '₵0.00';
             if (shippingCalculator) shippingCalculator.style.display = 'none';
         } else {
+            console.log('DEBUG: updateCartDisplay - cart has items, generating HTML');
             let cartHTML = '';
             cart.forEach(item => {
                 const isWholesale = item.isWholesale === true;
@@ -518,6 +527,8 @@ function updateCartDisplay() {
                 updateShippingOptions();
             }
         }
+        console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML length:', cartItemsContainer.innerHTML.length);
+        console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML:', cartItemsContainer.innerHTML.substring(0, 200) + '...');
     }
 }
 
@@ -740,8 +751,30 @@ function initializeDealsPage() {
 }
 
 function initializeCartPage() {
+    console.log('DEBUG: initializeCartPage called');
+    console.log('DEBUG: Cart contents at page load:', cart);
+    console.log('DEBUG: Cart length:', cart.length);
+    console.log('DEBUG: Cart items:', JSON.stringify(cart));
+
+    // Check if cart is empty and log accordingly
+    if (cart.length === 0) {
+        console.log('DEBUG: Cart is empty - will show empty cart message');
+    } else {
+        console.log('DEBUG: Cart has items - will display items');
+        cart.forEach((item, index) => {
+            console.log(`DEBUG: Cart item ${index}:`, {
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                isDeal: item.isDeal,
+                isWholesale: item.isWholesale
+            });
+        });
+    }
+
     updateCartDisplay();
-    
+
     // Clear cart button
     const clearCartBtn = document.getElementById('clearCartBtn');
     if (clearCartBtn) {
