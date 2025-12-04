@@ -2785,8 +2785,8 @@ function showCheckoutModal() {
                         </div>
 
                         <div class="form-group">
-                            <label for="email">Email Address *</label>
-                            <input type="email" id="email" required>
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email">
                         </div>
 
                         <div class="form-group">
