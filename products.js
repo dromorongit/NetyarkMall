@@ -551,38 +551,24 @@ async function getFastSellingItems() {
 
 // Get products by ID
 async function getProductById(id) {
-    const products = await getAllProducts();
-
-    // Debug: log all product IDs to see what we're working with
-    console.log('getProductById: Available product IDs:', products.map(p => p.id || p._id));
-
-    // Enhanced product finding with better matching
-    const product = products.find(product => {
-        const productId = product.id || product._id;
-        return productId && productId.toString() === id.toString();
-    });
-
-    // Debug logging
-    if (product) {
-        console.log('getProductById Debug:', {
-            productId: id,
-            productName: product.name,
-            stockStatus: product.stockStatus,
-            stock: product.stock,
-            stockCount: product.stockCount,
-            inStock: product.inStock
-        });
-    } else {
-        console.log('getProductById Debug: Product not found for ID:', id);
-        console.log('Available products:', products.map(p => ({
-            id: p.id || p._id,
-            name: p.name,
-            stockStatus: p.stockStatus,
-            stock: p.stock
-        })));
+    console.log('Fetching product by ID:', id);
+    try {
+        const response = await fetch(`${API_BASE}/products/${id}`);
+        console.log('Product API response status:', response.status);
+        if (response.ok) {
+            const product = await response.json();
+            console.log('Fetched product:', product);
+            return product;
+        } else {
+            console.error('Failed to fetch product:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Product API error response:', errorText);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        return null;
     }
-
-    return product;
 }
 
 // Get category data for the homepage category grid

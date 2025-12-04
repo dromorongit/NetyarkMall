@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Product Details</title>
+</head>
+<body>
+    <h1>Testing Product Details Fix</h1>
+    <button onclick="testProductDetails()">Test Product Details</button>
+    <div id="result"></div>
+
+    <script src="products.js"></script>
+    <script>
+        async function testProductDetails() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+
+            try {
+                // Test with a known product ID
+                const product = await getProductById('69310e6d50ec7dbd98a6437c');
+                if (product) {
+                    resultDiv.innerHTML = `
+                        <h2>Success!</h2>
+                        <p><strong>Name:</strong> ${product.name}</p>
+                        <p><strong>Price:</strong> ₵${product.price}</p>
+                        <p><strong>Category:</strong> ${product.category}</p>
+                        <p><strong>Stock:</strong> ${product.stock}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<p style="color: red;">Failed: Product not found</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
