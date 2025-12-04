@@ -6593,6 +6593,284 @@ a:hover {
     }
 }
 
+/* Product Rating System Styles */
+
+/* Rating Input Section */
+.rating-input-section {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 128, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.rating-form-container h3 {
+    color: var(--primary-green);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.rating-form-container h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-green), var(--primary-orange));
+    border-radius: 2px;
+}
+
+/* Star Rating Input */
+.star-rating-input {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    direction: rtl; /* Reverse direction for better UX */
+}
+
+.star-rating-input input[type="radio"] {
+    display: none;
+}
+
+.star-rating-input label {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+}
+
+.star-rating-input label:hover,
+.star-rating-input label.active {
+    color: #ffd700;
+    transform: scale(1.2);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.star-rating-input input[type="radio"]:checked ~ label {
+    color: #ffd700;
+}
+
+.star-rating-input input[type="radio"]:checked ~ label ~ label {
+    color: #ddd;
+}
+
+/* Rating Text Display */
+.rating-text-display {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    min-height: 20px;
+}
+
+.rating-text-display.rating-1 { background: #fee; color: #d32f2f; border: 1px solid #ffcdd2; }
+.rating-text-display.rating-2 { background: #fff3e0; color: #f57c00; border: 1px solid #ffcc02; }
+.rating-text-display.rating-3 { background: #fffde7; color: #fbc02d; border: 1px solid #fff59d; }
+.rating-text-display.rating-4 { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+.rating-text-display.rating-5 { background: #e8f5e8; color: #388e3c; border: 1px solid #c8e6c9; }
+
+/* Rating Form Styles */
+.rating-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.rating-input-group {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.rating-input-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.rating-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.rating-form .form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.rating-form input[type="text"],
+.rating-form textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: var(--white);
+}
+
+.rating-form input[type="text"]:focus,
+.rating-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.rating-form textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.5;
+}
+
+/* Character Count */
+.char-count {
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--medium-gray);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* Rating Form Actions */
+.rating-form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.rating-form-actions .btn {
+    min-width: 140px;
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.rating-form-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced Review Actions */
+.review-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.write-review-btn {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #006600 100%);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 128, 0, 0.3);
+}
+
+.write-review-btn:hover {
+    background: linear-gradient(135deg, #006600 0%, var(--primary-green) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 128, 0, 0.4);
+}
+
+/* Notification Styles for Rating Feedback */
+.rating-notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: var(--white);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 400px;
+    animation: slideInRight 0.3s ease;
+    border-left: 4px solid var(--primary-green);
+}
+
+.rating-notification.success {
+    border-left-color: var(--success);
+}
+
+.rating-notification.error {
+    border-left-color: var(--error);
+}
+
+.rating-notification i {
+    font-size: 1.5rem;
+}
+
+.rating-notification.success i {
+    color: var(--success);
+}
+
+.rating-notification.error i {
+    color: var(--error);
+}
+
+/* Mobile Rating Styles */
+@media (max-width: 768px) {
+    .rating-input-section {
+        margin: 1rem 0;
+        padding: 1.5rem 1rem;
+    }
+
+    .star-rating-input label {
+        font-size: 1.75rem;
+        width: 45px;
+        height: 45px;
+    }
+
+    .rating-form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .rating-form-actions .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .rating-notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        width: calc(100vw - 20px);
+    }
+}
+
 /* Mobile Product Detail Styles */
 @media (max-width: 768px) {
     .product-detail-container {

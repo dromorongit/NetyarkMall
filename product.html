@@ -502,9 +502,54 @@
                             </div>
                         </div>
                         <div class="review-actions">
-                            <button class="btn btn-primary write-review-btn">
+                            <button class="btn btn-primary write-review-btn" id="writeReviewBtn">
                                 <i class="fas fa-pen"></i> Write a Review
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Rating Section -->
+                    <div class="rating-input-section" id="ratingInputSection" style="display: none;">
+                        <div class="rating-form-container">
+                            <h3>Rate this Product</h3>
+                            <form id="ratingForm" class="rating-form">
+                                <div class="rating-input-group">
+                                    <label for="userRating">Your Rating:</label>
+                                    <div class="star-rating-input" id="starRatingInput">
+                                        <input type="radio" id="star5" name="rating" value="5" />
+                                        <label for="star5" title="5 stars"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star4" name="rating" value="4" />
+                                        <label for="star4" title="4 stars"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star3" name="rating" value="3" />
+                                        <label for="star3" title="3 stars"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star2" name="rating" value="2" />
+                                        <label for="star2" title="2 stars"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star1" name="rating" value="1" />
+                                        <label for="star1" title="1 star"><i class="fas fa-star"></i></label>
+                                    </div>
+                                    <div class="rating-text-display" id="ratingTextDisplay">Select a rating</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reviewTitle">Review Title (Optional):</label>
+                                    <input type="text" id="reviewTitle" name="title" placeholder="Summarize your experience" maxlength="100">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reviewText">Your Review:</label>
+                                    <textarea id="reviewText" name="review" rows="4" placeholder="Share your thoughts about this product..." required maxlength="500"></textarea>
+                                    <div class="char-count">
+                                        <span id="charCount">0</span>/500 characters
+                                    </div>
+                                </div>
+
+                                <div class="rating-form-actions">
+                                    <button type="button" class="btn btn-outline" id="cancelRatingBtn">Cancel</button>
+                                    <button type="submit" class="btn btn-primary" id="submitRatingBtn">
+                                        <i class="fas fa-paper-plane"></i> Submit Rating
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
 
@@ -635,6 +680,194 @@
 
             return stars;
         }
+
+        // Rating functionality
+        function initializeRatingSystem() {
+            const writeReviewBtn = document.getElementById('writeReviewBtn');
+            const ratingInputSection = document.getElementById('ratingInputSection');
+            const cancelRatingBtn = document.getElementById('cancelRatingBtn');
+            const ratingForm = document.getElementById('ratingForm');
+            const starRatingInput = document.getElementById('starRatingInput');
+            const ratingTextDisplay = document.getElementById('ratingTextDisplay');
+            const reviewText = document.getElementById('reviewText');
+            const charCount = document.getElementById('charCount');
+
+            // Show rating form
+            writeReviewBtn.addEventListener('click', function() {
+                ratingInputSection.style.display = 'block';
+                writeReviewBtn.style.display = 'none';
+                // Scroll to rating form
+                ratingInputSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            // Cancel rating
+            cancelRatingBtn.addEventListener('click', function() {
+                ratingInputSection.style.display = 'none';
+                writeReviewBtn.style.display = 'inline-block';
+                ratingForm.reset();
+                updateRatingText(0);
+            });
+
+            // Star rating interaction
+            const starLabels = starRatingInput.querySelectorAll('label');
+            starLabels.forEach((label, index) => {
+                label.addEventListener('mouseenter', function() {
+                    highlightStars(index + 1);
+                });
+
+                label.addEventListener('mouseleave', function() {
+                    const checkedRadio = starRatingInput.querySelector('input:checked');
+                    if (checkedRadio) {
+                        highlightStars(parseInt(checkedRadio.value));
+                    } else {
+                        highlightStars(0);
+                    }
+                });
+
+                label.addEventListener('click', function() {
+                    const rating = index + 1;
+                    updateRatingText(rating);
+                });
+            });
+
+            // Character count for review text
+            reviewText.addEventListener('input', function() {
+                const count = this.value.length;
+                charCount.textContent = count;
+                charCount.style.color = count > 450 ? '#dc3545' : count > 400 ? '#ffc107' : '#6c757d';
+            });
+
+            // Form submission
+            ratingForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(ratingForm);
+                const rating = formData.get('rating');
+                const title = formData.get('title');
+                const review = formData.get('review');
+
+                if (!rating) {
+                    showNotification('Please select a rating', 'error');
+                    return;
+                }
+
+                if (!review.trim()) {
+                    showNotification('Please write a review', 'error');
+                    return;
+                }
+
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const productId = urlParams.get('id');
+
+                    const ratingData = {
+                        productId: productId,
+                        rating: parseInt(rating),
+                        title: title.trim(),
+                        review: review.trim(),
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Submit rating (this would typically go to your backend)
+                    const success = await submitProductRating(ratingData);
+
+                    if (success) {
+                        showNotification('Thank you for your rating!', 'success');
+                        ratingInputSection.style.display = 'none';
+                        writeReviewBtn.style.display = 'inline-block';
+                        ratingForm.reset();
+                        updateRatingText(0);
+
+                        // Optionally refresh the page to show updated ratings
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        showNotification('Failed to submit rating. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error submitting rating:', error);
+                    showNotification('An error occurred. Please try again.', 'error');
+                }
+            });
+
+            function highlightStars(rating) {
+                starLabels.forEach((label, index) => {
+                    if (index < rating) {
+                        label.classList.add('active');
+                    } else {
+                        label.classList.remove('active');
+                    }
+                });
+            }
+
+            function updateRatingText(rating) {
+                const ratingTexts = {
+                    0: 'Select a rating',
+                    1: 'Poor',
+                    2: 'Fair',
+                    3: 'Good',
+                    4: 'Very Good',
+                    5: 'Excellent'
+                };
+                ratingTextDisplay.textContent = ratingTexts[rating] || 'Select a rating';
+                ratingTextDisplay.className = `rating-text-display rating-${rating}`;
+            }
+        }
+
+        // Mock function for submitting rating (replace with actual API call)
+        async function submitProductRating(ratingData) {
+            // Simulate API call
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // In a real implementation, this would send data to your backend
+                    console.log('Rating submitted:', ratingData);
+                    // Store in localStorage for demo purposes
+                    const ratings = JSON.parse(localStorage.getItem('productRatings') || '[]');
+                    ratings.push(ratingData);
+                    localStorage.setItem('productRatings', JSON.stringify(ratings));
+                    resolve(true);
+                }, 1000);
+            });
+        }
+
+        // Notification system for rating feedback
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.rating-notification');
+            existingNotifications.forEach(notification => notification.remove());
+
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `rating-notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;">
+                        ${type === 'success' ? 'Success!' : type === 'error' ? 'Error' : 'Info'}
+                    </div>
+                    <div style="font-size: 0.9rem;">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--medium-gray); margin-left: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize rating system when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeProductDetailPage();
+            initializeRatingSystem();
+        });
     </script>
 </body>
 </html>
