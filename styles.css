@@ -849,9 +849,17 @@ a:hover {
 /* Product Grid */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: 1fr;
     gap: 2rem;
     margin-top: 2rem;
+}
+
+/* Desktop Product Grid */
+@media (min-width: 769px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
 }
 
 /* Product Card - Mobile App Style */
@@ -2280,14 +2288,14 @@ a:hover {
     }
     
     .product-grid {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: 1fr !important;
         gap: 1rem;
         display: grid;
         width: 100%;
     }
-    
+
     .category-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
         gap: 1rem;
     }
     
@@ -2342,7 +2350,7 @@ a:hover {
     }
 
     .product-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: 1fr;
         gap: 1rem;
         display: grid;
         width: 100%;
