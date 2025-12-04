@@ -2920,14 +2920,8 @@ function loadCheckoutItems() {
 
     checkoutItemsContainer.innerHTML = html;
 
-    // Update totals
-    const shippingCost = 50; // Default shipping
-    const total = subtotal + shippingCost;
-
-    document.getElementById('checkoutSubtotal').textContent = `₵${subtotal.toLocaleString()}`;
-    document.getElementById('checkoutShipping').textContent = `₵${shippingCost.toLocaleString()}`;
-    document.getElementById('checkoutTax').textContent = `₵${tax.toLocaleString()}`;
-    document.getElementById('checkoutTotal').textContent = `₵${total.toLocaleString()}`;
+    // Update total (no shipping or tax)
+    document.getElementById('checkoutTotal').textContent = `₵${subtotal.toLocaleString()}`;
 }
 
 // Process checkout order submission
@@ -2938,10 +2932,8 @@ async function processCheckoutOrder(form) {
         const formData = new FormData(form);
         const selectedShipping = document.querySelector('input[name="shipping"]:checked');
 
-        // Calculate totals
-        const subtotal = getCartTotal();
-        const shippingCost = 50; // Default shipping cost
-        const total = subtotal + shippingCost;
+        // Calculate total (no shipping or tax)
+        const total = getCartTotal();
 
         // Prepare order data
         const orderData = {
@@ -2959,9 +2951,7 @@ async function processCheckoutOrder(form) {
             shipping: {
                 address: formData.get('address'),
                 city: formData.get('city'),
-                region: formData.get('region'),
-                zone: formData.get('shippingZone') || 'accra',
-                method: selectedShipping ? selectedShipping.value : 'standard'
+                region: formData.get('region')
             },
             paymentMethod: formData.get('paymentMethod')
         };
