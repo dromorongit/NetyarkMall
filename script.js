@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             initializeDealsPage();
             break;
         case 'cart.html':
+            console.log('DIAGNOSIS: Cart page detected, calling initializeCartPage');
             initializeCartPage();
             break;
         case 'checkout.html':
@@ -159,7 +160,8 @@ function initializeCart() {
 }
 
 async function addToCart(productId, quantity = 1, sourcePage = null) {
-    console.log('DEBUG: addToCart called with:', { productId, quantity, sourcePage });
+    console.log('DIAGNOSIS: addToCart called with:', { productId, quantity, sourcePage });
+    console.log('DIAGNOSIS: Current cart before add:', cart.length, 'items');
 
     // Add debug logging to see if we can fetch the product
     console.log('DEBUG: About to call getProductById for:', productId);
@@ -283,6 +285,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
     saveCart();
     updateCartCount();
     updateCartDisplay(); // Update cart display to show shipping
+    console.log('DIAGNOSIS: addToCart completed, cart now has', cart.length, 'items');
+    console.log('DIAGNOSIS: Final cart contents:', cart.map(item => ({id: item.id, name: item.name, quantity: item.quantity})));
     showNotification(`${product.name} added to cart!`, 'success');
 }
 
@@ -488,12 +492,18 @@ function updateCartDisplay() {
         console.log('DEBUG: updateCartDisplay - Cart after sync:', cart);
     }
 
+    // DIAGNOSIS: Add explicit check for cart state before display logic
+    console.log('DIAGNOSIS: About to check cart.length === 0, current cart.length:', cart.length);
+    console.log('DIAGNOSIS: Cart is array?', Array.isArray(cart));
+    console.log('DIAGNOSIS: Cart variable type:', typeof cart);
+
     if (cartItemsContainer) {
         console.log('DEBUG: updateCartDisplay - cartItemsContainer found');
         console.log('DEBUG: updateCartDisplay - cart length:', cart.length);
 
         if (cart.length === 0) {
-            console.log('DEBUG: updateCartDisplay - showing empty cart message');
+            console.log('DIAGNOSIS: Cart is empty, showing empty cart message');
+            console.log('DIAGNOSIS: This means either no items were added, or they were not saved/loaded properly');
             cartItemsContainer.innerHTML = `
                 <div class="empty-cart-message" id="emptyCartMessage">
                     <div class="empty-cart-content">
@@ -511,7 +521,8 @@ function updateCartDisplay() {
             if (totalElement) totalElement.textContent = '₵0.00';
             if (shippingCalculator) shippingCalculator.style.display = 'none';
         } else {
-            console.log('DEBUG: updateCartDisplay - cart has items, generating HTML');
+            console.log('DIAGNOSIS: Cart has items, generating HTML for', cart.length, 'items');
+            console.log('DIAGNOSIS: Cart items:', cart.map(item => ({id: item.id, name: item.name, quantity: item.quantity})));
             let cartHTML = '';
             cart.forEach(item => {
                 const isWholesale = item.isWholesale === true;
@@ -536,6 +547,9 @@ function updateCartDisplay() {
                     canDecreaseCheck: !isWholesaleFromWholesalePage || item.quantity > (item.moq || item.minOrderQty || 1)
                 });
 
+                // Only show wholesale indicators for items added from wholesale page
+                const showWholesaleIndicators = isWholesaleFromWholesalePage;
+
                 // Debug logging for deal items
                 console.log('DEBUG: Deal item display check:', {
                     itemId: item.id,
@@ -547,9 +561,6 @@ function updateCartDisplay() {
                     showWholesaleIndicators: showWholesaleIndicators,
                     willShowDealPrice: item.isDeal && item.originalPrice
                 });
-
-                // Only show wholesale indicators for items added from wholesale page
-                const showWholesaleIndicators = isWholesaleFromWholesalePage;
 
                 cartHTML += `
                     <div class="cart-item ${showWholesaleIndicators ? 'wholesale-item' : ''}" data-product-id="${item.id}">
