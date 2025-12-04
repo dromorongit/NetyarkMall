@@ -592,11 +592,11 @@ function updateCartDisplay() {
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
-        console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML length:', cartItemsContainer.innerHTML.length);
-        console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML:', cartItemsContainer.innerHTML.substring(0, 200) + '...');
-        logCartState('updateCartDisplay - end');
                 `;
             });
+            console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML length:', cartItemsContainer.innerHTML.length);
+            console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML:', cartItemsContainer.innerHTML.substring(0, 200) + '...');
+            logCartState('updateCartDisplay - end');
             cartItemsContainer.innerHTML = cartHTML;
 
             if (cartItemCountElement) cartItemCountElement.textContent = cart.length;
