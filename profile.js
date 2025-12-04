@@ -322,7 +322,7 @@ function createWishlistCard(product) {
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="quickView('${product.id}')">Quick View</button>
+                    <button class="quick-view-btn" onclick="viewProductDetails('${product.id}')">Quick View</button>
                     <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>

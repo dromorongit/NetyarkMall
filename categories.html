@@ -332,6 +332,130 @@
 
     <!-- Scripts -->
     <script src="script.js"></script>
+    <script>
+        // Handle search functionality for categories page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for search parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchQuery = urlParams.get('search');
+
+            if (searchQuery) {
+                // Perform search and display results
+                performSearchOnCategoriesPage(searchQuery);
+            }
+        });
+
+        async function performSearchOnCategoriesPage(query) {
+            console.log('Performing search on categories page for:', query);
+
+            // Update page title and header
+            document.title = `Search Results for "${query}" - Netyark Mall`;
+            const pageHeader = document.querySelector('.page-header h1');
+            if (pageHeader) {
+                pageHeader.textContent = `Search Results for "${query}"`;
+            }
+
+            const pageSubheader = document.querySelector('.page-header p');
+            if (pageSubheader) {
+                pageSubheader.textContent = `Found products matching your search`;
+            }
+
+            // Hide category filters and grid
+            const categoryFilters = document.querySelector('.category-filters');
+            const categoriesGrid = document.getElementById('categoriesGrid');
+
+            if (categoryFilters) categoryFilters.style.display = 'none';
+            if (categoriesGrid) categoriesGrid.style.display = 'none';
+
+            // Show search results
+            const categoriesSection = document.querySelector('.categories-section');
+            if (categoriesSection) {
+                // Create search results container
+                const searchResultsContainer = document.createElement('div');
+                searchResultsContainer.id = 'searchResultsContainer';
+                searchResultsContainer.innerHTML = `
+                    <div class="search-results-header">
+                        <h2>Search Results</h2>
+                        <p class="search-query">Searching for: "<strong>${query}</strong>"</p>
+                    </div>
+                    <div class="search-results-grid" id="searchResultsGrid">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Searching products...</p>
+                        </div>
+                    </div>
+                `;
+
+                categoriesSection.appendChild(searchResultsContainer);
+
+                // Perform the search
+                try {
+                    const results = await searchProducts(query);
+                    console.log('Search results:', results.length, 'products found');
+
+                    const searchResultsGrid = document.getElementById('searchResultsGrid');
+
+                    if (results.length === 0) {
+                        searchResultsGrid.innerHTML = `
+                            <div class="no-search-results">
+                                <i class="fas fa-search"></i>
+                                <h3>No products found</h3>
+                                <p>We couldn't find any products matching "<strong>${query}</strong>".</p>
+                                <p>Try searching with different keywords or browse our categories below.</p>
+                                <a href="categories.html" class="btn btn-primary">Browse All Categories</a>
+                            </div>
+                        `;
+                    } else {
+                        // Filter out out-of-stock products
+                        const inStockResults = results.filter(product => {
+                            const stockCount = product.stockCount || product.stock || 0;
+                            if (product.stockStatus) {
+                                return product.stockStatus === 'in-stock' && stockCount > 0;
+                            }
+                            return product.inStock !== undefined ? product.inStock : stockCount > 0;
+                        });
+
+                        if (inStockResults.length === 0) {
+                            searchResultsGrid.innerHTML = `
+                                <div class="no-search-results">
+                                    <i class="fas fa-box-open"></i>
+                                    <h3>No products in stock</h3>
+                                    <p>We found ${results.length} product(s) matching your search, but they're currently out of stock.</p>
+                                    <a href="categories.html" class="btn btn-primary">Browse All Categories</a>
+                                </div>
+                            `;
+                        } else {
+                            // Update search results header
+                            const searchResultsHeader = document.querySelector('.search-results-header p');
+                            if (searchResultsHeader) {
+                                searchResultsHeader.innerHTML = `Found <strong>${inStockResults.length}</strong> product(s) for "<strong>${query}</strong>"`;
+                            }
+
+                            // Display search results
+                            searchResultsGrid.innerHTML = `
+                                <div class="product-grid">
+                                    ${inStockResults.map(product => createProductCard(product)).join('')}
+                                </div>
+                            `;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error performing search:', error);
+                    const searchResultsGrid = document.getElementById('searchResultsGrid');
+                    if (searchResultsGrid) {
+                        searchResultsGrid.innerHTML = `
+                            <div class="no-search-results">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>Search Error</h3>
+                                <p>There was an error performing your search. Please try again.</p>
+                                <a href="categories.html" class="btn btn-primary">Browse All Categories</a>
+                            </div>
+                        `;
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>
 

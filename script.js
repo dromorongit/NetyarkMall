@@ -1280,7 +1280,7 @@ function createProductCard(product) {
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
+                    <button class="quick-view-btn" onclick="viewProductDetails('${productId}')">Quick View</button>
                     <button class="add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> ${!available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
@@ -1387,7 +1387,7 @@ function createWholesaleProductCard(product) {
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name || 'Unnamed Product'}" loading="lazy">
                 <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="console.log('Quick View button clicked for product:', '${productId}'); quickView('${productId}')" style="position: relative; z-index: 10;">Quick View</button>
+                    <button class="quick-view-btn" onclick="console.log('Quick View button clicked for product:', '${productId}'); viewProductDetails('${productId}')" style="position: relative; z-index: 10;">Quick View</button>
                     <button class="add-to-cart-btn" style="position: relative; z-index: 10;">
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
@@ -1462,7 +1462,7 @@ function createDealCard(product) {
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
                 <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="quickView('${productId}')">Quick View</button>
+                    <button class="quick-view-btn" onclick="viewProductDetails('${productId}')">Quick View</button>
                     <button class="add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> ${!available ? 'Out of Stock' : 'Add to Cart'}
                     </button>
