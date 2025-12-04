@@ -5,9 +5,58 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let currentSlide = 0;
 let slideInterval;
 
+// FIX: Ensure cart is always synchronized with localStorage and exposed globally
+function syncCartWithLocalStorage() {
+    try {
+        const localStorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // If localStorage has items but our cart doesn't, sync them
+        if (localStorageCart.length > 0 && cart.length === 0) {
+            console.log('DEBUG: Syncing cart from localStorage');
+            cart = [...localStorageCart];
+        }
+        // If our cart has items but localStorage doesn't, sync to localStorage
+        else if (cart.length > 0 && localStorageCart.length === 0) {
+            console.log('DEBUG: Syncing cart to localStorage');
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+        // If both have items but they're different, merge them (prefer localStorage)
+        else if (localStorageCart.length > 0 && cart.length > 0 &&
+                JSON.stringify(localStorageCart) !== JSON.stringify(cart)) {
+            console.log('DEBUG: Merging cart differences - preferring localStorage');
+            cart = [...localStorageCart];
+        }
+
+        // Always ensure window.cart is up to date
+        window.cart = cart;
+
+    } catch (error) {
+        console.error('Error syncing cart:', error);
+    }
+}
+
+// Initialize cart synchronization
+syncCartWithLocalStorage();
+
+// Set up periodic synchronization to prevent drift
+setInterval(syncCartWithLocalStorage, 5000);
+
+// DEBUG: Add comprehensive cart state logging
+function logCartState(source = 'unknown') {
+    console.log(`=== CART STATE LOG (Source: ${source}) ===`);
+    console.log('Global cart variable:', cart);
+    console.log('Global cart length:', cart.length);
+    console.log('LocalStorage cart:', localStorage.getItem('cart'));
+    console.log('Window.cart (if exposed):', window.cart);
+    console.log('Cart variable type:', typeof cart);
+    console.log('Cart is array:', Array.isArray(cart));
+    console.log('====================================');
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing application...');
+    logCartState('DOMContentLoaded');
     // Clear product cache to ensure fresh data from API
     if (typeof clearProductCache === 'function') {
         clearProductCache();
@@ -101,10 +150,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // Cart Management
 function initializeCart() {
     console.log('DEBUG: initializeCart called');
+    logCartState('initializeCart - start');
     console.log('DEBUG: Current cart from localStorage:', JSON.parse(localStorage.getItem('cart')) || []);
     console.log('DEBUG: Cart variable before updateCartCount:', cart);
     updateCartCount();
     console.log('DEBUG: Cart variable after updateCartCount:', cart);
+    logCartState('initializeCart - end');
 }
 
 async function addToCart(productId, quantity = 1, sourcePage = null) {
@@ -375,6 +426,9 @@ function clearCart() {
 
 function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
+    // Ensure window.cart is always in sync
+    window.cart = cart;
+    console.log('DEBUG: Cart saved to localStorage', { cartLength: cart.length });
 }
 
 function getCartTotal() {
@@ -405,6 +459,9 @@ function updateCartCount() {
 }
 
 function updateCartDisplay() {
+    logCartState('updateCartDisplay - start');
+    console.log('DEBUG: updateCartDisplay called');
+
     const cartItemsContainer = document.getElementById('cartItems');
     const cartItemCountElement = document.getElementById('cartItemCount');
     const emptyCartMessage = document.getElementById('emptyCartMessage');
@@ -413,6 +470,23 @@ function updateCartDisplay() {
     const taxElement = document.getElementById('tax');
     const totalElement = document.getElementById('total');
     const shippingCalculator = document.getElementById('shippingCalculator');
+
+    console.log('DEBUG: updateCartDisplay - cartItemsContainer:', cartItemsContainer ? 'found' : 'NOT FOUND');
+    console.log('DEBUG: updateCartDisplay - cart length:', cart.length);
+    console.log('DEBUG: updateCartDisplay - cart contents:', JSON.stringify(cart));
+
+    // DEBUG: Check if we're reading from the right cart variable
+    const localStorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+    console.log('DEBUG: updateCartDisplay - localStorage cart length:', localStorageCart.length);
+    console.log('DEBUG: updateCartDisplay - localStorage cart contents:', JSON.stringify(localStorageCart));
+
+    // DEBUG: If our cart variable is empty but localStorage has items, sync them
+    if (cart.length === 0 && localStorageCart.length > 0) {
+        console.log('DEBUG: updateCartDisplay - Syncing cart from localStorage');
+        cart = localStorageCart;
+        window.cart = cart;
+        console.log('DEBUG: updateCartDisplay - Cart after sync:', cart);
+    }
 
     if (cartItemsContainer) {
         console.log('DEBUG: updateCartDisplay - cartItemsContainer found');
@@ -507,6 +581,9 @@ function updateCartDisplay() {
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
+        console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML length:', cartItemsContainer.innerHTML.length);
+        console.log('DEBUG: updateCartDisplay completed - cartItemsContainer innerHTML:', cartItemsContainer.innerHTML.substring(0, 200) + '...');
+        logCartState('updateCartDisplay - end');
                 `;
             });
             cartItemsContainer.innerHTML = cartHTML;
@@ -752,9 +829,14 @@ function initializeDealsPage() {
 
 function initializeCartPage() {
     console.log('DEBUG: initializeCartPage called');
-    console.log('DEBUG: Cart contents at page load:', cart);
-    console.log('DEBUG: Cart length:', cart.length);
-    console.log('DEBUG: Cart items:', JSON.stringify(cart));
+    logCartState('initializeCartPage - start');
+
+    // DEBUG: Check if we can access the global cart variable
+    console.log('DEBUG: typeof cart:', typeof cart);
+    console.log('DEBUG: cart instanceof Array:', cart instanceof Array);
+    console.log('DEBUG: Array.isArray(cart):', Array.isArray(cart));
+    console.log('DEBUG: window.cart exists:', typeof window.cart !== 'undefined');
+    console.log('DEBUG: window.cart === cart:', window.cart === cart);
 
     // Check if cart is empty and log accordingly
     if (cart.length === 0) {
@@ -773,7 +855,20 @@ function initializeCartPage() {
         });
     }
 
+    // DEBUG: Force re-read from localStorage to ensure we have latest data
+    const localStorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+    console.log('DEBUG: LocalStorage cart:', localStorageCart);
+    console.log('DEBUG: LocalStorage cart length:', localStorageCart.length);
+
+    // If localStorage has items but our cart variable doesn't, sync them
+    if (localStorageCart.length > 0 && cart.length === 0) {
+        console.log('DEBUG: Syncing cart from localStorage to variable');
+        cart = localStorageCart;
+        window.cart = cart;
+    }
+
     updateCartDisplay();
+    logCartState('initializeCartPage - after updateCartDisplay');
 
     // Clear cart button
     const clearCartBtn = document.getElementById('clearCartBtn');

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Functionality Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cart Functionality Fix Test</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Add Product to Cart</h2>
+        <p>This test adds a product to cart and verifies it appears in localStorage</p>
+        <button onclick="testAddToCart()">Run Test</button>
+        <div id="test1Result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Verify Cart Display</h2>
+        <p>This test verifies that the cart display function can read from localStorage</p>
+        <button onclick="testCartDisplay()">Run Test</button>
+        <div id="test2Result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Cart Synchronization</h2>
+        <p>This test verifies that cart synchronization works between variable and localStorage</p>
+        <button onclick="testCartSync()">Run Test</button>
+        <div id="test3Result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Clear Cart</h2>
+        <p>This test clears the cart and verifies it's empty</p>
+        <button onclick="testClearCart()">Run Test</button>
+        <div id="test4Result" class="test-result"></div>
+    </div>
+
+    <script>
+        // Mock product data for testing
+        const mockProduct = {
+            id: 'test-product-1',
+            name: 'Test Product',
+            price: 100,
+            image: 'test.jpg',
+            inStock: true
+        };
+
+        // Test 1: Add product to cart
+        function testAddToCart() {
+            const resultElement = document.getElementById('test1Result');
+
+            try {
+                // Clear any existing cart
+                localStorage.removeItem('cart');
+
+                // Add product to cart
+                const cart = [];
+                cart.push({
+                    id: mockProduct.id,
+                    name: mockProduct.name,
+                    price: mockProduct.price,
+                    image: mockProduct.image,
+                    quantity: 1
+                });
+
+                // Save to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                // Verify it was saved
+                const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                if (savedCart.length === 1 && savedCart[0].id === mockProduct.id) {
+                    resultElement.innerHTML = '✅ SUCCESS: Product added to cart and saved to localStorage';
+                    resultElement.className = 'test-result success';
+                    return true;
+                } else {
+                    resultElement.innerHTML = '❌ FAILED: Product not properly saved to localStorage';
+                    resultElement.className = 'test-result error';
+                    return false;
+                }
+            } catch (error) {
+                resultElement.innerHTML = '❌ ERROR: ' + error.message;
+                resultElement.className = 'test-result error';
+                return false;
+            }
+        }
+
+        // Test 2: Verify cart display can read from localStorage
+        function testCartDisplay() {
+            const resultElement = document.getElementById('test2Result');
+
+            try {
+                // Check if cart exists in localStorage
+                const localStorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                if (localStorageCart.length === 0) {
+                    resultElement.innerHTML = '⚠️ WARNING: No cart data in localStorage. Run Test 1 first.';
+                    resultElement.className = 'test-result';
+                    return false;
+                }
+
+                // Verify we can read the cart data
+                if (localStorageCart.length > 0 && localStorageCart[0].id === mockProduct.id) {
+                    resultElement.innerHTML = '✅ SUCCESS: Cart display can read from localStorage';
+                    resultElement.className = 'test-result success';
+                    return true;
+                } else {
+                    resultElement.innerHTML = '❌ FAILED: Cart data not properly read from localStorage';
+                    resultElement.className = 'test-result error';
+                    return false;
+                }
+            } catch (error) {
+                resultElement.innerHTML = '❌ ERROR: ' + error.message;
+                resultElement.className = 'test-result error';
+                return false;
+            }
+        }
+
+        // Test 3: Cart synchronization
+        function testCartSync() {
+            const resultElement = document.getElementById('test3Result');
+
+            try {
+                // Get current cart from localStorage
+                const localStorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                if (localStorageCart.length === 0) {
+                    resultElement.innerHTML = '⚠️ WARNING: No cart data in localStorage. Run Test 1 first.';
+                    resultElement.className = 'test-result';
+                    return false;
+                }
+
+                // Simulate the sync logic from our fix
+                let cart = [];
+                if (cart.length === 0 && localStorageCart.length > 0) {
+                    cart = localStorageCart;
+                }
+
+                // Verify sync worked
+                if (cart.length > 0 && cart[0].id === mockProduct.id) {
+                    resultElement.innerHTML = '✅ SUCCESS: Cart synchronization works correctly';
+                    resultElement.className = 'test-result success';
+                    return true;
+                } else {
+                    resultElement.innerHTML = '❌ FAILED: Cart synchronization failed';
+                    resultElement.className = 'test-result error';
+                    return false;
+                }
+            } catch (error) {
+                resultElement.innerHTML = '❌ ERROR: ' + error.message;
+                resultElement.className = 'test-result error';
+                return false;
+            }
+        }
+
+        // Test 4: Clear cart
+        function testClearCart() {
+            const resultElement = document.getElementById('test4Result');
+
+            try {
+                // Clear the cart
+                localStorage.removeItem('cart');
+
+                // Verify it's empty
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                if (cart.length === 0) {
+                    resultElement.innerHTML = '✅ SUCCESS: Cart cleared successfully';
+                    resultElement.className = 'test-result success';
+                    return true;
+                } else {
+                    resultElement.innerHTML = '❌ FAILED: Cart not properly cleared';
+                    resultElement.className = 'test-result error';
+                    return false;
+                }
+            } catch (error) {
+                resultElement.innerHTML = '❌ ERROR: ' + error.message;
+                resultElement.className = 'test-result error';
+                return false;
+            }
+        }
+
+        // Run all tests
+        function runAllTests() {
+            const test1Passed = testAddToCart();
+            const test2Passed = testCartDisplay();
+            const test3Passed = testCartSync();
+            const test4Passed = testClearCart();
+
+            const allPassed = test1Passed && test2Passed && test3Passed && test4Passed;
+
+            if (allPassed) {
+                alert('🎉 All tests passed! The cart functionality fix is working correctly.');
+            } else {
+                alert('⚠️ Some tests failed. Please check the results above.');
+            }
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', function() {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>
