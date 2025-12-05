@@ -25,29 +25,48 @@ async function fetchProducts(forceRefresh = false) {
   }
 
   console.log('Fetching products from API...');
-  try {
-    const response = await fetch(`${API_BASE}/products`);
-    console.log('API response status:', response.status);
-    if (response.ok) {
-      const apiProducts = await response.json();
-      console.log('Fetched API products:', apiProducts.length, 'items');
-      console.log('Sample API product:', apiProducts[0] ? JSON.stringify(apiProducts[0], null, 2) : 'No products');
 
-      productCache = apiProducts;
-      console.log('API products:', productCache.length, 'items');
-      return productCache;
-    } else {
-      console.error('API response not ok:', response.status, response.statusText);
-      // Log response text for debugging
-      const errorText = await response.text();
-      console.error('API error response:', errorText);
+  // Try multiple API endpoints
+  const apiUrls = [
+    'https://netyarkmall-production.up.railway.app/api',
+    'http://localhost:5000/api'
+  ];
+
+  for (const baseUrl of apiUrls) {
+    try {
+      console.log('Trying API endpoint:', baseUrl);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(`${baseUrl}/products`, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      clearTimeout(timeoutId);
+      console.log('API response status:', response.status);
+
+      if (response.ok) {
+        const apiProducts = await response.json();
+        console.log('Fetched API products from', baseUrl, ':', apiProducts.length, 'items');
+
+        productCache = apiProducts;
+        console.log('API products cached:', productCache.length, 'items');
+        return productCache;
+      } else {
+        console.warn('Failed to fetch from', baseUrl, ':', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.warn('Error fetching from', baseUrl, ':', error.message);
     }
-  } catch (error) {
-    console.error('Error fetching products:', error);
   }
 
-  // Fallback to legacy product database if API fails
-  console.log('API failed, falling back to legacy product database');
+  // Fallback to legacy product database if all APIs fail
+  console.log('All API endpoints failed, falling back to legacy product database');
   return flattenLegacyProducts();
 }
 
@@ -552,23 +571,49 @@ async function getFastSellingItems() {
 // Get products by ID
 async function getProductById(id) {
     console.log('Fetching product by ID:', id);
-    try {
-        const response = await fetch(`${API_BASE}/products/${id}`);
-        console.log('Product API response status:', response.status);
-        if (response.ok) {
-            const product = await response.json();
-            console.log('Fetched product:', product);
-            return product;
-        } else {
-            console.error('Failed to fetch product:', response.status, response.statusText);
-            const errorText = await response.text();
-            console.error('Product API error response:', errorText);
-            return null;
+
+    // Try multiple API endpoints in case one fails
+    const apiUrls = [
+        'https://netyarkmall-production.up.railway.app/api',
+        'http://localhost:5000/api'
+    ];
+
+    for (const baseUrl of apiUrls) {
+        try {
+            console.log('Trying API endpoint:', baseUrl);
+
+            // Add timeout to prevent hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout per endpoint
+
+            const response = await fetch(`${baseUrl}/products/${id}`, {
+                signal: controller.signal,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            clearTimeout(timeoutId);
+            console.log('Product API response status:', response.status);
+
+            if (response.ok) {
+                const product = await response.json();
+                console.log('Fetched product from', baseUrl, ':', product);
+                return product;
+            } else {
+                console.warn('Failed to fetch from', baseUrl, ':', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.warn('Error fetching from', baseUrl, ':', error.message);
+            if (error.name === 'AbortError') {
+                console.warn('Request to', baseUrl, 'timed out');
+            }
         }
-    } catch (error) {
-        console.error('Error fetching product:', error);
-        return null;
     }
+
+    console.error('All API endpoints failed for product ID:', id);
+    return null;
 }
 
 // Get category data for the homepage category grid

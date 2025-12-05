@@ -18,7 +18,7 @@
 
             try {
                 // Test with a known product ID
-                const product = await getProductById('69310e6d50ec7dbd98a6437c');
+                const product = await getProductById('69322205fe9e410b8f7812b2');
                 if (product) {
                     resultDiv.innerHTML = `
                         <h2>Success!</h2>
@@ -26,12 +26,15 @@
                         <p><strong>Price:</strong> ₵${product.price}</p>
                         <p><strong>Category:</strong> ${product.category}</p>
                         <p><strong>Stock:</strong> ${product.stock}</p>
+                        <p><strong>Description:</strong> ${product.longDescription || product.description}</p>
+                        <p><strong>Brand:</strong> ${product.brand || 'N/A'}</p>
                     `;
                 } else {
                     resultDiv.innerHTML = '<p style="color: red;">Failed: Product not found</p>';
                 }
             } catch (error) {
                 resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error('Full error:', error);
             }
         }
     </script>
