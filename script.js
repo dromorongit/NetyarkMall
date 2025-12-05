@@ -1682,6 +1682,7 @@ function selectVariant(button, type, value) {
 // Event handlers for add to cart buttons
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('add-to-cart-btn') || e.target.closest('.add-to-cart-btn')) {
+        console.log('DEBUG: Add to Cart event listener triggered');
         e.preventDefault();
         const button = e.target.classList.contains('add-to-cart-btn') ? e.target : e.target.closest('.add-to-cart-btn');
         const productId = button.getAttribute('data-product') || button.closest('[data-product-id]')?.getAttribute('data-product-id');
@@ -1691,9 +1692,11 @@ document.addEventListener('click', function(e) {
             target: e.target,
             button: button,
             productId: productId,
+            buttonAttributes: Array.from(button.attributes).map(attr => ({name: attr.name, value: attr.value})),
             isWholesale: button.closest('.wholesale-card') !== null,
             isDeal: button.closest('.deal-card') !== null,
-            currentPage: window.location.pathname.split('/').pop() || 'index.html'
+            currentPage: window.location.pathname.split('/').pop() || 'index.html',
+            buttonHTML: button.outerHTML
         });
 
         if (productId) {
