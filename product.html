@@ -273,18 +273,26 @@
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
 
+            console.log('Product Details Page - Initializing with productId:', productId);
+
             if (!productId) {
+                console.error('No productId found in URL parameters');
                 showErrorState();
                 return;
             }
 
             try {
+                console.log('Fetching product with ID:', productId);
                 const product = await getProductById(productId);
+                console.log('Product fetched:', product);
+
                 if (!product) {
+                    console.error('Product not found for ID:', productId);
                     showErrorState();
                     return;
                 }
 
+                console.log('Displaying product details for:', product.name);
                 displayProductDetails(product);
                 loadRelatedProducts(product.category, productId);
                 loadProductReviews(productId);
@@ -937,7 +945,6 @@
 
         // Initialize rating system when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            initializeProductDetailPage();
             initializeRatingSystem();
         });
     </script>

@@ -1048,23 +1048,19 @@ async function loadFeaturedDeals() {
             stockStatus: p.stockStatus
         })));
 
-        // Filter for products that have a discount (originalPrice > price)
-        // OR products that don't have originalPrice set (for backward compatibility)
+        // For daily deals, we show ALL products marked as isDailyDeal=true
+        // regardless of whether they have discounts or not
         const dealsWithDiscount = dailyDeals.filter(product => {
-            const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-            const noOriginalPrice = !product.originalPrice; // Allow products without originalPrice
-            const isValidDeal = hasDiscount || noOriginalPrice;
-
-            console.log('DEBUG: Checking discount for product:', {
+            console.log('DEBUG: Daily deal product:', {
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 originalPrice: product.originalPrice,
-                hasDiscount: hasDiscount,
-                noOriginalPrice: noOriginalPrice,
-                isValidDeal: isValidDeal
+                isDailyDeal: product.isDailyDeal
             });
-            return isValidDeal;
+            // Since we already filtered for isDailyDeal=true from the API,
+            // all products here are valid daily deals
+            return true;
         });
         console.log('DEBUG: Daily deals with discounts:', dealsWithDiscount.length);
 
