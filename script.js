@@ -1702,8 +1702,9 @@ document.addEventListener('click', function(e) {
         if (productId) {
             const isWholesale = button.closest('.wholesale-card') !== null;
             const isDeal = button.closest('.deal-card') !== null;
+            const isProductDetail = button.closest('.product-detail-container') !== null;
 
-            console.log('DEBUG: Product detection - isWholesale:', isWholesale, 'isDeal:', isDeal);
+            console.log('DEBUG: Product detection - isWholesale:', isWholesale, 'isDeal:', isDeal, 'isProductDetail:', isProductDetail);
 
             if (isWholesale) {
                 const quantityInput = button.closest('.product-card').querySelector(`#wholesale-qty-${productId}`);
@@ -1716,6 +1717,12 @@ document.addEventListener('click', function(e) {
                 const sourcePage = currentPage === 'deals.html' ? 'deals' : null;
                 console.log('DEBUG: Adding deal product:', productId, 'from page:', currentPage, 'sourcePage:', sourcePage);
                 addToCart(productId, 1, sourcePage);
+            } else if (isProductDetail) {
+                // For product details page, read quantity from the productQuantity input
+                const quantityInput = document.getElementById('productQuantity');
+                const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                console.log('DEBUG: Adding product from details page:', productId, 'quantity:', quantity);
+                addToCart(productId, quantity, 'product-detail');
             } else {
                 // Determine source page based on current URL
                 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
