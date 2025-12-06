@@ -149,19 +149,34 @@ router.put('/:id', auth, adminAuth, upload.fields([
     // Handle image upload
     if (req.files && req.files.image && req.files.image[0]) {
       console.log('New image uploaded:', req.files.image[0].filename);
-      productData.image = '/uploads/' + req.files.image[0].filename;
+      const newImagePath = '/uploads/' + req.files.image[0].filename;
+      console.log('New image path:', newImagePath);
+      productData.image = newImagePath;
 
-      // TODO: Delete old image file if it exists
+      // Delete old image file if it exists
       if (currentProduct && currentProduct.image) {
         const fs = require('fs');
         const path = require('path');
         const oldImagePath = path.join(__dirname, '..', 'backend', 'uploads', path.basename(currentProduct.image));
         console.log('Old image path to delete:', oldImagePath);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-          console.log('Old image file deleted successfully');
-        } else {
-          console.log('Old image file not found at path:', oldImagePath);
+        console.log('Current working directory:', process.cwd());
+        console.log('__dirname:', __dirname);
+        console.log('Old image basename:', path.basename(currentProduct.image));
+        try {
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+            console.log('Old image file deleted successfully');
+          } else {
+            console.log('Old image file not found at path:', oldImagePath);
+            // List files in uploads directory to debug
+            const uploadsDir = path.join(__dirname, '..', 'backend', 'uploads');
+            if (fs.existsSync(uploadsDir)) {
+              const files = fs.readdirSync(uploadsDir);
+              console.log('Files in uploads directory:', files);
+            }
+          }
+        } catch (error) {
+          console.error('Error deleting old image file:', error);
         }
       }
     } else {
@@ -183,6 +198,11 @@ router.put('/:id', auth, adminAuth, upload.fields([
 
     const product = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
+    console.log('Product updated successfully. New product data:', {
+      id: product._id,
+      name: product.name,
+      image: product.image
+    });
     res.json(product);
   } catch (err) {
     res.status(400).json({ message: err.message });
