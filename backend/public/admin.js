@@ -559,7 +559,8 @@ function closeEditModal() {
 }
 
 // Handle edit product form submission
-document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
+if (document.getElementById('edit-product-form')) {
+  document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const productId = document.getElementById('edit-product-id').value;
@@ -630,6 +631,7 @@ document.getElementById('edit-product-form').addEventListener('submit', async (e
     showNotification('Error updating product: ' + err.message, 'error');
   }
 });
+}
 
 async function deleteProduct(id) {
   if (confirm('Delete this product?')) {
