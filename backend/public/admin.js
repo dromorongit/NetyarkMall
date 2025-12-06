@@ -176,6 +176,7 @@ document.getElementById('product-daily-deal').addEventListener('change', functio
 
 document.getElementById('product-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    console.log('Product form submitted');
     const formData = new FormData();
     formData.append('name', document.getElementById('product-name').value);
     formData.append('shortDescription', document.getElementById('product-short-description').value);
@@ -209,18 +210,35 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     // Add stock status field
     const stockStatus = document.querySelector('input[name="stock-status"]:checked').value;
     formData.append('stockStatus', stockStatus);
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
+      } else {
+        console.log(`${key}: ${value}`);
+      }
+    }
+    console.log('Sending request to /api/products');
     try {
       const res = await authFetch(`${API_BASE}/products`, {
         method: 'POST',
         body: formData
       });
-      if (res && res.ok) {
+      console.log('Response received:', res ? `status ${res.status}` : 'null');
+      if (res && !res.ok) {
+        const errorData = await res.json();
+        console.log('Error data:', errorData);
+        showNotification(errorData.message || 'Failed to add product', 'error');
+      } else if (res) {
+        console.log('Product added successfully');
+        showNotification('Product added successfully', 'success');
         loadProducts();
         document.getElementById('product-form').reset();
         document.getElementById('product-moq').value = '1';
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error in form submission:', err);
+      showNotification('Error adding product', 'error');
     }
   });
 

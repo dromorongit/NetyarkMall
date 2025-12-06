@@ -6,7 +6,7 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, 'backend', 'uploads');
+    const uploadPath = path.join(__dirname, '..', 'backend', 'uploads');
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
@@ -114,18 +114,25 @@ router.post('/', auth, adminAuth, upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'additionalMedia', maxCount: 10 }
 ]), async (req, res) => {
+  console.log('POST /products called');
+  console.log('req.body:', req.body);
+  console.log('req.files:', req.files);
   const productData = req.body;
+  console.log('productData before processing:', productData);
   if (req.files.image && req.files.image[0]) {
     productData.image = '/uploads/' + req.files.image[0].filename;
   }
   if (req.files.additionalMedia) {
     productData.additionalMedia = req.files.additionalMedia.map(file => '/uploads/' + file.filename);
   }
+  console.log('Final productData:', productData);
   const product = new Product(productData);
   try {
     await product.save();
+    console.log('Product saved with id:', product._id);
     res.status(201).json(product);
   } catch (err) {
+    console.log('Error saving product:', err.message);
     res.status(400).json({ message: err.message });
   }
 });
@@ -157,7 +164,7 @@ router.put('/:id', auth, adminAuth, upload.fields([
       if (currentProduct && currentProduct.image) {
         const fs = require('fs');
         const path = require('path');
-        const oldImagePath = path.join(__dirname, 'backend', 'uploads', path.basename(currentProduct.image));
+        const oldImagePath = path.join(__dirname, '..', 'backend', 'uploads', path.basename(currentProduct.image));
         console.log('Old image path to delete:', oldImagePath);
         console.log('Current working directory:', process.cwd());
         console.log('__dirname:', __dirname);
@@ -169,7 +176,7 @@ router.put('/:id', auth, adminAuth, upload.fields([
           } else {
             console.log('Old image file not found at path:', oldImagePath);
             // List files in uploads directory to debug
-            const uploadsDir = path.join(__dirname, 'backend', 'uploads');
+            const uploadsDir = path.join(__dirname, '..', 'backend', 'uploads');
             if (fs.existsSync(uploadsDir)) {
               const files = fs.readdirSync(uploadsDir);
               console.log('Files in uploads directory:', files);
