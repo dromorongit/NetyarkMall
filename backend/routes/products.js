@@ -136,11 +136,36 @@ router.put('/:id', auth, adminAuth, upload.fields([
   { name: 'additionalMedia', maxCount: 10 }
 ]), async (req, res) => {
   try {
+    console.log('PUT /products/:id - Updating product:', req.params.id);
+    console.log('Request files:', req.files);
+    console.log('Request body:', req.body);
+
     const productData = req.body;
+
+    // Get current product to check for existing image
+    const currentProduct = await Product.findById(req.params.id);
+    console.log('Current product image:', currentProduct ? currentProduct.image : 'Product not found');
 
     // Handle image upload
     if (req.files && req.files.image && req.files.image[0]) {
+      console.log('New image uploaded:', req.files.image[0].filename);
       productData.image = '/uploads/' + req.files.image[0].filename;
+
+      // TODO: Delete old image file if it exists
+      if (currentProduct && currentProduct.image) {
+        const fs = require('fs');
+        const path = require('path');
+        const oldImagePath = path.join(__dirname, '..', 'backend', 'uploads', path.basename(currentProduct.image));
+        console.log('Old image path to delete:', oldImagePath);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+          console.log('Old image file deleted successfully');
+        } else {
+          console.log('Old image file not found at path:', oldImagePath);
+        }
+      }
+    } else {
+      console.log('No new image uploaded, keeping existing image');
     }
 
     // Handle additional media uploads

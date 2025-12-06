@@ -547,6 +547,8 @@ document.getElementById('edit-product-form').addEventListener('submit', async (e
   const productId = document.getElementById('edit-product-id').value;
   const formData = new FormData();
 
+  console.log('Frontend: Starting edit product submission for ID:', productId);
+
   // Add basic product data
   formData.append('name', document.getElementById('edit-product-name').value);
   formData.append('shortDescription', document.getElementById('edit-product-short-description').value);
@@ -567,26 +569,46 @@ document.getElementById('edit-product-form').addEventListener('submit', async (e
 
   // Handle image upload
   const imageFile = document.getElementById('edit-product-image').files[0];
+  console.log('Frontend: Image file selected:', imageFile);
   if (imageFile) {
     formData.append('image', imageFile);
+    console.log('Frontend: Appended image to formData:', imageFile.name, 'Size:', imageFile.size);
+  } else {
+    console.log('Frontend: No image file selected');
+  }
+
+  // Log all formData entries
+  console.log('Frontend: FormData contents:');
+  for (let [key, value] of formData.entries()) {
+    if (value instanceof File) {
+      console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
+    } else {
+      console.log(`  ${key}: ${value}`);
+    }
   }
 
   try {
+    console.log('Frontend: Sending PUT request to:', `${API_BASE}/products/${productId}`);
     const response = await authFetch(`${API_BASE}/products/${productId}`, {
       method: 'PUT',
       body: formData
     });
 
+    console.log('Frontend: Response status:', response ? response.status : 'No response');
+
     if (response && response.ok) {
+      const result = await response.json();
+      console.log('Frontend: Product updated successfully:', result);
       showNotification('Product updated successfully!', 'success');
       closeEditModal();
       loadProducts();
     } else {
       const errorData = await response.json();
+      console.log('Frontend: Failed to update product:', errorData);
       showNotification('Failed to update product: ' + (errorData.message || 'Unknown error'), 'error');
     }
   } catch (err) {
-    console.error('Error updating product:', err);
+    console.error('Frontend: Error updating product:', err);
     showNotification('Error updating product: ' + err.message, 'error');
   }
 });
