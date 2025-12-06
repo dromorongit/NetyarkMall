@@ -6,7 +6,7 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '..', 'backend', 'uploads');
+    const uploadPath = path.join(__dirname, 'backend', 'uploads');
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
@@ -157,7 +157,7 @@ router.put('/:id', auth, adminAuth, upload.fields([
       if (currentProduct && currentProduct.image) {
         const fs = require('fs');
         const path = require('path');
-        const oldImagePath = path.join(__dirname, '..', 'backend', 'uploads', path.basename(currentProduct.image));
+        const oldImagePath = path.join(__dirname, 'backend', 'uploads', path.basename(currentProduct.image));
         console.log('Old image path to delete:', oldImagePath);
         console.log('Current working directory:', process.cwd());
         console.log('__dirname:', __dirname);
@@ -169,7 +169,7 @@ router.put('/:id', auth, adminAuth, upload.fields([
           } else {
             console.log('Old image file not found at path:', oldImagePath);
             // List files in uploads directory to debug
-            const uploadsDir = path.join(__dirname, '..', 'backend', 'uploads');
+            const uploadsDir = path.join(__dirname, 'backend', 'uploads');
             if (fs.existsSync(uploadsDir)) {
               const files = fs.readdirSync(uploadsDir);
               console.log('Files in uploads directory:', files);
