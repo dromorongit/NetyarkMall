@@ -231,7 +231,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         showNotification(errorData.message || 'Failed to add product', 'error');
       } else if (res) {
         console.log('Product added successfully');
-        showNotification('Product added successfully', 'success');
+        showNotification('Product added successfully! Images are now stored on Cloudinary and will persist across redeployments.', 'success');
         loadProducts();
         document.getElementById('product-form').reset();
         document.getElementById('product-moq').value = '1';
@@ -615,17 +615,17 @@ if (document.getElementById('edit-product-form')) {
 
     console.log('Frontend: Response status:', response ? response.status : 'No response');
 
-    if (response && response.ok) {
-      const result = await response.json();
-      console.log('Frontend: Product updated successfully:', result);
-      showNotification('Product updated successfully!', 'success');
-      closeEditModal();
-      loadProducts();
-    } else {
-      const errorData = await response.json();
-      console.log('Frontend: Failed to update product:', errorData);
-      showNotification('Failed to update product: ' + (errorData.message || 'Unknown error'), 'error');
-    }
+   if (response && response.ok) {
+     const result = await response.json();
+     console.log('Frontend: Product updated successfully:', result);
+     showNotification('Product updated successfully! Images are stored on Cloudinary and will persist across redeployments.', 'success');
+     closeEditModal();
+     loadProducts();
+   } else {
+     const errorData = await response.json();
+     console.log('Frontend: Failed to update product:', errorData);
+     showNotification('Failed to update product: ' + (errorData.message || 'Unknown error'), 'error');
+   }
   } catch (err) {
     console.error('Frontend: Error updating product:', err);
     showNotification('Error updating product: ' + err.message, 'error');

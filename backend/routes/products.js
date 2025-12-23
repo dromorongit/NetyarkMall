@@ -4,6 +4,7 @@ const { auth, adminAuth } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../cloudinaryConfig');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -123,15 +124,25 @@ router.post('/', auth, adminAuth, upload.fields([
   console.log('req.files:', req.files);
   const productData = req.body;
   console.log('productData before processing:', productData);
-  if (req.files.image && req.files.image[0]) {
-    productData.image = '/uploads/' + req.files.image[0].filename;
-  }
-  if (req.files.additionalMedia) {
-    productData.additionalMedia = req.files.additionalMedia.map(file => '/uploads/' + file.filename);
-  }
-  console.log('Final productData:', productData);
-  const product = new Product(productData);
+  
   try {
+    // Upload main image to Cloudinary
+    if (req.files.image && req.files.image[0]) {
+      const imageUrl = await uploadToCloudinary(req.files.image[0], 'netyarkmall/products');
+      productData.image = imageUrl;
+    }
+    
+    // Upload additional media to Cloudinary
+    if (req.files.additionalMedia) {
+      const uploadPromises = req.files.additionalMedia.map(file =>
+        uploadToCloudinary(file, 'netyarkmall/products/additional')
+      );
+      const mediaUrls = await Promise.all(uploadPromises);
+      productData.additionalMedia = mediaUrls;
+    }
+    
+    console.log('Final productData:', productData);
+    const product = new Product(productData);
     await product.save();
     console.log('Product saved with id:', product._id);
     res.status(201).json(product);
@@ -160,34 +171,19 @@ router.put('/:id', auth, adminAuth, upload.fields([
     // Handle image upload
     if (req.files && req.files.image && req.files.image[0]) {
       console.log('New image uploaded:', req.files.image[0].filename);
-      const newImagePath = '/uploads/' + req.files.image[0].filename;
-      console.log('New image path:', newImagePath);
-      productData.image = newImagePath;
+      
+      // Upload new image to Cloudinary
+      const newImageUrl = await uploadToCloudinary(req.files.image[0], 'netyarkmall/products');
+      console.log('New image URL:', newImageUrl);
+      productData.image = newImageUrl;
 
-      // Delete old image file if it exists
+      // Delete old image from Cloudinary if it exists
       if (currentProduct && currentProduct.image) {
-        const fs = require('fs');
-        const path = require('path');
-        const oldImagePath = path.join(__dirname, '..', 'backend', 'uploads', path.basename(currentProduct.image));
-        console.log('Old image path to delete:', oldImagePath);
-        console.log('Current working directory:', process.cwd());
-        console.log('__dirname:', __dirname);
-        console.log('Old image basename:', path.basename(currentProduct.image));
         try {
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-            console.log('Old image file deleted successfully');
-          } else {
-            console.log('Old image file not found at path:', oldImagePath);
-            // List files in uploads directory to debug
-            const uploadsDir = path.join(__dirname, '..', 'backend', 'uploads');
-            if (fs.existsSync(uploadsDir)) {
-              const files = fs.readdirSync(uploadsDir);
-              console.log('Files in uploads directory:', files);
-            }
-          }
+          await deleteFromCloudinary(currentProduct.image);
+          console.log('Old image deleted from Cloudinary successfully');
         } catch (error) {
-          console.error('Error deleting old image file:', error);
+          console.error('Error deleting old image from Cloudinary:', error);
         }
       }
     } else {
@@ -196,7 +192,14 @@ router.put('/:id', auth, adminAuth, upload.fields([
 
     // Handle additional media uploads
     if (req.files && req.files.additionalMedia) {
-      productData.additionalMedia = req.files.additionalMedia.map(file => '/uploads/' + file.filename);
+      const uploadPromises = req.files.additionalMedia.map(file =>
+        uploadToCloudinary(file, 'netyarkmall/products/additional')
+      );
+      const mediaUrls = await Promise.all(uploadPromises);
+      
+      // Combine new media with existing media (if any)
+      const existingMedia = currentProduct.additionalMedia || [];
+      productData.additionalMedia = [...existingMedia, ...mediaUrls];
     }
 
     // Handle array fields that come as comma-separated strings
