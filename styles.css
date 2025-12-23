@@ -849,15 +849,15 @@ a:hover {
 /* Product Grid */
 .product-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
     margin-top: 2rem;
 }
 
 /* Desktop Product Grid */
 @media (min-width: 769px) {
     .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
     }
 }
