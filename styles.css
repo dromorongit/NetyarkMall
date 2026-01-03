@@ -2074,6 +2074,118 @@ a:hover {
     gap: 1rem;
 }
 
+/* Developer Credits Styling */
+.developer-credits {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, rgba(0, 128, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    border: 1px solid rgba(0, 128, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.developer-credits::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.developer-credits:hover::before {
+    left: 100%;
+}
+
+.developer-credits:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 128, 0, 0.2);
+    border-color: rgba(0, 128, 0, 0.4);
+    background: linear-gradient(135deg, rgba(0, 128, 0, 0.15) 0%, rgba(255, 165, 0, 0.15) 100%);
+}
+
+.developer-credits i {
+    font-size: 1.1rem;
+    color: var(--primary-green);
+    animation: pulse 2s infinite;
+}
+
+.developer-credits span {
+    font-weight: 600;
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+    letter-spacing: 0.025em;
+}
+
+.developer-credits .developer-name {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-orange) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    position: relative;
+}
+
+.developer-credits .developer-name::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-orange) 100%);
+    transition: width 0.3s ease;
+}
+
+.developer-credits:hover .developer-name::after {
+    width: 100%;
+}
+
+/* Mobile responsive for developer credits */
+@media (max-width: 768px) {
+    .footer-bottom-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .developer-credits {
+        padding: 1rem 1.25rem;
+        border-radius: 20px;
+    }
+    
+    .developer-credits i {
+        font-size: 1rem;
+    }
+    
+    .developer-credits span {
+        font-size: 0.85rem;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 .legal-links {
     display: flex;
     gap: 1rem;
