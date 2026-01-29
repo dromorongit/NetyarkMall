@@ -6,7 +6,10 @@
     <title>Checkout - Netyark Mall | Complete Your Order</title>
     <meta name="description" content="Complete your purchase at Netyark Mall. Secure checkout with multiple payment options.">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="payment-modal.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Paystack Inline Payment Widget -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
     <!-- Header Section -->
@@ -169,12 +172,12 @@
                                 <h3>Payment Method</h3>
                                 <div class="payment-methods">
                                     <div class="payment-option">
-                                        <input type="radio" id="card" name="paymentMethod" value="card" required>
+                                        <input type="radio" id="card" name="paymentMethod" value="card" checked>
                                         <label for="card">
                                             <i class="fas fa-credit-card"></i>
                                             <div class="payment-details">
                                                 <div class="payment-name">Credit/Debit Card</div>
-                                                <div class="payment-desc">Visa, Mastercard, American Express</div>
+                                                <div class="payment-desc">Pay securely with Visa, Mastercard via Paystack</div>
                                             </div>
                                         </label>
                                     </div>
@@ -188,16 +191,10 @@
                                             </div>
                                         </label>
                                     </div>
-                                    <div class="payment-option">
-                                        <input type="radio" id="cash" name="paymentMethod" value="cash">
-                                        <label for="cash">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                            <div class="payment-details">
-                                                <div class="payment-name">Cash on Delivery</div>
-                                                <div class="payment-desc">Pay when you receive your order</div>
-                                            </div>
-                                        </label>
-                                    </div>
+                                </div>
+                                <div id="paystackPaymentSection" style="display: block; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                    <p style="margin-bottom: 10px;"><i class="fas fa-lock" style="color: #28a745;"></i> <strong>Secure Payment via Paystack</strong></p>
+                                    <p style="font-size: 13px; color: #666;">You will be redirected to Paystack's secure payment page to complete your transaction securely.</p>
                                 </div>
                             </div>
                         </div>
@@ -208,11 +205,68 @@
                         <a href="cart.html" class="btn btn-outline">
                             <i class="fas fa-arrow-left"></i> Back to Cart
                         </a>
-                        <button type="submit" class="btn btn-primary checkout-submit-btn">
-                            <i class="fas fa-lock"></i> Place Order
+                        <button type="button" id="placeOrderBtn" class="btn btn-primary checkout-submit-btn">
+                            <i class="fas fa-lock"></i> Pay & Place Order
                         </button>
                     </div>
                 </form>
+
+                <!-- Payment Modal -->
+                <div id="paymentModal" class="payment-modal-overlay">
+                    <div class="payment-modal">
+                        <div class="payment-modal-header">
+                            <h3><i class="fas fa-lock"></i> Secure Payment</h3>
+                            <div class="secure-badge"><i class="fas fa-shield-alt"></i> SSL Secured</div>
+                            <button type="button" class="payment-modal-close" onclick="closePaymentModal()">&times;</button>
+                        </div>
+                        <div class="payment-modal-body">
+                            <div class="payment-order-summary">
+                                <h4><i class="fas fa-receipt"></i> Order Summary</h4>
+                                <div class="payment-summary-row"><span>Subtotal</span><span id="modalSubtotal">₵0.00</span></div>
+                                <div class="payment-summary-row"><span>Shipping</span><span id="modalShipping">₵0.00</span></div>
+                                <div class="payment-summary-row total"><span>Total to Pay</span><span id="modalTotal">₵0.00</span></div>
+                            </div>
+                            <div class="payment-form">
+                                <div class="payment-form-group">
+                                    <label for="paymentEmail">Email Address</label>
+                                    <input type="email" id="paymentEmail" placeholder="your@email.com">
+                                </div>
+                                <div class="payment-form-group">
+                                    <label for="paymentAmount">Amount (GHS)</label>
+                                    <input type="number" id="paymentAmount" placeholder="0.00" readonly>
+                                </div>
+                                <button type="button" id="paystackPayButton" class="pay-button" onclick="payWithPaystack()">
+                                    <i class="fas fa-credit-card"></i> Pay Now
+                                </button>
+                            </div>
+                            <div class="secure-payment-info">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Powered by Paystack. Your payment is secured with 256-bit SSL encryption.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Success Modal -->
+                <div id="paymentSuccessModal" class="payment-modal" style="display: none;">
+                    <div class="payment-modal-content">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2>Payment Successful!</h2>
+                        <p>Your order has been placed successfully.</p>
+                        <p id="orderNumber"></p>
+                        <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                    </div>
+                </div>
+
+                <!-- Payment Processing Overlay -->
+                <div id="paymentProcessing" class="payment-processing" style="display: none;">
+                    <div class="processing-content">
+                        <div class="spinner"></div>
+                        <p>Processing your payment...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -359,5 +413,458 @@
     <script src="products.js"></script>
     <script src="script.js"></script>
     <script src="auth.js"></script>
+    <script>
+        // Paystack Configuration
+        const PAYSTACK_PUBLIC_KEY = 'pk_live_bb605d276395ba7ec654e28f948a28c9f8abbaea'; // Live public key
+        const API_BASE = 'https://netyarkmall-production.up.railway.app/api';
+        const PAYSTACK_CALLBACK_URL = 'https://dromorongit.github.io/NetyarkMall/checkout.html';
+        
+        let currentOrder = null;
+        
+        // Helper function to get full image URL
+        function getFullImageUrl(imagePath) {
+            if (!imagePath) return '';
+            if (imagePath.startsWith('http') || imagePath.startsWith('data:')) return imagePath;
+            return imagePath;
+        }
+        
+        // Initialize checkout page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Checkout page initialized');
+            
+            // Check for payment callback
+            checkPaymentCallback();
+            
+            // Load cart items
+            loadCheckoutItems();
+            
+            // Setup form submission
+            const placeOrderBtn = document.getElementById('placeOrderBtn');
+            if (placeOrderBtn) {
+                placeOrderBtn.addEventListener('click', handlePlaceOrder);
+            }
+            
+            // Auto-fill email from cart if available
+            autoFillCustomerInfo();
+        });
+        
+        // Check for payment callback from Paystack
+        function checkPaymentCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('payment');
+            const orderId = urlParams.get('orderId');
+            
+            if (paymentStatus === 'callback' && orderId) {
+                verifyPayment(orderId);
+            }
+        }
+        
+        // Auto-fill customer info from localStorage if available
+        function autoFillCustomerInfo() {
+            const savedInfo = localStorage.getItem('checkoutCustomerInfo');
+            if (savedInfo) {
+                try {
+                    const info = JSON.parse(savedInfo);
+                    if (info.firstName) document.getElementById('firstName').value = info.firstName;
+                    if (info.lastName) document.getElementById('lastName').value = info.lastName;
+                    if (info.email) document.getElementById('email').value = info.email;
+                    if (info.phone) document.getElementById('phone').value = info.phone;
+                    if (info.address) document.getElementById('address').value = info.address;
+                    if (info.city) document.getElementById('city').value = info.city;
+                    if (info.region) document.getElementById('region').value = info.region;
+                } catch (e) {
+                    console.error('Error parsing saved customer info:', e);
+                }
+            }
+        }
+        
+        // Load checkout items from cart
+        function loadCheckoutItems() {
+            const checkoutItemsContainer = document.getElementById('checkoutItems');
+            if (!checkoutItemsContainer) return;
+            
+            let html = '';
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                html += `
+                    <div class="checkout-item">
+                        <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(item.image) : item.image}" alt="${item.name}">
+                        <div class="checkout-item-details">
+                            <h4>${item.name}</h4>
+                            <p>Quantity: ${item.quantity}</p>
+                            <p>₵${item.price.toLocaleString()} each</p>
+                        </div>
+                        <div class="checkout-item-total">₵${itemTotal.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+            
+            checkoutItemsContainer.innerHTML = html;
+            document.getElementById('checkoutTotal').textContent = `₵${subtotal.toLocaleString()}`;
+            
+            // Check if cart is empty
+            if (cart.length === 0) {
+                showNotification('Your cart is empty. Redirecting to shop...', 'warning');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+        }
+        
+        // Handle place order button click
+        async function handlePlaceOrder() {
+            console.log('handlePlaceOrder called');
+            
+            // Validate form
+            const form = document.getElementById('checkoutForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Get form data
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                region: document.getElementById('region').value
+            };
+            
+            // Save customer info for future use
+            localStorage.setItem('checkoutCustomerInfo', JSON.stringify(formData));
+            
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'card';
+            
+            // Calculate total
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            // Prepare order data
+            const orderData = {
+                products: cart.map(item => ({
+                    product: item.id,
+                    quantity: item.quantity
+                })),
+                total: total,
+                customer: {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    phone: formData.phone
+                },
+                shipping: {
+                    address: formData.address,
+                    city: formData.city,
+                    region: formData.region
+                },
+                paymentMethod: paymentMethod
+            };
+            
+            // Show processing overlay
+            showPaymentProcessing();
+            
+            try {
+                console.log('Creating order...');
+                
+                // Get auth token if user is logged in
+                const token = localStorage.getItem('token');
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                // Create order
+                const orderResponse = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (!orderResponse.ok) {
+                    const error = await orderResponse.json();
+                    throw new Error(error.message || 'Failed to create order');
+                }
+                
+                const orderResult = await orderResponse.json();
+                console.log('Order created:', orderResult);
+                
+                currentOrder = orderResult.order;
+                
+                // Initialize Paystack payment
+                if (paymentMethod === 'card' || paymentMethod === 'mobile-money') {
+                    hidePaymentProcessing();
+                    await initializePaystackPayment(currentOrder.id, formData.email, total, formData);
+                } else {
+                    // For other payment methods, just show success
+                    hidePaymentProcessing();
+                    showPaymentSuccess(currentOrder.id);
+                }
+                
+            } catch (error) {
+                console.error('Error creating order:', error);
+                hidePaymentProcessing();
+                showNotification(error.message || 'Error creating order. Please try again.', 'error');
+            }
+        }
+        
+        // Initialize Paystack payment
+        async function initializePaystackPayment(orderId, email, amount, customerInfo) {
+            try {
+                console.log('Initializing Paystack payment for order:', orderId);
+                
+                // Call backend to initialize payment
+                const response = await fetch(`${API_BASE}/payments/initialize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        email: email,
+                        amount: amount,
+                        firstName: customerInfo.firstName,
+                        lastName: customerInfo.lastName,
+                        phone: customerInfo.phone
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Use Paystack inline payment
+                    if (typeof PaystackPop !== 'undefined') {
+                        const handler = PaystackPop.setup({
+                            key: PAYSTACK_PUBLIC_KEY,
+                            email: email,
+                            amount: Math.round(amount * 100), // Convert to kobo
+                            currency: 'GHS',
+                            ref: data.data.reference,
+                            callback_url: PAYSTACK_CALLBACK_URL,
+                            metadata: {
+                                order_id: orderId,
+                                customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
+                                customer_phone: customerInfo.phone
+                            },
+                            callback: function(response) {
+                                console.log('Paystack callback:', response);
+                                verifyPayment(orderId, response.reference);
+                            },
+                            onClose: function() {
+                                console.log('Payment window closed');
+                                showNotification('Payment was not completed. Please try again.', 'info');
+                            }
+                        });
+                        
+                        handler.openIframe();
+                    } else {
+                        // Fallback: redirect to Paystack
+                        window.location.href = data.authorizationUrl;
+                    }
+                } else {
+                    showNotification(data.message || 'Failed to initialize payment. Please try again.', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error initializing Paystack payment:', error);
+                showNotification('Error initializing payment. Please try again.', 'error');
+            }
+        }
+        
+        // Verify payment
+        async function verifyPayment(orderId, reference) {
+            showPaymentProcessing();
+            
+            try {
+                console.log('Verifying payment for order:', orderId, 'reference:', reference);
+                
+                // If no reference provided, check URL params
+                if (!reference) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    reference = urlParams.get('reference');
+                }
+                
+                const response = await fetch(`${API_BASE}/payments/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reference: reference })
+                });
+                
+                const data = await response.json();
+                
+                console.log('Payment verification result:', data);
+                
+                hidePaymentProcessing();
+                
+                if (data.success) {
+                    showPaymentSuccess(orderId || data.data?.orderId);
+                } else {
+                    showNotification(data.message || 'Payment verification failed. Please contact support.', 'error');
+                }
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                hidePaymentProcessing();
+                showNotification('Error verifying payment. Please contact support.', 'error');
+            }
+        }
+        
+        // Show payment success modal
+        function showPaymentSuccess(orderId) {
+            // Clear cart
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            
+            // Show success modal
+            const modal = document.getElementById('paymentSuccessModal');
+            if (modal) {
+                document.getElementById('orderNumber').textContent = `Order Number: ${orderId}`;
+                modal.style.display = 'flex';
+                modal.classList.add('show');
+            } else {
+                showNotification('Order placed successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+        }
+        
+        // Show payment processing overlay
+        function showPaymentProcessing() {
+            const overlay = document.getElementById('paymentProcessing');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+        }
+        
+        // Hide payment processing overlay
+        function hidePaymentProcessing() {
+            const overlay = document.getElementById('paymentProcessing');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+        
+        // Open payment modal
+        function openPaymentModal(orderId, email, amount) {
+            const modal = document.getElementById('paymentModal');
+            if (modal) {
+                document.getElementById('paymentEmail').value = email;
+                document.getElementById('paymentAmount').value = amount;
+                document.getElementById('modalSubtotal').textContent = `₵${amount.toLocaleString()}`;
+                document.getElementById('modalTotal').textContent = `₵${amount.toLocaleString()}`;
+                modal.classList.add('show');
+            }
+        }
+        
+        // Close payment modal
+        function closePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+        
+        // Pay with Paystack inline
+        async function payWithPaystack() {
+            const email = document.getElementById('paymentEmail').value;
+            const amount = document.getElementById('paymentAmount').value;
+            
+            if (!email) {
+                showNotification('Please enter your email address', 'error');
+                return;
+            }
+            
+            if (!currentOrder || !currentOrder.id) {
+                showNotification('Order not found. Please try again.', 'error');
+                return;
+            }
+            
+            closePaymentModal();
+            showPaymentProcessing();
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments/initialize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: currentOrder.id,
+                        email: email,
+                        amount: parseFloat(amount)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (typeof PaystackPop !== 'undefined') {
+                        const handler = PaystackPop.setup({
+                            key: PAYSTACK_PUBLIC_KEY,
+                            email: email,
+                            amount: Math.round(parseFloat(amount) * 100),
+                            currency: 'GHS',
+                            ref: data.data.reference,
+                            callback_url: PAYSTACK_CALLBACK_URL,
+                            callback: function(response) {
+                                console.log('Payment successful:', response);
+                                verifyPayment(currentOrder.id, response.reference);
+                            },
+                            onClose: function() {
+                                console.log('Payment window closed');
+                                showNotification('Payment was not completed. Please try again.', 'info');
+                            }
+                        });
+                        handler.openIframe();
+                    } else {
+                        window.location.href = data.data.authorizationUrl;
+                    }
+                } else {
+                    hidePaymentProcessing();
+                    showNotification(data.message || 'Failed to initialize payment', 'error');
+                }
+            } catch (error) {
+                console.error('Error initializing payment:', error);
+                hidePaymentProcessing();
+                showNotification('Error initializing payment. Please try again.', 'error');
+            }
+        }
+        
+        // Notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button class="notification-close">&times;</button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+            
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.addEventListener('click', () => {
+                notification.remove();
+            });
+        }
+    </script>
 </body>
 </html>

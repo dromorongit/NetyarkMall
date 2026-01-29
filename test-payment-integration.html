@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Integration Test - Netyark Mall</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="payment-modal.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #008000;
+            margin-bottom: 15px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-result.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .test-result.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .test-result.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        button.test-btn {
+            background: #008000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button.test-btn:hover {
+            background: #006400;
+        }
+        input[type="text"], input[type="email"], input[type="number"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Payment Integration Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>1. Paystack SDK Test</h2>
+            <p>Test if Paystack inline SDK is loaded correctly.</p>
+            <div id="paystack-test-result" class="test-result pending">Testing...</div>
+            <button class="test-btn" onclick="testPaystackSDK()">Test Paystack SDK</button>
+        </div>
+
+        <div class="test-section">
+            <h2>2. API Connection Test</h2>
+            <p>Test connection to backend payment API.</p>
+            <div id="api-test-result" class="test-result pending">Testing...</div>
+            <button class="test-btn" onclick="testAPIConnection()">Test API Connection</button>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Payment Initialization Test</h2>
+            <p>Test payment initialization with Paystack.</p>
+            <input type="email" id="testEmail" placeholder="Test Email" value="test@example.com">
+            <input type="number" id="testAmount" placeholder="Amount (GHS)" value="10">
+            <div id="init-test-result" class="test-result pending">Testing...</div>
+            <button class="test-btn" onclick="testPaymentInit()">Test Payment Init</button>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Modal UI Test</h2>
+            <p>Test the payment modal display.</p>
+            <button class="test-btn" onclick="testModalDisplay()">Open Payment Modal</button>
+            <div id="modal-test-result" class="test-result pending">Testing...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Payment Verification Test</h2>
+            <p>Test payment verification endpoint.</p>
+            <input type="text" id="testReference" placeholder="Payment Reference">
+            <div id="verify-test-result" class="test-result pending">Testing...</div>
+            <button class="test-btn" onclick="testPaymentVerify()">Test Verify</button>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="payment-modal-overlay">
+        <div class="payment-modal">
+            <div class="payment-modal-header">
+                <h3><i class="fas fa-lock"></i> Secure Payment</h3>
+                <div class="secure-badge"><i class="fas fa-shield-alt"></i> SSL Secured</div>
+                <button type="button" class="payment-modal-close" onclick="closePaymentModal()">&times;</button>
+            </div>
+            <div class="payment-modal-body">
+                <div class="payment-order-summary">
+                    <h4><i class="fas fa-receipt"></i> Order Summary</h4>
+                    <div class="payment-summary-row"><span>Subtotal</span><span id="modalSubtotal">₵0.00</span></div>
+                    <div class="payment-summary-row"><span>Shipping</span><span id="modalShipping">₵0.00</span></div>
+                    <div class="payment-summary-row total"><span>Total to Pay</span><span id="modalTotal">₵0.00</span></div>
+                </div>
+                <div class="payment-form">
+                    <div class="payment-form-group">
+                        <label for="paymentEmail">Email Address</label>
+                        <input type="email" id="paymentEmail" placeholder="your@email.com">
+                    </div>
+                    <div class="payment-form-group">
+                        <label for="paymentAmount">Amount (GHS)</label>
+                        <input type="number" id="paymentAmount" placeholder="0.00" readonly>
+                    </div>
+                    <button type="button" id="paystackPayButton" class="pay-button" onclick="payWithPaystack()">
+                        <i class="fas fa-credit-card"></i> Pay Now
+                    </button>
+                </div>
+                <div class="secure-payment-info">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Powered by Paystack. Your payment is secured with 256-bit SSL encryption.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div id="paymentProcessing" class="processing-overlay">
+        <div class="processing-content">
+            <div class="processing-spinner"></div>
+            <h3>Processing Payment...</h3>
+            <p>Please wait while we process your payment</p>
+            <div class="processing-progress">
+                <div class="processing-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://netyarkmall-production.up.railway.app/api';
+
+        // Test 1: Paystack SDK
+        function testPaystackSDK() {
+            const result = document.getElementById('paystack-test-result');
+            if (typeof PaystackPop !== 'undefined') {
+                result.className = 'test-result success';
+                result.textContent = '✓ Paystack SDK loaded successfully';
+            } else {
+                result.className = 'test-result error';
+                result.textContent = '✗ Paystack SDK not loaded';
+            }
+        }
+
+        // Test 2: API Connection
+        async function testAPIConnection() {
+            const result = document.getElementById('api-test-result');
+            result.className = 'test-result pending';
+            result.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments/test`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    result.className = 'test-result success';
+                    result.textContent = '✓ API connection successful';
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = '✗ API connection failed';
+                }
+            } catch (error) {
+                result.className = 'test-result error';
+                result.textContent = '✗ API connection error: ' + error.message;
+            }
+        }
+
+        // Test 3: Payment Initialization
+        async function testPaymentInit() {
+            const result = document.getElementById('init-test-result');
+            const email = document.getElementById('testEmail').value;
+            const amount = document.getElementById('testAmount').value;
+            
+            result.className = 'test-result pending';
+            result.textContent = 'Initializing payment...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments/initialize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: 'test-order-' + Date.now(),
+                        email: email,
+                        amount: parseFloat(amount)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.className = 'test-result success';
+                    result.textContent = '✓ Payment initialized. Reference: ' + data.data.reference;
+                    document.getElementById('testReference').value = data.data.reference;
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = '✗ Payment init failed: ' + data.message;
+                }
+            } catch (error) {
+                result.className = 'test-result error';
+                result.textContent = '✗ Payment init error: ' + error.message;
+            }
+        }
+
+        // Test 4: Modal Display
+        function testModalDisplay() {
+            const result = document.getElementById('modal-test-result');
+            const modal = document.getElementById('paymentModal');
+            
+            // Set test values
+            document.getElementById('paymentEmail').value = 'test@example.com';
+            document.getElementById('paymentAmount').value = '100';
+            document.getElementById('modalSubtotal').textContent = '₵100.00';
+            document.getElementById('modalTotal').textContent = '₵100.00';
+            
+            modal.classList.add('show');
+            
+            setTimeout(() => {
+                if (modal.classList.contains('show')) {
+                    result.className = 'test-result success';
+                    result.textContent = '✓ Modal displayed successfully';
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = '✗ Modal not displayed';
+                }
+            }, 500);
+        }
+
+        // Close modal
+        function closePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            modal.classList.remove('show');
+        }
+
+        // Test 5: Payment Verification
+        async function testPaymentVerify() {
+            const result = document.getElementById('verify-test-result');
+            const reference = document.getElementById('testReference').value;
+            
+            if (!reference) {
+                result.className = 'test-result error';
+                result.textContent = '✗ Please enter a payment reference';
+                return;
+            }
+            
+            result.className = 'test-result pending';
+            result.textContent = 'Verifying payment...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reference: reference })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.className = 'test-result success';
+                    result.textContent = '✓ Payment verified: ' + JSON.stringify(data);
+                } else {
+                    result.className = 'test-result error';
+                    result.textContent = '✗ Payment verification: ' + data.message;
+                }
+            } catch (error) {
+                result.className = 'test-result error';
+                result.textContent = '✗ Verification error: ' + error.message;
+            }
+        }
+
+        // Pay with Paystack (for modal button)
+        async function payWithPaystack() {
+            const email = document.getElementById('paymentEmail').value;
+            const amount = document.getElementById('paymentAmount').value;
+            
+            if (!email) {
+                alert('Please enter your email address');
+                return;
+            }
+            
+            showProcessing();
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments/initialize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: 'test-' + Date.now(),
+                        email: email,
+                        amount: parseFloat(amount)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (typeof PaystackPop !== 'undefined') {
+                        const handler = PaystackPop.setup({
+                            key: 'pk_live_bb605d276395ba7ec654e28f948a28c9f8abbaea',
+                            email: email,
+                            amount: Math.round(parseFloat(amount) * 100),
+                            currency: 'GHS',
+                            ref: data.data.reference,
+                            callback: function(response) {
+                                hideProcessing();
+                                alert('Payment successful! Reference: ' + response.reference);
+                            },
+                            onClose: function() {
+                                hideProcessing();
+                                alert('Payment window closed');
+                            }
+                        });
+                        handler.openIframe();
+                    }
+                } else {
+                    hideProcessing();
+                    alert('Payment init failed: ' + data.message);
+                }
+            } catch (error) {
+                hideProcessing();
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function showProcessing() {
+            document.getElementById('paymentProcessing').classList.add('show');
+        }
+
+        function hideProcessing() {
+            document.getElementById('paymentProcessing').classList.remove('show');
+        }
+
+        // Run tests on load
+        document.addEventListener('DOMContentLoaded', function() {
+            testPaystackSDK();
+        });
+    </script>
+</body>
+</html>

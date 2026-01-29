@@ -39,7 +39,7 @@ router.get('/my', auth, async (req, res) => {
   }
 });
 
-// Create order (user or guest)
+// Create order (user or guest) - order is created in pending status
 router.post('/', async (req, res) => {
   try {
     const { products, total, customer, shipping, paymentMethod } = req.body;
@@ -64,11 +64,23 @@ router.post('/', async (req, res) => {
       total,
       customer,
       shipping,
-      paymentMethod
+      paymentMethod,
+      status: 'pending',
+      paymentStatus: 'pending'
     });
 
     await order.save();
-    res.status(201).json(order);
+    res.status(201).json({
+      success: true,
+      order: {
+        id: order._id,
+        total: order.total,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        customer: order.customer,
+        requiresPayment: true
+      }
+    });
   } catch (err) {
     console.error('Error creating order:', err);
     res.status(400).json({ message: err.message });

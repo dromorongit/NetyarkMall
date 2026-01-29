@@ -13,6 +13,7 @@ app.use(cors({
     'https://www.netyarkmall.com',  // Production frontend domain
     'https://netyarkmall.com',  // Alternative domain
     'https://dromorongit.github.io',  // GitHub Pages frontend
+    'https://dromorongit.github.io/NetyarkMall',  // NetyarkMall GitHub Pages
     '*'  // Allow all origins for testing
   ],
   credentials: false
@@ -38,6 +39,9 @@ app.use('/api/messages', messageRoutes);
 
 const reviewRoutes = require('./routes/reviews');
 app.use('/api/reviews', reviewRoutes);
+
+const paymentRoutes = require('./routes/payments');
+app.use('/api/payments', paymentRoutes);
 
 app.get('/', async (req, res) => {
   try {
