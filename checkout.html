@@ -630,69 +630,42 @@
             }
         }
         
-        // Initialize Paystack payment
+        // Initialize Paystack payment - call directly from frontend to bypass server IP restriction
         async function initializePaystackPayment(orderId, email, amount, customerInfo) {
             try {
                 console.log('Initializing Paystack payment for order:', orderId);
                 
-                // Get auth token if user is logged in
-                const token = localStorage.getItem('token');
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
+                // Generate a unique reference
+                const reference = `Netyark_${orderId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-                
-                // Call backend to initialize payment
-                const response = await fetch(`${API_BASE}/payments/initialize`, {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        orderId: orderId,
+                // Use Paystack inline payment directly from frontend
+                if (typeof PaystackPop !== 'undefined') {
+                    const handler = PaystackPop.setup({
+                        key: PAYSTACK_PUBLIC_KEY,
                         email: email,
-                        amount: amount,
-                        firstName: customerInfo.firstName,
-                        lastName: customerInfo.lastName,
-                        phone: customerInfo.phone
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Use Paystack inline payment
-                    if (typeof PaystackPop !== 'undefined') {
-                        const handler = PaystackPop.setup({
-                            key: PAYSTACK_PUBLIC_KEY,
-                            email: email,
-                            amount: Math.round(amount * 100), // Convert to kobo
-                            currency: 'GHS',
-                            ref: data.data.reference,
-                            callback_url: PAYSTACK_CALLBACK_URL,
-                            metadata: {
-                                order_id: orderId,
-                                customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
-                                customer_phone: customerInfo.phone
-                            },
-                            callback: function(response) {
-                                console.log('Paystack callback:', response);
-                                verifyPayment(orderId, response.reference);
-                            },
-                            onClose: function() {
-                                console.log('Payment window closed');
-                                showNotification('Payment was not completed. Please try again.', 'info');
-                            }
-                        });
-                        
-                        handler.openIframe();
-                    } else {
-                        // Fallback: redirect to Paystack
-                        window.location.href = data.data.authorizationUrl;
-                    }
+                        amount: Math.round(amount * 100), // Convert to pesewas
+                        currency: 'GHS',
+                        ref: reference,
+                        callback_url: PAYSTACK_CALLBACK_URL,
+                        metadata: {
+                            order_id: orderId,
+                            customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
+                            customer_phone: customerInfo.phone,
+                            order_total: amount
+                        },
+                        callback: function(response) {
+                            console.log('Paystack callback:', response);
+                            verifyPayment(orderId, response.reference);
+                        },
+                        onClose: function() {
+                            console.log('Payment window closed');
+                            showNotification('Payment was not completed. Please try again.', 'info');
+                        }
+                    });
+                    
+                    handler.openIframe();
                 } else {
-                    showNotification(data.message || 'Failed to initialize payment. Please try again.', 'error');
+                    showNotification('Paystack payment system is not loaded. Please refresh the page.', 'error');
                 }
                 
             } catch (error) {
@@ -809,7 +782,7 @@
             }
         }
         
-        // Pay with Paystack inline
+        // Pay with Paystack inline - direct frontend call to bypass server IP restriction
         async function payWithPaystack() {
             const email = document.getElementById('paymentEmail').value;
             const amount = document.getElementById('paymentAmount').value;
@@ -827,54 +800,31 @@
             closePaymentModal();
             showPaymentProcessing();
             
-            // Get auth token if user is logged in
-            const token = localStorage.getItem('token');
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-            
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-            
             try {
-                const response = await fetch(`${API_BASE}/payments/initialize`, {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        orderId: currentOrder.id,
+                // Generate a unique reference
+                const reference = `Netyark_${currentOrder.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                if (typeof PaystackPop !== 'undefined') {
+                    const handler = PaystackPop.setup({
+                        key: PAYSTACK_PUBLIC_KEY,
                         email: email,
-                        amount: parseFloat(amount)
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    if (typeof PaystackPop !== 'undefined') {
-                        const handler = PaystackPop.setup({
-                            key: PAYSTACK_PUBLIC_KEY,
-                            email: email,
-                            amount: Math.round(parseFloat(amount) * 100),
-                            currency: 'GHS',
-                            ref: data.data.reference,
-                            callback_url: PAYSTACK_CALLBACK_URL,
-                            callback: function(response) {
-                                console.log('Payment successful:', response);
-                                verifyPayment(currentOrder.id, response.reference);
-                            },
-                            onClose: function() {
-                                console.log('Payment window closed');
-                                showNotification('Payment was not completed. Please try again.', 'info');
-                            }
-                        });
-                        handler.openIframe();
-                    } else {
-                        window.location.href = data.data.authorizationUrl;
-                    }
+                        amount: Math.round(parseFloat(amount) * 100),
+                        currency: 'GHS',
+                        ref: reference,
+                        callback_url: PAYSTACK_CALLBACK_URL,
+                        callback: function(response) {
+                            console.log('Payment successful:', response);
+                            verifyPayment(currentOrder.id, response.reference);
+                        },
+                        onClose: function() {
+                            console.log('Payment window closed');
+                            showNotification('Payment was not completed. Please try again.', 'info');
+                        }
+                    });
+                    handler.openIframe();
                 } else {
                     hidePaymentProcessing();
-                    showNotification(data.message || 'Failed to initialize payment', 'error');
+                    showNotification('Paystack payment system is not loaded. Please refresh the page.', 'error');
                 }
             } catch (error) {
                 console.error('Error initializing payment:', error);
