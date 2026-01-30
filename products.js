@@ -12,6 +12,7 @@ let productCache = null;
 let categoriesCache = null;
 const CACHE_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes cache expiration
 let cacheTimestamp = null;
+let refreshInterval = null; // Interval for periodic refresh
 
 // Clear product cache to force refresh
 function clearProductCache() {
