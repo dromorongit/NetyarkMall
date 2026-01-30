@@ -738,8 +738,8 @@ function getFullImageUrl(imagePath) {
         return imagePath;
     }
 
-    console.log('Returning image path as-is:', imagePath);
-    return imagePath;
+    // For any other path, assume it's a relative path and prepend the API base URL
+    return `${API_BASE.replace('/api', '')}/${imagePath}`;
 }
 
 // Export for use in browser
