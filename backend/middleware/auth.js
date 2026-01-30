@@ -28,4 +28,4 @@ const superAdminAuth = (req, res, next) => {
   next();
 };
 
-module.exports = { auth, adminAuth, superAdminAuth };
+module.exports = { auth, protect: auth, adminAuth, superAdminAuth };
