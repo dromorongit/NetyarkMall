@@ -1285,29 +1285,12 @@ function createProductCard(product) {
             <div class="product-info">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
                 ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
-                <p class="product-description">${product.shortDescription || product.description || 'No description available'}</p>
-                ${product.colors && product.colors.length > 0 ? `<p class="product-colors">Colors: ${product.colors.join(', ')}</p>` : ''}
-                ${product.sizes && product.sizes.length > 0 ? `<p class="product-sizes">Sizes: ${product.sizes.join(', ')}</p>` : ''}
-                <div class="product-rating">
-                    <div class="stars">
-                        ${generateStarRating(product.rating || 0)}
-                    </div>
-                    <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
-                </div>
                 <div class="product-price">
                     <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-card-actions">
-                    <div class="quantity-controls" style="margin-bottom: 10px;">
-                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity:</label>
-                        <div class="quantity-input-wrapper" style="display: flex; align-items: center; gap: 8px;">
-                            <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
-                            <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount}" style="width: 50px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;">
-                            <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
-                        </div>
-                    </div>
                     <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
@@ -1399,16 +1382,6 @@ function createWholesaleProductCard(product) {
             </div>
             <div class="product-info">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
-                <p class="product-description">${product.description || product.shortDescription || 'No description available'}</p>
-                <div class="wholesale-moq">
-                    <span class="moq-label">MOQ: ${moq} units</span>
-                </div>
-                <div class="product-rating">
-                    <div class="stars">
-                        ${generateStarRating(product.rating || 0)}
-                    </div>
-                    <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
-                </div>
                 <div class="product-price">
                     <span class="current-price">₵${(product.wholesalePrice || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
@@ -1475,29 +1448,12 @@ function createDealCard(product) {
             <div class="product-info">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
                 ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
-                <p class="product-description">${product.shortDescription || product.description || 'No description available'}</p>
-                ${product.colors && product.colors.length > 0 ? `<p class="product-colors">Colors: ${product.colors.join(', ')}</p>` : ''}
-                ${product.sizes && product.sizes.length > 0 ? `<p class="product-sizes">Sizes: ${product.sizes.join(', ')}</p>` : ''}
-                <div class="product-rating">
-                    <div class="stars">
-                        ${generateStarRating(product.rating || 0)}
-                    </div>
-                    <span class="rating-text">${product.rating || 0} (${product.reviews || 0})</span>
-                </div>
                 <div class="product-price">
                     <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-card-actions">
-                    <div class="quantity-controls" style="margin-bottom: 10px;">
-                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity:</label>
-                        <div class="quantity-input-wrapper" style="display: flex; align-items: center; gap: 8px;">
-                            <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
-                            <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount}" style="width: 50px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;">
-                            <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
-                        </div>
-                    </div>
                     <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
@@ -2049,7 +2005,7 @@ document.addEventListener('click', function(e) {
         if (target) {
             target.scrollIntoView({ behavior: 'smooth' });
         }
-    }
+    });
 });
 
 // Loading animation
@@ -3797,7 +3753,7 @@ function testRefreshButton() {
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         console.log('Refresh button found and initialized');
-return true;
+    return true;
     } else {
         console.log('Refresh button not found');
         return false;

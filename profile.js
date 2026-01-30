@@ -330,7 +330,6 @@ function createWishlistCard(product) {
             </div>
             <div class="product-info">
                 <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
                 <div class="product-rating">
                     <div class="stars">
                         ${generateStarRating(product.rating)}
