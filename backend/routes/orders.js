@@ -51,7 +51,7 @@ router.post('/', async (req, res) => {
       const token = authHeader.substring(7);
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-        userId = decoded.userId;
+        userId = decoded.id; // Use 'id' to match auth.js token format
       } catch (error) {
         // Token is invalid, but we'll still allow the order as a guest
         console.log('Invalid token, proceeding as guest checkout');
