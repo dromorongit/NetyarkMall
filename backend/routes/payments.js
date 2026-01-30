@@ -9,11 +9,17 @@ const User = require('../models/User');
 const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
 console.log('Paystack secret key present:', !!paystackSecretKey);
 
-if (!paystackSecretKey) {
-    console.error('PAYSTACK_SECRET_KEY is not defined in environment variables');
+// Only initialize Paystack if secret key is available
+let paystack = null;
+if (paystackSecretKey) {
+    try {
+        paystack = Paystack(paystackSecretKey);
+    } catch (err) {
+        console.error('Failed to initialize Paystack:', err.message);
+    }
+} else {
+    console.warn('PAYSTACK_SECRET_KEY is not defined - payment routes will be disabled');
 }
-
-const paystack = Paystack(paystackSecretKey);
 
 // Optional auth middleware - works for both authenticated and guest users
 const optionalAuth = async (req, res, next) => {

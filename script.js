@@ -1300,6 +1300,14 @@ function createProductCard(product) {
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-card-actions">
+                    <div class="quantity-controls" style="margin-bottom: 10px;">
+                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity:</label>
+                        <div class="quantity-input-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                            <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+                            <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount}" style="width: 50px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;">
+                            <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                        </div>
+                    </div>
                     <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
@@ -1482,6 +1490,14 @@ function createDealCard(product) {
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 <div class="product-card-actions">
+                    <div class="quantity-controls" style="margin-bottom: 10px;">
+                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity:</label>
+                        <div class="quantity-input-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                            <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+                            <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount}" style="width: 50px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;">
+                            <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" style="width: 28px; height: 28px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                        </div>
+                    </div>
                     <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
@@ -1724,11 +1740,15 @@ document.addEventListener('click', function(e) {
                 console.log('DEBUG: Adding product from details page:', productId, 'quantity:', quantity);
                 addToCart(productId, quantity, 'product-detail');
             } else {
+                // For regular product cards, read quantity from the quantity input
+                const quantityInput = document.getElementById(`qty-${productId}`);
+                const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                
                 // Determine source page based on current URL
                 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
                 const sourcePage = currentPage === 'wholesale.html' ? 'wholesale' : null;
-                console.log('DEBUG: Adding regular product:', productId, 'from page:', currentPage, 'sourcePage:', sourcePage);
-                addToCart(productId, 1, sourcePage);
+                console.log('DEBUG: Adding regular product:', productId, 'quantity:', quantity, 'from page:', currentPage, 'sourcePage:', sourcePage);
+                addToCart(productId, quantity, sourcePage);
             }
         } else {
             console.error('DEBUG: No productId found for add to cart button');
@@ -2169,6 +2189,54 @@ function adjustWholesaleQuantity(productId, delta) {
     }
 }
 
+// Adjust quantity for regular product cards
+function adjustCardQuantity(productId, delta) {
+    try {
+        console.log('adjustCardQuantity called with:', { productId, delta });
+
+        const quantityInput = document.getElementById(`qty-${productId}`);
+        if (!quantityInput) {
+            console.error('Quantity input not found for product:', productId);
+            return;
+        }
+
+        const currentValue = parseInt(quantityInput.value) || 1;
+        const minValue = 1;
+        const maxValue = parseInt(quantityInput.max) || 999;
+        let newValue = currentValue + delta;
+
+        // Prevent decreasing below 1
+        if (newValue < minValue) {
+            newValue = minValue;
+        }
+
+        // Prevent increasing above max stock
+        if (newValue > maxValue) {
+            newValue = maxValue;
+            showNotification(`Only ${maxValue} items available in stock.`, 'warning');
+        }
+
+        console.log('Quantity adjustment:', { currentValue, minValue, maxValue, newValue, delta });
+
+        quantityInput.value = newValue;
+
+        // Also allow manual input changes
+        quantityInput.addEventListener('change', function() {
+            const manualValue = parseInt(this.value) || minValue;
+            if (manualValue < minValue) {
+                this.value = minValue;
+            }
+            if (manualValue > maxValue) {
+                this.value = maxValue;
+                showNotification(`Maximum ${maxValue} items available.`, 'warning');
+            }
+        });
+    } catch (error) {
+        console.error('Error in adjustCardQuantity:', error);
+        showNotification('Error adjusting quantity. Please try again.', 'error');
+    }
+}
+
 // Product comparison functionality
 let compareList = JSON.parse(localStorage.getItem('compare_list') || '[]');
 
@@ -2581,6 +2649,7 @@ document.addEventListener('DOMContentLoaded', function() {
 window.addToCart = addToCart;
 window.addWholesaleToCart = addWholesaleToCart;
 window.adjustWholesaleQuantity = adjustWholesaleQuantity;
+window.adjustCardQuantity = adjustCardQuantity;
 window.removeFromCart = removeFromCart;
 window.updateCartQuantity = updateCartQuantity;
 window.clearCart = clearCart;
