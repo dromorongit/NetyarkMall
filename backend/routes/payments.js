@@ -6,7 +6,14 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Initialize Paystack with secret key from environment variables
-const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY);
+const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
+console.log('Paystack secret key present:', !!paystackSecretKey);
+
+if (!paystackSecretKey) {
+    console.error('PAYSTACK_SECRET_KEY is not defined in environment variables');
+}
+
+const paystack = Paystack(paystackSecretKey);
 
 // Optional auth middleware - works for both authenticated and guest users
 const optionalAuth = async (req, res, next) => {
@@ -73,8 +80,8 @@ router.post('/initialize', optionalAuth, async (req, res) => {
         // Initialize Paystack transaction
         const response = await paystack.transaction.initialize({
             email: email,
-            amount: Math.round(amount * 100), // Convert to kobo (smallest Nigerian currency unit)
-            currency: 'NGN',
+            amount: Math.round(amount * 100), // Convert to pesewas (smallest Ghanaian currency unit)
+            currency: 'GHS',
             reference: `Netyark_${orderId}_${Date.now()}`,
             metadata: {
                 orderId: orderId.toString(),
