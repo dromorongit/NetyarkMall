@@ -191,6 +191,16 @@
                                             </div>
                                         </label>
                                     </div>
+                                    <div class="payment-option">
+                                        <input type="radio" id="cash-on-delivery" name="paymentMethod" value="cash-on-delivery">
+                                        <label for="cash-on-delivery">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <div class="payment-details">
+                                                <div class="payment-name">Payment on Delivery</div>
+                                                <div class="payment-desc">Pay cash when your order is delivered to you</div>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                                 <div id="paystackPaymentSection" style="display: block; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                                     <p style="margin-bottom: 10px;"><i class="fas fa-lock" style="color: #28a745;"></i> <strong>Secure Payment via Paystack</strong></p>
@@ -599,8 +609,13 @@
                 
                 currentOrder = orderResult.order;
                 
-                // Initialize Paystack payment
-                if (paymentMethod === 'card' || paymentMethod === 'mobile-money') {
+                // Handle payment based on method
+                if (paymentMethod === 'cash-on-delivery') {
+                    // For cash on delivery, order is complete without payment
+                    hidePaymentProcessing();
+                    showPaymentSuccess(currentOrder.id, 'cash-on-delivery');
+                } else if (paymentMethod === 'card' || paymentMethod === 'mobile-money') {
+                    // Initialize Paystack payment for online payments
                     hidePaymentProcessing();
                     await initializePaystackPayment(currentOrder.id, formData.email, total, formData);
                 } else {
@@ -731,7 +746,7 @@
         }
         
         // Show payment success modal
-        function showPaymentSuccess(orderId) {
+        function showPaymentSuccess(orderId, paymentMethod = 'online') {
             // Clear cart
             cart = [];
             localStorage.setItem('cart', JSON.stringify(cart));
@@ -740,11 +755,19 @@
             // Show success modal
             const modal = document.getElementById('paymentSuccessModal');
             if (modal) {
-                document.getElementById('orderNumber').textContent = `Order Number: ${orderId}`;
+                if (paymentMethod === 'cash-on-delivery') {
+                    document.getElementById('orderNumber').innerHTML = `Order Number: ${orderId}<br><span style="font-size: 14px; color: #28a745;"><i class="fas fa-check-circle"></i> Payment on Delivery - Pay when your order arrives!</span>`;
+                } else {
+                    document.getElementById('orderNumber').textContent = `Order Number: ${orderId}`;
+                }
                 modal.style.display = 'flex';
                 modal.classList.add('show');
             } else {
-                showNotification('Order placed successfully!', 'success');
+                if (paymentMethod === 'cash-on-delivery') {
+                    showNotification('Order placed successfully! You will pay on delivery.', 'success');
+                } else {
+                    showNotification('Order placed successfully!', 'success');
+                }
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 2000);
