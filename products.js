@@ -699,8 +699,13 @@ function getFullImageUrl(imagePath) {
         return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'; // Default placeholder image
     }
 
+    // Handle Cloudinary URLs (these are already complete URLs)
+    if (imagePath.includes('cloudinary.com') || imagePath.includes('res.cloudinary.com')) {
+        return imagePath;
+    }
+
+    // Handle uploads path - try multiple base URLs to handle different deployment scenarios
     if (imagePath.startsWith('/uploads/')) {
-        // Handle uploads path - try multiple base URLs to handle different deployment scenarios
         const baseUrls = [
             'https://netyarkmall-production.up.railway.app', // Production
             'https://dromorongit.github.io', // GitHub Pages (from error)
