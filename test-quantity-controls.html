@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantity Controls Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .product-image {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-title {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .quantity-controls label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .quantity-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 5px;
+        }
+        
+        .quantity-btn {
+            width: 36px;
+            height: 36px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .quantity-btn.decrease {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .quantity-btn.decrease:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .quantity-btn.increase {
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+        
+        .quantity-btn.increase:hover {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .quantity-input:focus {
+            border-color: #667eea;
+        }
+        
+        .log-container {
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .log-entry.success {
+            color: #0f0;
+        }
+        
+        .log-entry.error {
+            color: #f00;
+        }
+        
+        .log-entry.info {
+            color: #ff0;
+        }
+        
+        .test-results {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .test-result {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .test-result.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .test-result.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .run-test-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .run-test-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Quantity Controls Test</h1>
+        
+        <div class="product-card">
+            <div class="product-image">📦</div>
+            <div class="product-info">
+                <h3 class="product-title">Test Product 1</h3>
+                <div class="quantity-controls">
+                    <label>Quantity:</label>
+                    <div class="quantity-input-wrapper">
+                        <button class="quantity-btn decrease" id="decrease-1">-</button>
+                        <input type="number" id="qty-test-1" value="1" min="1" max="10" class="quantity-input">
+                        <button class="quantity-btn increase" id="increase-1">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="product-card">
+            <div class="product-image">🛒</div>
+            <div class="product-info">
+                <h3 class="product-title">Test Product 2</h3>
+                <div class="quantity-controls">
+                    <label>Quantity:</label>
+                    <div class="quantity-input-wrapper">
+                        <button class="quantity-btn decrease" id="decrease-2">-</button>
+                        <input type="number" id="qty-test-2" value="1" min="1" max="10" class="quantity-input">
+                        <button class="quantity-btn increase" id="increase-2">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="run-test-btn" onclick="runTests()">▶️ Run Tests</button>
+        
+        <div class="test-results" id="testResults"></div>
+        
+        <div class="log-container" id="logContainer">
+            <div class="log-entry info">Log initialized...</div>
+        </div>
+    </div>
+
+    <script>
+        // Test-specific adjustCardQuantity function
+        function adjustCardQuantity(productId, delta) {
+            const quantityInput = document.getElementById(`qty-${productId}`);
+            if (!quantityInput) {
+                console.error('Quantity input not found for product:', productId);
+                log(`❌ Error: Quantity input not found for product: ${productId}`, 'error');
+                return false;
+            }
+            
+            const currentValue = parseInt(quantityInput.value) || 1;
+            const minValue = parseInt(quantityInput.min) || 1;
+            const maxValue = parseInt(quantityInput.max) || 999;
+            let newValue = currentValue + delta;
+            
+            // Prevent decreasing below minimum
+            if (newValue < minValue) {
+                newValue = minValue;
+                log(`⚠️ Cannot decrease below minimum quantity (${minValue})`, 'info');
+            }
+            
+            // Prevent increasing above maximum
+            if (newValue > maxValue) {
+                newValue = maxValue;
+                log(`⚠️ Cannot increase above maximum quantity (${maxValue})`, 'info');
+            }
+            
+            quantityInput.value = newValue;
+            log(`✅ Quantity updated: ${currentValue} → ${newValue} (delta: ${delta})`, 'success');
+            
+            return true;
+        }
+        
+        // Logging function
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+        
+        // Direct event binding test
+        function bindDirectEvents() {
+            log('Binding direct events...', 'info');
+            
+            // Bind decrease buttons
+            document.querySelectorAll('.quantity-btn.decrease').forEach(btn => {
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    log('Decrease button clicked (direct binding)', 'info');
+                    
+                    // Extract product ID from the button's ID
+                    const productId = this.id.replace('decrease-', '');
+                    log(`Extracted product ID: ${productId}`, 'info');
+                    
+                    adjustCardQuantity(productId, -1);
+                };
+                log(`✅ Bound decrease event to button: ${btn.id}`, 'success');
+            });
+            
+            // Bind increase buttons
+            document.querySelectorAll('.quantity-btn.increase').forEach(btn => {
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    log('Increase button clicked (direct binding)', 'info');
+                    
+                    // Extract product ID from the button's ID
+                    const productId = this.id.replace('increase-', '');
+                    log(`Extracted product ID: ${productId}`, 'info');
+                    
+                    adjustCardQuantity(productId, 1);
+                };
+                log(`✅ Bound increase event to button: ${btn.id}`, 'success');
+            });
+        }
+        
+        // Document-level event delegation
+        function bindDelegatedEvents() {
+            log('Setting up document-level event delegation...', 'info');
+            
+            document.addEventListener('click', function(e) {
+                // Handle quantity decrease buttons
+                if (e.target.classList.contains('quantity-btn') && e.target.classList.contains('decrease')) {
+                    e.preventDefault();
+                    log('Decrease button clicked (event delegation)', 'info');
+                    
+                    const button = e.target;
+                    const productId = button.id.replace('decrease-', '');
+                    log(`Extracted product ID from delegation: ${productId}`, 'info');
+                    
+                    adjustCardQuantity(productId, -1);
+                    return;
+                }
+                
+                // Handle quantity increase buttons
+                if (e.target.classList.contains('quantity-btn') && e.target.classList.contains('increase')) {
+                    e.preventDefault();
+                    log('Increase button clicked (event delegation)', 'info');
+                    
+                    const button = e.target;
+                    const productId = button.id.replace('increase-', '');
+                    log(`Extracted product ID from delegation: ${productId}`, 'info');
+                    
+                    adjustCardQuantity(productId, 1);
+                    return;
+                }
+            });
+            
+            log('✅ Document-level event delegation set up', 'success');
+        }
+        
+        // Test functions
+        function runTests() {
+            const testResults = document.getElementById('testResults');
+            testResults.innerHTML = '';
+            log('='.repeat(50), 'info');
+            log('Starting tests...', 'info');
+            log('='.repeat(50), 'info');
+            
+            const tests = [];
+            
+            // Test 1: Check if functions exist
+            tests.push({
+                name: 'adjustCardQuantity function exists',
+                test: () => typeof adjustCardQuantity === 'function'
+            });
+            
+            // Test 2: Check if quantity inputs exist
+            tests.push({
+                name: 'Quantity input #qty-test-1 exists',
+                test: () => document.getElementById('qty-test-1') !== null
+            });
+            
+            tests.push({
+                name: 'Quantity input #qty-test-2 exists',
+                test: () => document.getElementById('qty-test-2') !== null
+            });
+            
+            // Test 3: Check if decrease buttons exist
+            tests.push({
+                name: 'Decrease button #decrease-1 exists',
+                test: () => document.getElementById('decrease-1') !== null
+            });
+            
+            tests.push({
+                name: 'Decrease button #decrease-2 exists',
+                test: () => document.getElementById('decrease-2') !== null
+            });
+            
+            // Test 4: Check if increase buttons exist
+            tests.push({
+                name: 'Increase button #increase-1 exists',
+                test: () => document.getElementById('increase-1') !== null
+            });
+            
+            tests.push({
+                name: 'Increase button #increase-2 exists',
+                test: () => document.getElementById('increase-2') !== null
+            });
+            
+            // Test 5: Test quantity adjustment for product 1
+            tests.push({
+                name: 'adjustCardQuantity("test-1", 1) works',
+                test: () => {
+                    const input = document.getElementById('qty-test-1');
+                    const initialValue = parseInt(input.value);
+                    const result = adjustCardQuantity('test-1', 1);
+                    const newValue = parseInt(input.value);
+                    return result && newValue === initialValue + 1;
+                }
+            });
+            
+            // Test 6: Test quantity decrease for product 1
+            tests.push({
+                name: 'adjustCardQuantity("test-1", -1) works',
+                test: () => {
+                    const input = document.getElementById('qty-test-1');
+                    const initialValue = parseInt(input.value);
+                    const result = adjustCardQuantity('test-1', -1);
+                    const newValue = parseInt(input.value);
+                    return result && newValue === Math.max(1, initialValue - 1);
+                }
+            });
+            
+            // Test 7: Test quantity adjustment for product 2
+            tests.push({
+                name: 'adjustCardQuantity("test-2", 1) works',
+                test: () => {
+                    const input = document.getElementById('qty-test-2');
+                    const initialValue = parseInt(input.value);
+                    const result = adjustCardQuantity('test-2', 1);
+                    const newValue = parseInt(input.value);
+                    return result && newValue === initialValue + 1;
+                }
+            });
+            
+            // Test 8: Test minimum quantity boundary
+            tests.push({
+                name: 'Minimum quantity boundary works',
+                test: () => {
+                    const input = document.getElementById('qty-test-1');
+                    input.value = 1;
+                    const result = adjustCardQuantity('test-1', -1);
+                    return parseInt(input.value) === 1;
+                }
+            });
+            
+            // Test 9: Test maximum quantity boundary
+            tests.push({
+                name: 'Maximum quantity boundary works',
+                test: () => {
+                    const input = document.getElementById('qty-test-1');
+                    input.value = 10;
+                    const result = adjustCardQuantity('test-1', 1);
+                    return parseInt(input.value) === 10;
+                }
+            });
+            
+            // Run tests
+            let passed = 0;
+            let failed = 0;
+            
+            tests.forEach((testCase, index) => {
+                try {
+                    const result = testCase.test();
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `test-result ${result ? 'pass' : 'fail'}`;
+                    resultDiv.textContent = `${result ? '✅' : '❌'} Test ${index + 1}: ${testCase.name}`;
+                    testResults.appendChild(resultDiv);
+                    
+                    if (result) {
+                        passed++;
+                        log(`✅ Test ${index + 1} passed: ${testCase.name}`, 'success');
+                    } else {
+                        failed++;
+                        log(`❌ Test ${index + 1} failed: ${testCase.name}`, 'error');
+                    }
+                } catch (error) {
+                    failed++;
+                    log(`❌ Test ${index + 1} error: ${testCase.name} - ${error.message}`, 'error');
+                }
+            });
+            
+            log('='.repeat(50), 'info');
+            log(`Tests completed: ${passed} passed, ${failed} failed`, 'info');
+            log('='.repeat(50), 'info');
+            
+            // Summary
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = `test-result ${failed === 0 ? 'pass' : 'fail'}`;
+            summaryDiv.innerHTML = `<strong>Summary:</strong> ${passed}/${tests.length} tests passed`;
+            testResults.insertBefore(summaryDiv, testResults.firstChild);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Page loaded, setting up event handlers...', 'info');
+            
+            // Bind both direct events and event delegation
+            bindDirectEvents();
+            bindDelegatedEvents();
+            
+            log('✅ All event handlers set up', 'success');
+            log('Click the + and - buttons to test quantity controls', 'info');
+        });
+    </script>
+</body>
+</html>
