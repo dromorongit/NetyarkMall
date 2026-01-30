@@ -621,12 +621,20 @@
             try {
                 console.log('Initializing Paystack payment for order:', orderId);
                 
+                // Get auth token if user is logged in
+                const token = localStorage.getItem('token');
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
                 // Call backend to initialize payment
                 const response = await fetch(`${API_BASE}/payments/initialize`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         orderId: orderId,
                         email: email,
@@ -667,7 +675,7 @@
                         handler.openIframe();
                     } else {
                         // Fallback: redirect to Paystack
-                        window.location.href = data.authorizationUrl;
+                        window.location.href = data.data.authorizationUrl;
                     }
                 } else {
                     showNotification(data.message || 'Failed to initialize payment. Please try again.', 'error');
@@ -797,12 +805,20 @@
             closePaymentModal();
             showPaymentProcessing();
             
+            // Get auth token if user is logged in
+            const token = localStorage.getItem('token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/payments/initialize`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         orderId: currentOrder.id,
                         email: email,

@@ -2,17 +2,38 @@ const express = require('express');
 const router = express.Router();
 const Paystack = require('paystack');
 const Order = require('../models/Order');
-const { protect } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 // Initialize Paystack with secret key from environment variables
 const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY);
+
+// Optional auth middleware - works for both authenticated and guest users
+const optionalAuth = async (req, res, next) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+        // Guest user - continue without user
+        req.user = null;
+        return next();
+    }
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.id);
+        next();
+    } catch (err) {
+        // Invalid token - continue as guest
+        req.user = null;
+        next();
+    }
+};
 
 /**
  * @route   POST /api/payments/initialize
  * @desc    Initialize a payment transaction
  * @access  Private
  */
-router.post('/initialize', protect, async (req, res) => {
+router.post('/initialize', optionalAuth, async (req, res) => {
     try {
         const { orderId, email, amount, metadata } = req.body;
 
@@ -24,7 +45,7 @@ router.post('/initialize', protect, async (req, res) => {
             });
         }
 
-        // Verify order exists and belongs to user
+        // Verify order exists
         const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).json({
@@ -33,7 +54,8 @@ router.post('/initialize', protect, async (req, res) => {
             });
         }
 
-        if (order.user.toString() !== req.user._id.toString()) {
+        // Check if user is authorized (allow guest if order is guest order)
+        if (req.user && order.user && order.user.toString() !== req.user._id.toString()) {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to pay for this order'
@@ -56,7 +78,7 @@ router.post('/initialize', protect, async (req, res) => {
             reference: `Netyark_${orderId}_${Date.now()}`,
             metadata: {
                 orderId: orderId.toString(),
-                userId: req.user._id.toString(),
+                userId: req.user ? req.user._id.toString() : 'guest',
                 ...metadata
             },
             callback_url: `${process.env.FRONTEND_URL}/payment-callback`
@@ -94,7 +116,7 @@ router.post('/initialize', protect, async (req, res) => {
  * @desc    Verify a payment transaction
  * @access  Private
  */
-router.post('/verify', protect, async (req, res) => {
+router.post('/verify', optionalAuth, async (req, res) => {
     try {
         const { reference } = req.body;
 
@@ -235,7 +257,7 @@ router.post('/webhook', async (req, res) => {
  * @desc    Get payment status for an order
  * @access  Private
  */
-router.get('/:orderId', protect, async (req, res) => {
+router.get('/:orderId', optionalAuth, async (req, res) => {
     try {
         const order = await Order.findById(req.params.orderId);
 
@@ -246,7 +268,8 @@ router.get('/:orderId', protect, async (req, res) => {
             });
         }
 
-        if (order.user.toString() !== req.user._id.toString()) {
+        // Check if user is authorized (allow guest if order is guest order)
+        if (req.user && order.user && order.user.toString() !== req.user._id.toString()) {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to view this order'
