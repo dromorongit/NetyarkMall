@@ -27,8 +27,11 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find();
+    console.log(`[PRODUCTS] GET / - Found ${products.length} products in database`);
+    console.log('Products:', products.map(p => ({ id: p._id, name: p.name, category: p.category })));
     res.json(products);
   } catch (err) {
+    console.error('[PRODUCTS] GET / - Error:', err.message);
     res.status(500).json({ message: err.message });
   }
 });
@@ -141,10 +144,10 @@ router.post('/', auth, adminAuth, upload.fields([
       productData.additionalMedia = mediaUrls;
     }
     
-    console.log('Final productData:', productData);
+    console.log('[PRODUCTS] Creating product:', productData.name, 'Category:', productData.category);
     const product = new Product(productData);
     await product.save();
-    console.log('Product saved with id:', product._id);
+    console.log('[PRODUCTS] Product saved successfully:', { id: product._id, name: product.name, category: product.category });
     res.status(201).json(product);
   } catch (err) {
     console.log('Error saving product:', err.message);

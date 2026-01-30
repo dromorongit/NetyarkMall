@@ -7,24 +7,37 @@
 // For production: https://netyarkmall-production.up.railway.app/api
 const API_BASE = 'https://netyarkmall-production.up.railway.app/api';
 
-// Cache for products
+// Cache for products with expiration
 let productCache = null;
 let categoriesCache = null;
+const CACHE_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes cache expiration
+let cacheTimestamp = null;
 
 // Clear product cache to force refresh
 function clearProductCache() {
     productCache = null;
+    cacheTimestamp = null;
     console.log('Product cache cleared');
+}
+
+// Check if cache is expired
+function isCacheExpired() {
+    if (!cacheTimestamp || !productCache) return true;
+    const now = Date.now();
+    const age = now - cacheTimestamp;
+    console.log(`Cache age: ${Math.round(age / 1000)}s, expiration: ${CACHE_EXPIRATION_MS / 1000}s`);
+    return age > CACHE_EXPIRATION_MS;
 }
 
 // Fetch products from API
 async function fetchProducts(forceRefresh = false) {
-  if (productCache && !forceRefresh) {
+  // Check cache with expiration
+  if (productCache && !forceRefresh && !isCacheExpired()) {
     console.log('Returning cached products:', productCache.length, 'items');
     return productCache;
   }
 
-  console.log('Fetching products from API...');
+  console.log('Fetching products from API... (cache expired or force refresh)');
 
   // Try multiple API endpoints
   const apiUrls = [
@@ -53,8 +66,10 @@ async function fetchProducts(forceRefresh = false) {
       if (response.ok) {
         const apiProducts = await response.json();
         console.log('Fetched API products from', baseUrl, ':', apiProducts.length, 'items');
-
+        
+        // Update cache with timestamp
         productCache = apiProducts;
+        cacheTimestamp = Date.now();
         console.log('API products cached:', productCache.length, 'items');
         return productCache;
       } else {
@@ -763,6 +778,63 @@ window.formatPrice = formatPrice;
 window.calculateDiscount = calculateDiscount;
 window.getFullImageUrl = getFullImageUrl;
 window.clearProductCache = clearProductCache;
+window.refreshProducts = () => clearProductCache() || getAllProducts();
+
+// Clear cache when page becomes visible (user returns to tab)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        // Check if cache is expired when tab becomes visible
+        if (isCacheExpired()) {
+            console.log('Tab became visible, cache expired - clearing and refreshing');
+            clearProductCache();
+            getAllProducts(); // Trigger refresh
+        }
+    }
+});
+
+// Also clear cache on page load/refresh
+window.addEventListener('load', () => {
+    console.log('Page loaded - checking cache');
+    if (isCacheExpired()) {
+        console.log('Cache expired on load - clearing');
+        clearProductCache();
+    }
+});
+
+// Periodic refresh every 30 seconds to check for new products
+let refreshInterval = setInterval(async () => {
+    if (document.visibilityState === 'visible' && isCacheExpired()) {
+        console.log('Periodic check - cache expired, refreshing products');
+        try {
+            const products = await getAllProducts();
+            console.log('Periodic refresh complete:', products.length, 'products');
+        } catch (error) {
+            console.error('Periodic refresh failed:', error);
+        }
+    }
+}, 30000); // 30 seconds
+
+// Clear interval when page is hidden to save resources
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        clearInterval(refreshInterval);
+        console.log('Periodic refresh paused (tab hidden)');
+    } else {
+        // Restart interval when tab becomes visible
+        refreshInterval = setInterval(async () => {
+            if (document.visibilityState === 'visible' && isCacheExpired()) {
+                console.log('Periodic check - cache expired, refreshing products');
+                try {
+                    const products = await getAllProducts();
+                    console.log('Periodic refresh complete:', products.length, 'products');
+                } catch (error) {
+                    console.error('Periodic refresh failed:', error);
+                }
+            }
+        }, 30000);
+        console.log('Periodic refresh resumed (tab visible)');
+    }
+});
 
 
 // Product reviews management
@@ -1106,3 +1178,34 @@ window.getShippingOptions = getShippingOptions;
 window.getShippingZones = getShippingZones;
 window.processOrder = processOrder;
 window.getOrderStatus = getOrderStatus;
+
+// Debug function to check product loading
+window.debugProducts = async function() {
+    console.log('=== Product Debug Info ===');
+    console.log('Cache status:', productCache ? `Cached (${productCache.length} items, age: ${Math.round((Date.now() - cacheTimestamp) / 1000)}s)` : 'Not cached');
+    console.log('Cache expiration:', CACHE_EXPIRATION_MS / 1000, 'seconds');
+    console.log('Cache expired:', isCacheExpired());
+    
+    try {
+        const products = await getAllProducts();
+        console.log('Total products loaded:', products.length);
+        console.log('Sample products:', products.slice(0, 3).map(p => ({ name: p.name, category: p.category, price: p.price })));
+        
+        // Group by category
+        const byCategory = products.reduce((acc, p) => {
+            const cat = p.category || 'Unknown';
+            acc[cat] = (acc[cat] || 0) + 1;
+            return acc;
+        }, {});
+        console.log('Products by category:', byCategory);
+        
+        return {
+            totalProducts: products.length,
+            byCategory: byCategory,
+            cacheExpired: isCacheExpired()
+        };
+    } catch (error) {
+        console.error('Error loading products:', error);
+        return { error: error.message };
+    }
+};
