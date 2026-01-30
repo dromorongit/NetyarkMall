@@ -26,6 +26,9 @@ async function fetchProducts(forceRefresh = false) {
     'http://localhost:5000/api'
   ];
 
+  // Add cache-busting parameter if force refresh is requested
+  const cacheBust = forceRefresh ? `?timestamp=${Date.now()}` : '';
+
   for (const baseUrl of apiUrls) {
     try {
       console.log('Trying API endpoint:', baseUrl);
@@ -33,7 +36,7 @@ async function fetchProducts(forceRefresh = false) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(`${baseUrl}/products`, {
+      const response = await fetch(`${baseUrl}/products${cacheBust}`, {
         signal: controller.signal,
         headers: {
           'Accept': 'application/json',
@@ -62,10 +65,10 @@ async function fetchProducts(forceRefresh = false) {
 }
 
 // Fetch wholesale products from API
-async function fetchWholesaleProducts() {
+async function fetchWholesaleProducts(cacheBust = '') {
   console.log('Fetching wholesale products from API...');
   try {
-    const response = await fetch(`${API_BASE}/products/wholesale`);
+    const response = await fetch(`${API_BASE}/products/wholesale${cacheBust}`);
     console.log('Wholesale API response status:', response.status);
     if (response.ok) {
       const data = await response.json();
@@ -401,10 +404,10 @@ async function getProductsByCategory(category) {
 }
 
 // Get new arrivals (products marked as new)
-async function getNewArrivals() {
+async function getNewArrivals(cacheBust = '') {
     console.log('Fetching new arrivals from API...');
     try {
-        const response = await fetch(`${API_BASE}/products/new-arrivals`);
+        const response = await fetch(`${API_BASE}/products/new-arrivals${cacheBust}`);
         console.log('New arrivals API response status:', response.status);
         if (response.ok) {
             const newArrivals = await response.json();
@@ -436,9 +439,9 @@ async function getNewArrivals() {
 }
 
 // Get wholesale products
-async function getWholesaleProducts() {
+async function getWholesaleProducts(cacheBust = '') {
     // First try the dedicated wholesale endpoint
-    const wholesaleProducts = await fetchWholesaleProducts();
+    const wholesaleProducts = await fetchWholesaleProducts(cacheBust);
     if (wholesaleProducts.length > 0) {
         return wholesaleProducts;
     }
@@ -522,10 +525,10 @@ async function getOutOfStockProducts() {
 }
 
 // Get fast-selling items (products with high review count and good ratings)
-async function getFastSellingItems() {
+async function getFastSellingItems(cacheBust = '') {
     console.log('Fetching fast-selling items from API...');
     try {
-        const response = await fetch(`${API_BASE}/products/fast-selling`);
+        const response = await fetch(`${API_BASE}/products/fast-selling${cacheBust}`);
         console.log('Fast-selling API response status:', response.status);
         if (response.ok) {
             const fastSelling = await response.json();

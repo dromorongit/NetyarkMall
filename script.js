@@ -1154,14 +1154,14 @@ async function loadWholesaleProducts(forceRefresh = false) {
         const inStockWholesale = filterInStockProducts(wholesaleProducts);
 
         if (inStockWholesale.length === 0) {
-            container.innerHTML = '<p>No wholesale products currently in stock.</p>';
+            container.innerHTML = '<p>No wholesale products currently in stock. <button onclick="refreshProductData()" class="btn btn-primary">Refresh</button></p>';
         } else {
             container.innerHTML = inStockWholesale.map(product => createWholesaleProductCard(product)).join('');
         }
         console.log('Wholesale products loaded successfully');
     } catch (error) {
         console.error('Error loading wholesale products:', error);
-        container.innerHTML = '<p>Error loading wholesale products. Please try again later.</p>';
+        container.innerHTML = '<p>Error loading wholesale products. <button onclick="refreshProductData()" class="btn btn-primary">Try Again</button></p>';
     }
 }
 
