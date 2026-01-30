@@ -778,9 +778,9 @@ window.formatPrice = formatPrice;
 window.calculateDiscount = calculateDiscount;
 window.getFullImageUrl = getFullImageUrl;
 window.clearProductCache = clearProductCache;
-window.refreshProducts = () => clearProductCache() || getAllProducts();
+window.refreshProducts = () => { clearProductCache(); getAllProducts(); };
 
-// Clear cache when page becomes visible (user returns to tab)
+// Clear cache and manage periodic refresh when page becomes visible/hidden
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
         // Check if cache is expired when tab becomes visible
@@ -789,50 +789,28 @@ document.addEventListener('visibilitychange', () => {
             clearProductCache();
             getAllProducts(); // Trigger refresh
         }
-    }
-});
-
-// Also clear cache on page load/refresh
-window.addEventListener('load', () => {
-    console.log('Page loaded - checking cache');
-    if (isCacheExpired()) {
-        console.log('Cache expired on load - clearing');
-        clearProductCache();
-    }
-});
-
-// Periodic refresh every 30 seconds to check for new products
-let refreshInterval = setInterval(async () => {
-    if (document.visibilityState === 'visible' && isCacheExpired()) {
-        console.log('Periodic check - cache expired, refreshing products');
-        try {
-            const products = await getAllProducts();
-            console.log('Periodic refresh complete:', products.length, 'products');
-        } catch (error) {
-            console.error('Periodic refresh failed:', error);
-        }
-    }
-}, 30000); // 30 seconds
-
-// Clear interval when page is hidden to save resources
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        clearInterval(refreshInterval);
-        console.log('Periodic refresh paused (tab hidden)');
-    } else {
         // Restart interval when tab becomes visible
-        refreshInterval = setInterval(async () => {
-            if (document.visibilityState === 'visible' && isCacheExpired()) {
-                console.log('Periodic check - cache expired, refreshing products');
-                try {
-                    const products = await getAllProducts();
-                    console.log('Periodic refresh complete:', products.length, 'products');
-                } catch (error) {
-                    console.error('Periodic refresh failed:', error);
+        if (!refreshInterval) {
+            refreshInterval = setInterval(async () => {
+                if (document.visibilityState === 'visible' && isCacheExpired()) {
+                    console.log('Periodic check - cache expired, refreshing products');
+                    try {
+                        const products = await getAllProducts();
+                        console.log('Periodic refresh complete:', products.length, 'products');
+                    } catch (error) {
+                        console.error('Periodic refresh failed:', error);
+                    }
                 }
-            }
-        }, 30000);
+            }, 30000);
+        }
         console.log('Periodic refresh resumed (tab visible)');
+    } else {
+        // Clear interval when tab is hidden to save resources
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+        }
+        console.log('Periodic refresh paused (tab hidden)');
     }
 });
 
