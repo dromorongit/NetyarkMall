@@ -14,15 +14,36 @@ const CACHE_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes cache expiration
 let cacheTimestamp = null;
 let refreshInterval = null; // Interval for periodic refresh
 
+// Cache version to force refresh on admin updates
+let cacheVersion = 0;
+
 // Clear product cache to force refresh
 function clearProductCache() {
     productCache = null;
     cacheTimestamp = null;
-    console.log('Product cache cleared');
+    cacheVersion++; // Increment version to force all clients to refresh
+    localStorage.setItem('productCacheVersion', cacheVersion);
+    console.log('Product cache cleared, new cache version:', cacheVersion);
+}
+
+// Get current cache version
+function getCacheVersion() {
+    const stored = localStorage.getItem('productCacheVersion');
+    if (stored) {
+        cacheVersion = parseInt(stored, 10);
+    }
+    return cacheVersion;
 }
 
 // Check if cache is expired
 function isCacheExpired() {
+    // Always expire cache if version mismatch (admin updated products)
+    const currentVersion = getCacheVersion();
+    if (currentVersion > cacheVersion) {
+        console.log('Cache expired due to version mismatch (admin update detected)');
+        return true;
+    }
+    
     if (!cacheTimestamp || !productCache) return true;
     const now = Date.now();
     const age = now - cacheTimestamp;
@@ -71,7 +92,8 @@ async function fetchProducts(forceRefresh = false) {
         // Update cache with timestamp
         productCache = apiProducts;
         cacheTimestamp = Date.now();
-        console.log('API products cached:', productCache.length, 'items');
+        cacheVersion = getCacheVersion(); // Sync with latest version
+        console.log('API products cached:', productCache.length, 'items, cache version:', cacheVersion);
         return productCache;
       } else {
         console.warn('Failed to fetch from', baseUrl, ':', response.status, response.statusText);

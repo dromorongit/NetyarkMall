@@ -125,6 +125,14 @@ function showNotification(message, type = 'error') {
     }, 3000);
 }
 
+// Clear product cache across all tabs/windows
+function clearProductCacheAcrossTabs() {
+    // Update localStorage to signal cache invalidation
+    const currentVersion = parseInt(localStorage.getItem('productCacheVersion') || '0');
+    localStorage.setItem('productCacheVersion', (currentVersion + 1).toString());
+    console.log('Product cache version incremented to:', currentVersion + 1);
+}
+
 // Check if user is logged in
 if (!token) {
   window.location.href = 'admin-login.html';
@@ -233,6 +241,8 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         console.log('Product added successfully');
         showNotification('Product added successfully! Images are now stored on Cloudinary and will persist across redeployments.', 'success');
         loadProducts();
+        // Clear frontend cache to reflect new product
+        clearProductCacheAcrossTabs();
         document.getElementById('product-form').reset();
         document.getElementById('product-moq').value = '1';
       }
@@ -491,6 +501,8 @@ async function updateStock(id, currentStock) {
         body: JSON.stringify({ stock: parseInt(newStock) })
       });
       loadProducts();
+      // Clear frontend cache to reflect stock update
+      clearProductCacheAcrossTabs();
     } catch (err) {
       console.error(err);
     }
@@ -621,6 +633,8 @@ if (document.getElementById('edit-product-form')) {
      showNotification('Product updated successfully! Images are stored on Cloudinary and will persist across redeployments.', 'success');
      closeEditModal();
      loadProducts();
+     // Clear frontend cache to reflect updated product
+     clearProductCacheAcrossTabs();
    } else {
      const errorData = await response.json();
      console.log('Frontend: Failed to update product:', errorData);
@@ -646,6 +660,8 @@ async function deleteProduct(id) {
       if (response.ok) {
         console.log('Product deleted successfully');
         loadProducts();
+        // Clear frontend cache to reflect deleted product
+        clearProductCacheAcrossTabs();
       } else {
         const errorData = await response.json();
         console.error('Delete failed:', errorData);
