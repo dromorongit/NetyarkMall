@@ -2005,7 +2005,7 @@ document.addEventListener('click', function(e) {
         if (target) {
             target.scrollIntoView({ behavior: 'smooth' });
         }
-    });
+    }
 });
 
 // Loading animation

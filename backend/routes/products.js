@@ -166,6 +166,12 @@ router.post('/', auth, adminAuth, upload.fields([
     }
     
     console.log('[PRODUCTS] Creating product:', productData.name, 'Category:', productData.category);
+    
+    // Set isNewArrival to true by default so new products appear on homepage
+    if (productData.isNewArrival === undefined || productData.isNewArrival === '') {
+      productData.isNewArrival = true;
+    }
+    
     const product = new Product(productData);
     await product.save();
     console.log('[PRODUCTS] Product saved successfully:', { id: product._id, name: product.name, category: product.category });
