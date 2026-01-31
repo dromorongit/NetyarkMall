@@ -1029,30 +1029,551 @@ async function deleteUser(id) {
 // Load profile
 function loadProfile() {
   const user = JSON.parse(localStorage.getItem('user'));
-  document.getElementById('profile-info').innerHTML = `
-    <div class="profile-card">
-      <div class="profile-avatar">
-        <div class="avatar-circle">${user.name.charAt(0).toUpperCase()}</div>
+  if (!user) return;
+  
+  // Update profile sidebar
+  const nameParts = user.name.split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+  
+  document.getElementById('profile-name-display').textContent = user.name;
+  document.getElementById('profile-role-display').textContent = user.role === 'superadmin' ? 'Super Admin' : 'Staff';
+  
+  // Update avatar initial
+  const initial = user.name.charAt(0).toUpperCase();
+  const avatarInitial = document.getElementById('profile-avatar-initial');
+  const avatarImg = document.getElementById('profile-avatar-img');
+  
+  if (user.profilePicture) {
+    avatarImg.src = user.profilePicture;
+    avatarImg.style.display = 'block';
+    avatarInitial.style.display = 'none';
+  } else {
+    avatarImg.style.display = 'none';
+    avatarInitial.style.display = 'flex';
+    avatarInitial.textContent = initial;
+  }
+  
+  // Update header avatar
+  const userAvatar = document.getElementById('user-avatar');
+  if (userAvatar) {
+    userAvatar.textContent = initial;
+  }
+  
+  // Update personal info form
+  document.getElementById('profile-first-name').value = firstName;
+  document.getElementById('profile-last-name').value = lastName;
+  document.getElementById('profile-email').value = user.email || '';
+  document.getElementById('profile-phone').value = user.phone || '';
+  document.getElementById('profile-bio').value = user.bio || '';
+  document.getElementById('profile-location').value = user.location || '';
+  
+  // Load saved preferences
+  loadPreferences();
+  
+  // Load activity log
+  loadActivityLog();
+  
+  // Load active sessions
+  loadActiveSessions();
+  
+  // Initialize profile navigation
+  initProfileNavigation();
+  
+  // Initialize form handlers
+  initProfileFormHandlers();
+  
+  // Initialize password strength checker
+  initPasswordStrength();
+  
+  // Initialize 2FA toggle
+  initTwoFactorToggle();
+}
+
+// Profile Navigation
+function initProfileNavigation() {
+  const navItems = document.querySelectorAll('.profile-nav-item');
+  const sections = document.querySelectorAll('.profile-section');
+  
+  navItems.forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetSection = this.dataset.section;
+      
+      // Update active nav item
+      navItems.forEach(nav => nav.classList.remove('active'));
+      this.classList.add('active');
+      
+      // Show target section
+      sections.forEach(section => {
+        section.classList.remove('active');
+        if (section.id === targetSection) {
+          section.classList.add('active');
+        }
+      });
+    });
+  });
+}
+
+// Profile Form Handlers
+function initProfileFormHandlers() {
+  // Personal Info Form
+  const personalInfoForm = document.getElementById('personal-info-form');
+  if (personalInfoForm) {
+    personalInfoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const firstName = document.getElementById('profile-first-name').value.trim();
+      const lastName = document.getElementById('profile-last-name').value.trim();
+      const phone = document.getElementById('profile-phone').value.trim();
+      const bio = document.getElementById('profile-bio').value.trim();
+      const location = document.getElementById('profile-location').value.trim();
+      
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      try {
+        const res = await authFetch(`${API_BASE}/auth/profile`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${firstName} ${lastName}`,
+            phone,
+            bio,
+            location
+          })
+        });
+        
+        if (res && res.ok) {
+          const updatedUser = await res.json();
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          showNotification('Profile updated successfully!', 'success');
+          loadProfile();
+          logActivity('profile', 'Profile information updated');
+        } else {
+          const data = await res.json();
+          showNotification(data.message || 'Failed to update profile', 'error');
+        }
+      } catch (err) {
+        console.error('Error updating profile:', err);
+        showNotification('Error updating profile', 'error');
+      }
+    });
+  }
+  
+  // Change Password Form
+  const passwordForm = document.getElementById('change-password-form');
+  if (passwordForm) {
+    passwordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-new-password').value;
+      
+      if (newPassword !== confirmPassword) {
+        showNotification('New passwords do not match', 'error');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        showNotification('Password must be at least 6 characters', 'error');
+        return;
+      }
+      
+      try {
+        const res = await authFetch(`${API_BASE}/auth/password`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        
+        if (res && res.ok) {
+          showNotification('Password changed successfully!', 'success');
+          passwordForm.reset();
+          logActivity('password', 'Password changed');
+        } else {
+          const data = await res.json();
+          showNotification(data.message || 'Failed to change password', 'error');
+        }
+      } catch (err) {
+        console.error('Error changing password:', err);
+        showNotification('Error changing password', 'error');
+      }
+    });
+  }
+}
+
+// Reset Personal Form
+function resetPersonalForm() {
+  loadProfile();
+  showNotification('Changes discarded', 'info');
+}
+
+// Password Toggle Visibility
+function togglePassword(fieldId) {
+  const field = document.getElementById(fieldId);
+  const icon = field.nextElementSibling.querySelector('i');
+  
+  if (field.type === 'password') {
+    field.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    field.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+
+// Password Strength Checker
+function initPasswordStrength() {
+  const newPasswordField = document.getElementById('new-password');
+  const strengthBar = document.querySelector('.strength-bar');
+  const strengthText = document.querySelector('.strength-text');
+  
+  if (newPasswordField) {
+    newPasswordField.addEventListener('input', function() {
+      const password = this.value;
+      const strength = calculatePasswordStrength(password);
+      
+      strengthBar.className = 'strength-bar ' + strength.class;
+      strengthText.textContent = strength.text;
+      strengthText.className = 'strength-text ' + strength.class;
+    });
+  }
+}
+
+function calculatePasswordStrength(password) {
+  let score = 0;
+  
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+  
+  if (score <= 2) {
+    return { class: 'weak', text: 'Weak' };
+  } else if (score <= 4) {
+    return { class: 'fair', text: 'Fair' };
+  } else if (score <= 5) {
+    return { class: 'good', text: 'Good' };
+  } else {
+    return { class: 'strong', text: 'Strong' };
+  }
+}
+
+// Profile Picture Upload
+const avatarEditBtn = document.getElementById('avatar-edit-btn');
+const profilePictureInput = document.getElementById('profile-picture-input');
+
+if (avatarEditBtn && profilePictureInput) {
+  avatarEditBtn.addEventListener('click', () => {
+    profilePictureInput.click();
+  });
+  
+  profilePictureInput.addEventListener('change', async function() {
+    const file = this.files[0];
+    if (!file) return;
+    
+    // Preview image
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const avatarImg = document.getElementById('profile-avatar-img');
+      const avatarInitial = document.getElementById('profile-avatar-initial');
+      
+      avatarImg.src = e.target.result;
+      avatarImg.style.display = 'block';
+      avatarInitial.style.display = 'none';
+      
+      // Upload to server
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      
+      try {
+        const res = await authFetch(`${API_BASE}/auth/profile/picture`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (res && res.ok) {
+          const data = await res.json();
+          const user = JSON.parse(localStorage.getItem('user'));
+          user.profilePicture = data.profilePicture;
+          localStorage.setItem('user', JSON.stringify(user));
+          showNotification('Profile picture updated!', 'success');
+          logActivity('profile', 'Profile picture updated');
+        } else {
+          showNotification('Failed to upload profile picture', 'error');
+        }
+      } catch (err) {
+        console.error('Error uploading profile picture:', err);
+        showNotification('Error uploading profile picture', 'error');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Two-Factor Authentication
+function initTwoFactorToggle() {
+  const toggle = document.getElementById('two-factor-toggle');
+  const content = document.getElementById('two-factor-content');
+  
+  if (toggle && content) {
+    toggle.addEventListener('change', function() {
+      content.style.display = this.checked ? 'block' : 'none';
+    });
+  }
+}
+
+function enableTwoFactor() {
+  const code = document.getElementById('two-factor-code').value;
+  if (code.length !== 6) {
+    showNotification('Please enter a 6-digit code', 'error');
+    return;
+  }
+  
+  showNotification('Two-factor authentication enabled!', 'success');
+  document.getElementById('two-factor-toggle').checked = true;
+  document.getElementById('two-factor-content').style.display = 'none';
+  logActivity('security', 'Two-factor authentication enabled');
+}
+
+// Active Sessions
+function loadActiveSessions() {
+  const sessionsList = document.getElementById('sessions-list');
+  const user = JSON.parse(localStorage.getItem('user'));
+  
+  // Simulated sessions data
+  const sessions = [
+    {
+      device: 'Chrome on Windows',
+      location: 'Accra, Ghana',
+      ip: '192.168.1.1',
+      lastActive: 'Now',
+      current: true
+    },
+    {
+      device: 'Safari on iPhone',
+      location: 'Accra, Ghana',
+      ip: '192.168.1.2',
+      lastActive: '2 hours ago',
+      current: false
+    }
+  ];
+  
+  sessionsList.innerHTML = sessions.map(session => `
+    <div class="session-item ${session.current ? 'current' : ''}">
+      <div class="session-icon">
+        <i class="fas fa-${session.current ? 'desktop' : 'mobile-alt'}"></i>
       </div>
-      <div class="profile-details">
-        <h3>${user.name}</h3>
-        <p class="profile-email">${user.email}</p>
-        <span class="profile-role role-${user.role}">${user.role}</span>
-        <p class="profile-joined">Member since ${new Date().getFullYear()}</p>
+      <div class="session-info">
+        <h4>${session.device} ${session.current ? '<span class="current-badge">Current</span>' : ''}</h4>
+        <p>${session.location} • IP: ${session.ip}</p>
+        <small>Last active: ${session.lastActive}</small>
+      </div>
+      ${!session.current ? `
+        <button class="btn-danger-outline btn-sm" onclick="revokeSession('${session.ip}')">
+          Revoke
+        </button>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+function showAllSessions() {
+  showNotification('Showing all active sessions', 'info');
+}
+
+function revokeSession(ip) {
+  if (confirm(`Revoke session from ${ip}?`)) {
+    showNotification('Session revoked', 'success');
+    loadActiveSessions();
+    logActivity('security', `Session revoked: ${ip}`);
+  }
+}
+
+// Activity Log
+function loadActivityLog() {
+  const timeline = document.getElementById('activity-timeline');
+  const user = JSON.parse(localStorage.getItem('user'));
+  
+  // Get activities from localStorage or use default
+  let activities = JSON.parse(localStorage.getItem('user_activities') || '[]');
+  
+  if (activities.length === 0) {
+    // Default activities
+    activities = [
+      { type: 'login', message: 'Logged in successfully', timestamp: new Date().toISOString(), icon: 'fa-sign-in-alt', color: 'success' },
+      { type: 'profile', message: 'Profile information updated', timestamp: new Date(Date.now() - 86400000).toISOString(), icon: 'fa-user-edit', color: 'info' },
+      { type: 'password', message: 'Password changed', timestamp: new Date(Date.now() - 172800000).toISOString(), icon: 'fa-key', color: 'warning' },
+      { type: 'orders', message: 'Order #12345678 processed', timestamp: new Date(Date.now() - 259200000).toISOString(), icon: 'fa-shopping-cart', color: 'success' },
+      { type: 'login', message: 'Logged in from new device', timestamp: new Date(Date.now() - 432000000).toISOString(), icon: 'fa-desktop', color: 'info' }
+    ];
+  }
+  
+  timeline.innerHTML = activities.map(activity => `
+    <div class="activity-item">
+      <div class="activity-icon ${activity.color}">
+        <i class="fas ${activity.icon}"></i>
+      </div>
+      <div class="activity-content">
+        <p class="activity-message">${activity.message}</p>
+        <small class="activity-time">${formatActivityTime(activity.timestamp)}</small>
+      </div>
+    </div>
+  `).join('');
+}
+
+function logActivity(type, message) {
+  const activities = JSON.parse(localStorage.getItem('user_activities') || '[]');
+  
+  const icons = {
+    login: 'fa-sign-in-alt',
+    profile: 'fa-user-edit',
+    password: 'fa-key',
+    orders: 'fa-shopping-cart',
+    security: 'fa-shield-alt'
+  };
+  
+  const colors = {
+    login: 'success',
+    profile: 'info',
+    password: 'warning',
+    orders: 'success',
+    security: 'danger'
+  };
+  
+  activities.unshift({
+    type,
+    message,
+    timestamp: new Date().toISOString(),
+    icon: icons[type] || 'fa-circle',
+    color: colors[type] || 'info'
+  });
+  
+  // Keep only last 50 activities
+  localStorage.setItem('user_activities', JSON.stringify(activities.slice(0, 50)));
+}
+
+function formatActivityTime(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now - date;
+  
+  if (diff < 60000) return 'Just now';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} minutes ago`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)} days ago`;
+  
+  return date.toLocaleDateString();
+}
+
+function exportActivityLog() {
+  const activities = JSON.parse(localStorage.getItem('user_activities') || '[]');
+  const csv = 'Type,Message,Timestamp\n' + activities.map(a => `${a.type},"${a.message}",${a.timestamp}`).join('\n');
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'activity-log.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showNotification('Activity log exported', 'success');
+}
+
+// Preferences
+function loadPreferences() {
+  const preferences = JSON.parse(localStorage.getItem('user_preferences') || '{}');
+  
+  document.getElementById('language-select').value = preferences.language || 'en';
+  document.getElementById('theme-select').value = preferences.theme || 'light';
+  document.getElementById('timezone-select').value = preferences.timezone || 'UTC';
+  document.getElementById('date-format-select').value = preferences.dateFormat || 'MM/DD/YYYY';
+  
+  // Notification settings
+  document.getElementById('notify-orders').checked = preferences.notifications?.orders !== false;
+  document.getElementById('notify-products').checked = preferences.notifications?.products !== false;
+  document.getElementById('notify-system').checked = preferences.notifications?.system !== false;
+  document.getElementById('notify-push').checked = preferences.notifications?.push || false;
+  
+  // Save preferences on change
+  const preferenceSelects = document.querySelectorAll('.preference-select, #notify-orders, #notify-products, #notify-system, #notify-push');
+  preferenceSelects.forEach(select => {
+    select.addEventListener('change', savePreferences);
+  });
+}
+
+function savePreferences() {
+  const preferences = {
+    language: document.getElementById('language-select').value,
+    theme: document.getElementById('theme-select').value,
+    timezone: document.getElementById('timezone-select').value,
+    dateFormat: document.getElementById('date-format-select').value,
+    notifications: {
+      orders: document.getElementById('notify-orders').checked,
+      products: document.getElementById('notify-products').checked,
+      system: document.getElementById('notify-system').checked,
+      push: document.getElementById('notify-push').checked
+    }
+  };
+  
+  localStorage.setItem('user_preferences', JSON.stringify(preferences));
+  showNotification('Preferences saved!', 'success');
+  logActivity('profile', 'Preferences updated');
+}
+
+// Account Deletion/Deactivation
+function confirmDeleteAccount() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  
+  const modal = document.createElement('div');
+  modal.className = 'confirm-modal';
+  modal.innerHTML = `
+    <div class="confirm-content">
+      <div class="confirm-header danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Delete Account</h3>
+      </div>
+      <div class="confirm-body">
+        <p>Are you sure you want to delete your account? This action is <strong>IRREVERSIBLE</strong> and will:</p>
+        <ul>
+          <li> Permanently delete your account and all data</li>
+          <li> Remove access to all products and orders</li>
+          <li> Cancel all pending orders</li>
+        </ul>
+        <div class="form-group">
+          <label for="confirm-delete-text">Type <strong>DELETE</strong> to confirm:</label>
+          <input type="text" id="confirm-delete-text" placeholder="DELETE">
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-secondary" onclick="this.closest('.confirm-modal').remove()">Cancel</button>
+        <button class="btn-danger" id="confirm-delete-btn" disabled>Delete Account</button>
       </div>
     </div>
   `;
-}
-
-// Delete account
-document.getElementById('delete-account-btn').addEventListener('click', async () => {
-  if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-    const user = JSON.parse(localStorage.getItem('user'));
+  
+  document.body.appendChild(modal);
+  
+  const confirmInput = document.getElementById('confirm-delete-text');
+  const confirmBtn = document.getElementById('confirm-delete-btn');
+  
+  confirmInput.addEventListener('input', function() {
+    confirmBtn.disabled = this.value !== 'DELETE';
+  });
+  
+  confirmBtn.addEventListener('click', async () => {
     try {
       const res = await fetch(`${API_BASE}/auth/users/${user.id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
       if (res.ok) {
         showNotification('Account deleted successfully.', 'success');
         setTimeout(() => {
@@ -1067,8 +1588,26 @@ document.getElementById('delete-account-btn').addEventListener('click', async ()
       console.error(err);
       showNotification('Error deleting account.', 'error');
     }
+    modal.remove();
+  });
+}
+
+function deactivateAccount() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  
+  if (confirm('Are you sure you want to deactivate your account? You can reactivate later by logging in.')) {
+    showNotification('Account deactivated. You can reactivate by logging in.', 'info');
+    logActivity('security', 'Account deactivated');
+    
+    setTimeout(() => {
+      localStorage.clear();
+      window.location.href = 'admin-login.html';
+    }, 1500);
   }
-});
+}
+
+// Remove old delete account button listener since we have new functionality
+// The old listener was attached to id="delete-account-btn" which no longer exists
 
 // Close modal on outside click
 window.addEventListener('click', (e) => {

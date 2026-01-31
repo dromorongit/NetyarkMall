@@ -273,14 +273,396 @@
       <!-- Profile Tab -->
       <div id="profile-tab" class="tab-content">
         <div class="tab-header">
-          <h2>Profile</h2>
-          <p class="tab-description">Manage your account settings</p>
+          <h2>Profile Settings</h2>
+          <p class="tab-description">Manage your account settings and preferences</p>
         </div>
-        <div id="profile-info"></div>
-        <div class="profile-actions">
-          <button id="delete-account-btn" class="btn-danger">
-            <span>🗑️</span> Delete Account
-          </button>
+        
+        <div class="profile-modern-container">
+          <!-- Profile Sidebar -->
+          <aside class="profile-sidebar-modern">
+            <div class="profile-cover">
+              <div class="profile-avatar-container">
+                <div class="profile-avatar-modern">
+                  <img id="profile-avatar-img" src="" alt="Profile Picture">
+                  <span id="profile-avatar-initial">A</span>
+                </div>
+                <button class="avatar-edit-btn" id="avatar-edit-btn" title="Change Profile Picture">
+                  <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="profile-picture-input" accept="image/*" hidden>
+              </div>
+              <h3 id="profile-name-display">Admin User</h3>
+              <p id="profile-role-display" class="profile-role-badge">Super Admin</p>
+              <div class="profile-status">
+                <span class="status-indicator active"></span>
+                <span>Active</span>
+              </div>
+            </div>
+            <nav class="profile-nav">
+              <a href="#" class="profile-nav-item active" data-section="personal-info">
+                <i class="fas fa-user"></i>
+                <span>Personal Info</span>
+              </a>
+              <a href="#" class="profile-nav-item" data-section="security">
+                <i class="fas fa-shield-alt"></i>
+                <span>Security</span>
+              </a>
+              <a href="#" class="profile-nav-item" data-section="activity">
+                <i class="fas fa-history"></i>
+                <span>Activity Log</span>
+              </a>
+              <a href="#" class="profile-nav-item" data-section="preferences">
+                <i class="fas fa-cog"></i>
+                <span>Preferences</span>
+              </a>
+              <a href="#" class="profile-nav-item" data-section="notifications">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+              </a>
+            </nav>
+          </aside>
+          
+          <!-- Profile Content -->
+          <div class="profile-main-content">
+            <!-- Personal Info Section -->
+            <section id="personal-info" class="profile-section active">
+              <div class="section-header">
+                <h3>Personal Information</h3>
+                <p>Update your personal details and contact information</p>
+              </div>
+              <form id="personal-info-form" class="modern-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profile-first-name">First Name</label>
+                    <div class="input-wrapper">
+                      <i class="fas fa-user input-icon"></i>
+                      <input type="text" id="profile-first-name" placeholder="Enter first name">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="profile-last-name">Last Name</label>
+                    <div class="input-wrapper">
+                      <i class="fas fa-user input-icon"></i>
+                      <input type="text" id="profile-last-name" placeholder="Enter last name">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="profile-email">Email Address</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="profile-email" placeholder="Enter email" readonly>
+                  </div>
+                  <span class="input-hint"><i class="fas fa-lock"></i> Email cannot be changed</span>
+                </div>
+                <div class="form-group">
+                  <label for="profile-phone">Phone Number</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-phone input-icon"></i>
+                    <input type="tel" id="profile-phone" placeholder="Enter phone number">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="profile-bio">Bio</label>
+                  <div class="input-wrapper textarea-wrapper">
+                    <i class="fas fa-pen input-icon"></i>
+                    <textarea id="profile-bio" placeholder="Tell us about yourself..." rows="4"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="profile-location">Location</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-map-marker-alt input-icon"></i>
+                    <input type="text" id="profile-location" placeholder="Enter your location">
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" onclick="resetPersonalForm()">
+                    <i class="fas fa-undo"></i> Cancel
+                  </button>
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                  </button>
+                </div>
+              </form>
+            </section>
+            
+            <!-- Security Section -->
+            <section id="security" class="profile-section">
+              <div class="section-header">
+                <h3>Security Settings</h3>
+                <p>Manage your password and security preferences</p>
+              </div>
+              
+              <!-- Change Password Card -->
+              <div class="security-card">
+                <div class="card-header">
+                  <div class="card-icon password-icon">
+                    <i class="fas fa-key"></i>
+                  </div>
+                  <div class="card-info">
+                    <h4>Change Password</h4>
+                    <p>Update your password regularly to keep your account secure</p>
+                  </div>
+                </div>
+                <form id="change-password-form" class="modern-form">
+                  <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <div class="input-wrapper">
+                      <i class="fas fa-lock input-icon"></i>
+                      <input type="password" id="current-password" placeholder="Enter current password">
+                      <button type="button" class="password-toggle" onclick="togglePassword('current-password')">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <div class="input-wrapper">
+                      <i class="fas fa-lock input-icon"></i>
+                      <input type="password" id="new-password" placeholder="Enter new password">
+                      <button type="button" class="password-toggle" onclick="togglePassword('new-password')">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="password-strength" id="password-strength">
+                      <div class="strength-bar"></div>
+                      <span class="strength-text"></span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm-new-password">Confirm New Password</label>
+                    <div class="input-wrapper">
+                      <i class="fas fa-lock input-icon"></i>
+                      <input type="password" id="confirm-new-password" placeholder="Confirm new password">
+                      <button type="button" class="password-toggle" onclick="togglePassword('confirm-new-password')">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                      <i class="fas fa-shield-alt"></i> Update Password
+                    </button>
+                  </div>
+                </form>
+              </div>
+              
+              <!-- Two-Factor Authentication -->
+              <div class="security-card">
+                <div class="card-header">
+                  <div class="card-icon two-factor-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                  </div>
+                  <div class="card-info">
+                    <h4>Two-Factor Authentication</h4>
+                    <p>Add an extra layer of security to your account</p>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="two-factor-toggle">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="card-content" id="two-factor-content" style="display: none;">
+                  <p>Scan the QR code below with your authenticator app:</p>
+                  <div class="qr-code-container">
+                    <div class="qr-code-placeholder">
+                      <i class="fas fa-qrcode"></i>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="two-factor-code">Enter Verification Code</label>
+                    <div class="input-wrapper">
+                      <i class="fas fa-shield-alt input-icon"></i>
+                      <input type="text" id="two-factor-code" placeholder="Enter 6-digit code" maxlength="6">
+                    </div>
+                  </div>
+                  <button class="btn-primary" onclick="enableTwoFactor()">
+                    <i class="fas fa-check"></i> Enable 2FA
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Active Sessions -->
+              <div class="security-card">
+                <div class="card-header">
+                  <div class="card-icon sessions-icon">
+                    <i class="fas fa-desktop"></i>
+                  </div>
+                  <div class="card-info">
+                    <h4>Active Sessions</h4>
+                    <p>Manage devices where you're logged in</p>
+                  </div>
+                  <button class="btn-secondary btn-sm" onclick="showAllSessions()">
+                    View All
+                  </button>
+                </div>
+                <div class="sessions-list" id="sessions-list">
+                  <!-- Sessions will be loaded here -->
+                </div>
+              </div>
+            </section>
+            
+            <!-- Activity Log Section -->
+            <section id="activity" class="profile-section">
+              <div class="section-header">
+                <h3>Activity Log</h3>
+                <p>Track your account activity and login history</p>
+              </div>
+              <div class="activity-filters">
+                <select id="activity-filter" class="activity-filter">
+                  <option value="all">All Activities</option>
+                  <option value="login">Logins</option>
+                  <option value="profile">Profile Updates</option>
+                  <option value="password">Password Changes</option>
+                  <option value="orders">Order Actions</option>
+                </select>
+                <button class="btn-secondary btn-sm" onclick="exportActivityLog()">
+                  <i class="fas fa-download"></i> Export
+                </button>
+              </div>
+              <div class="activity-timeline" id="activity-timeline">
+                <!-- Activity items will be loaded here -->
+              </div>
+            </section>
+            
+            <!-- Preferences Section -->
+            <section id="preferences" class="profile-section">
+              <div class="section-header">
+                <h3>Preferences</h3>
+                <p>Customize your experience and settings</p>
+              </div>
+              <div class="preferences-grid">
+                <div class="preference-card">
+                  <div class="preference-icon">
+                    <i class="fas fa-language"></i>
+                  </div>
+                  <div class="preference-info">
+                    <h4>Language</h4>
+                    <p>Select your preferred language</p>
+                  </div>
+                  <select id="language-select" class="preference-select">
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="es">Español</option>
+                  </select>
+                </div>
+                <div class="preference-card">
+                  <div class="preference-icon">
+                    <i class="fas fa-palette"></i>
+                  </div>
+                  <div class="preference-info">
+                    <h4>Theme</h4>
+                    <p>Choose your preferred theme</p>
+                  </div>
+                  <select id="theme-select" class="preference-select">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="system">System</option>
+                  </select>
+                </div>
+                <div class="preference-card">
+                  <div class="preference-icon">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <div class="preference-info">
+                    <h4>Timezone</h4>
+                    <p>Set your local timezone</p>
+                  </div>
+                  <select id="timezone-select" class="preference-select">
+                    <option value="UTC">UTC</option>
+                    <option value="GMT">GMT</option>
+                    <option value="EST">EST</option>
+                    <option value="PST">PST</option>
+                  </select>
+                </div>
+                <div class="preference-card">
+                  <div class="preference-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                  </div>
+                  <div class="preference-info">
+                    <h4>Date Format</h4>
+                    <p>Choose date display format</p>
+                  </div>
+                  <select id="date-format-select" class="preference-select">
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+            
+            <!-- Notifications Section -->
+            <section id="notifications" class="profile-section">
+              <div class="section-header">
+                <h3>Notification Settings</h3>
+                <p>Control how you receive notifications</p>
+              </div>
+              <div class="notification-settings">
+                <div class="notification-group">
+                  <h4>Email Notifications</h4>
+                  <div class="notification-item">
+                    <div class="notification-info">
+                      <h5>Order Updates</h5>
+                      <p>Receive updates about order status changes</p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="notify-orders" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div class="notification-item">
+                    <div class="notification-info">
+                      <h5>Product Alerts</h5>
+                      <p>Get notified about low stock and price changes</p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="notify-products" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div class="notification-item">
+                    <div class="notification-info">
+                      <h5>System Updates</h5>
+                      <p>Receive important system announcements</p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="notify-system" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="notification-group">
+                  <h4>Push Notifications</h4>
+                  <div class="notification-item">
+                    <div class="notification-info">
+                      <h5>Enable Push Notifications</h5>
+                      <p>Receive push notifications in your browser</p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="notify-push">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+          <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+          <p>Irreversible and destructive actions</p>
+          <div class="danger-actions">
+            <button class="btn-danger-outline" onclick="deactivateAccount()">
+              <i class="fas fa-pause"></i> Deactivate Account
+            </button>
+            <button class="btn-danger" onclick="confirmDeleteAccount()">
+              <i class="fas fa-trash"></i> Delete Account
+            </button>
+          </div>
         </div>
       </div>
     </div>
