@@ -223,20 +223,37 @@ function loadTabData(tabName) {
     }
 }
 
-// Check if user is logged in
-if (!token) {
-  window.location.href = 'admin-login.html';
-} else {
-  if (refreshToken) {
-    setTokenExpiration();
+// Check if user is logged in and initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  if (!token) {
+    window.location.href = 'admin-login.html';
+  } else {
+    if (refreshToken) {
+      setTokenExpiration();
+    }
+    loadDashboard();
   }
-  loadDashboard();
-}
-
-// Initialize sidebar and tabs
-initSidebar();
-initTabs();
-initFormToggle();
+  
+  // Initialize sidebar and tabs
+  initSidebar();
+  initTabs();
+  initFormToggle();
+  
+  // Initialize profile navigation immediately
+  initProfileNavigation();
+  
+  // Initialize profile form handlers
+  initProfileFormHandlers();
+  
+  // Initialize password strength
+  initPasswordStrength();
+  
+  // Initialize 2FA toggle
+  initTwoFactorToggle();
+  
+  // Setup other event listeners
+  setupEventListeners();
+});
 
 // Update user info in header
 function updateUserInfo() {
@@ -1108,18 +1125,28 @@ async function loadProfile() {
   }
 }
 
-// Profile Navigation
+// Initialize profile navigation immediately
 function initProfileNavigation() {
   const navItems = document.querySelectorAll('.profile-nav-item');
   const sections = document.querySelectorAll('.profile-section');
   
+  if (navItems.length === 0) {
+    console.log('Profile nav items not found yet');
+    return;
+  }
+  
   navItems.forEach(item => {
-    item.addEventListener('click', function(e) {
+    // Remove any existing listeners to avoid duplicates
+    const newItem = item.cloneNode(true);
+    item.parentNode.replaceChild(newItem, item);
+    
+    newItem.addEventListener('click', function(e) {
       e.preventDefault();
       const targetSection = this.dataset.section;
       
       // Update active nav item
-      navItems.forEach(nav => nav.classList.remove('active'));
+      const allNavItems = document.querySelectorAll('.profile-nav-item');
+      allNavItems.forEach(nav => nav.classList.remove('active'));
       this.classList.add('active');
       
       // Show target section
