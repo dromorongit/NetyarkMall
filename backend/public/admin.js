@@ -1027,67 +1027,85 @@ async function deleteUser(id) {
 }
 
 // Load profile
-function loadProfile() {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (!user) return;
-  
-  // Update profile sidebar
-  const nameParts = user.name.split(' ');
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
-  
-  document.getElementById('profile-name-display').textContent = user.name;
-  document.getElementById('profile-role-display').textContent = user.role === 'superadmin' ? 'Super Admin' : 'Staff';
-  
-  // Update avatar initial
-  const initial = user.name.charAt(0).toUpperCase();
-  const avatarInitial = document.getElementById('profile-avatar-initial');
-  const avatarImg = document.getElementById('profile-avatar-img');
-  
-  if (user.profilePicture) {
-    avatarImg.src = user.profilePicture;
-    avatarImg.style.display = 'block';
-    avatarInitial.style.display = 'none';
-  } else {
-    avatarImg.style.display = 'none';
-    avatarInitial.style.display = 'flex';
-    avatarInitial.textContent = initial;
+async function loadProfile() {
+  try {
+    // Fetch latest profile data from server
+    const res = await authFetch(`${API_BASE}/auth/profile`);
+    if (!res) return;
+    
+    const user = await res.json();
+    
+    // Update local storage with latest user data
+    localStorage.setItem('user', JSON.stringify(user));
+    
+    // Update profile sidebar
+    const nameParts = user.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    document.getElementById('profile-name-display').textContent = user.name;
+    document.getElementById('profile-role-display').textContent = user.role === 'superadmin' ? 'Super Admin' : 'Staff';
+    
+    // Update avatar initial
+    const initial = user.name.charAt(0).toUpperCase();
+    const avatarInitial = document.getElementById('profile-avatar-initial');
+    const avatarImg = document.getElementById('profile-avatar-img');
+    
+    if (user.profilePicture) {
+      avatarImg.src = user.profilePicture;
+      avatarImg.style.display = 'block';
+      avatarInitial.style.display = 'none';
+    } else {
+      avatarImg.style.display = 'none';
+      avatarInitial.style.display = 'flex';
+      avatarInitial.textContent = initial;
+    }
+    
+    // Update header avatar
+    const userAvatar = document.getElementById('user-avatar');
+    if (userAvatar) {
+      userAvatar.textContent = initial;
+    }
+    
+    // Update personal info form
+    document.getElementById('profile-first-name').value = firstName;
+    document.getElementById('profile-last-name').value = lastName;
+    document.getElementById('profile-email').value = user.email || '';
+    document.getElementById('profile-phone').value = user.phone || '';
+    document.getElementById('profile-bio').value = user.bio || '';
+    document.getElementById('profile-location').value = user.location || '';
+    
+    // Set 2FA toggle
+    const twoFactorToggle = document.getElementById('two-factor-toggle');
+    if (twoFactorToggle) {
+      twoFactorToggle.checked = user.twoFactorEnabled || false;
+    }
+    
+    // Load saved preferences
+    loadPreferences(user.preferences);
+    
+    // Load activity log from server
+    loadActivityLogFromServer();
+    
+    // Load active sessions from server
+    loadActiveSessionsFromServer();
+    
+    // Initialize profile navigation
+    initProfileNavigation();
+    
+    // Initialize form handlers
+    initProfileFormHandlers();
+    
+    // Initialize password strength checker
+    initPasswordStrength();
+    
+    // Initialize 2FA toggle
+    initTwoFactorToggle();
+    
+  } catch (err) {
+    console.error('Error loading profile:', err);
+    showNotification('Error loading profile', 'error');
   }
-  
-  // Update header avatar
-  const userAvatar = document.getElementById('user-avatar');
-  if (userAvatar) {
-    userAvatar.textContent = initial;
-  }
-  
-  // Update personal info form
-  document.getElementById('profile-first-name').value = firstName;
-  document.getElementById('profile-last-name').value = lastName;
-  document.getElementById('profile-email').value = user.email || '';
-  document.getElementById('profile-phone').value = user.phone || '';
-  document.getElementById('profile-bio').value = user.bio || '';
-  document.getElementById('profile-location').value = user.location || '';
-  
-  // Load saved preferences
-  loadPreferences();
-  
-  // Load activity log
-  loadActivityLog();
-  
-  // Load active sessions
-  loadActiveSessions();
-  
-  // Initialize profile navigation
-  initProfileNavigation();
-  
-  // Initialize form handlers
-  initProfileFormHandlers();
-  
-  // Initialize password strength checker
-  initPasswordStrength();
-  
-  // Initialize 2FA toggle
-  initTwoFactorToggle();
 }
 
 // Profile Navigation
@@ -1277,7 +1295,20 @@ if (avatarEditBtn && profilePictureInput) {
     const file = this.files[0];
     if (!file) return;
     
-    // Preview image
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showNotification('Please select a valid image file (JPEG, PNG, GIF, WebP)', 'error');
+      return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification('Image size must be less than 5MB', 'error');
+      return;
+    }
+    
+    // Preview image immediately
     const reader = new FileReader();
     reader.onload = async (e) => {
       const avatarImg = document.getElementById('profile-avatar-img');
@@ -1286,33 +1317,49 @@ if (avatarEditBtn && profilePictureInput) {
       avatarImg.src = e.target.result;
       avatarImg.style.display = 'block';
       avatarInitial.style.display = 'none';
-      
-      // Upload to server
-      const formData = new FormData();
-      formData.append('profilePicture', file);
-      
-      try {
-        const res = await authFetch(`${API_BASE}/auth/profile/picture`, {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (res && res.ok) {
-          const data = await res.json();
-          const user = JSON.parse(localStorage.getItem('user'));
-          user.profilePicture = data.profilePicture;
-          localStorage.setItem('user', JSON.stringify(user));
-          showNotification('Profile picture updated!', 'success');
-          logActivity('profile', 'Profile picture updated');
-        } else {
-          showNotification('Failed to upload profile picture', 'error');
-        }
-      } catch (err) {
-        console.error('Error uploading profile picture:', err);
-        showNotification('Error uploading profile picture', 'error');
-      }
     };
     reader.readAsDataURL(file);
+    
+    // Upload to server
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+    
+    // Show loading state
+    avatarEditBtn.disabled = true;
+    avatarEditBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    try {
+      // Get fresh token if needed
+      if (isTokenExpired()) {
+        await refreshAuthToken();
+      }
+      
+      const response = await fetch(`${API_BASE}/auth/profile/picture`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const user = JSON.parse(localStorage.getItem('user'));
+        user.profilePicture = data.profilePicture;
+        localStorage.setItem('user', JSON.stringify(user));
+        showNotification('Profile picture updated!', 'success');
+        logActivity('profile', 'Profile picture updated');
+      } else {
+        const errorData = await response.json();
+        showNotification(errorData.message || 'Failed to upload profile picture', 'error');
+      }
+    } catch (err) {
+      console.error('Error uploading profile picture:', err);
+      showNotification('Error uploading profile picture', 'error');
+    } finally {
+      avatarEditBtn.disabled = false;
+      avatarEditBtn.innerHTML = '<i class="fas fa-camera"></i>';
+    }
   });
 }
 
@@ -1322,57 +1369,130 @@ function initTwoFactorToggle() {
   const content = document.getElementById('two-factor-content');
   
   if (toggle && content) {
-    toggle.addEventListener('change', function() {
+    toggle.addEventListener('change', async function() {
       content.style.display = this.checked ? 'block' : 'none';
+      
+      // Enable/disable 2FA on server
+      try {
+        const res = await authFetch(`${API_BASE}/auth/2fa/toggle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: this.checked, secret: '' })
+        });
+        
+        if (res && res.ok) {
+          showNotification(this.checked ? '2FA enabled' : '2FA disabled', 'success');
+          logActivity('security', `Two-factor authentication ${this.checked ? 'enabled' : 'disabled'}`);
+        } else {
+          this.checked = !this.checked;
+          showNotification('Failed to toggle 2FA', 'error');
+        }
+      } catch (err) {
+        console.error('Error toggling 2FA:', err);
+        this.checked = !this.checked;
+        showNotification('Error toggling 2FA', 'error');
+      }
     });
   }
 }
 
-function enableTwoFactor() {
+async function enableTwoFactor() {
   const code = document.getElementById('two-factor-code').value;
   if (code.length !== 6) {
     showNotification('Please enter a 6-digit code', 'error');
     return;
   }
   
-  showNotification('Two-factor authentication enabled!', 'success');
-  document.getElementById('two-factor-toggle').checked = true;
-  document.getElementById('two-factor-content').style.display = 'none';
-  logActivity('security', 'Two-factor authentication enabled');
+  try {
+    const res = await authFetch(`${API_BASE}/auth/2fa/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    
+    const data = await res.json();
+    if (data.valid) {
+      showNotification('Two-factor authentication enabled!', 'success');
+      document.getElementById('two-factor-toggle').checked = true;
+      document.getElementById('two-factor-content').style.display = 'none';
+      logActivity('security', 'Two-factor authentication enabled');
+    } else {
+      showNotification('Invalid verification code', 'error');
+    }
+  } catch (err) {
+    console.error('Error verifying 2FA code:', err);
+    showNotification('Error verifying 2FA code', 'error');
+  }
 }
 
-// Active Sessions
+// Active Sessions - Load from Server
+async function loadActiveSessionsFromServer() {
+  try {
+    const res = await authFetch(`${API_BASE}/auth/sessions`);
+    if (!res) return;
+    
+    const sessions = await res.json();
+    const sessionsList = document.getElementById('sessions-list');
+    
+    if (!sessions || sessions.length === 0) {
+      sessionsList.innerHTML = `
+        <div class="empty-state">
+          <p>No active sessions</p>
+        </div>
+      `;
+      return;
+    }
+    
+    sessionsList.innerHTML = sessions.map(session => `
+      <div class="session-item ${session.current ? 'current' : ''}">
+        <div class="session-icon">
+          <i class="fas fa-${session.device.toLowerCase().includes('mobile') ? 'mobile-alt' : 'desktop'}"></i>
+        </div>
+        <div class="session-info">
+          <h4>${session.device} ${session.current ? '<span class="current-badge">Current</span>' : ''}</h4>
+          <p>${session.location || 'Unknown'} • IP: ${session.ip || 'N/A'}</p>
+          <small>Last active: ${formatActivityTime(session.lastActive)}</small>
+        </div>
+        ${!session.current ? `
+          <button class="btn-danger-outline btn-sm" onclick="revokeSession('${session._id}')">
+            Revoke
+          </button>
+        ` : ''}
+      </div>
+    `).join('');
+    
+  } catch (err) {
+    console.error('Error loading sessions:', err);
+    // Fallback to localStorage
+    loadActiveSessions();
+  }
+}
+
+// Legacy function for fallback
 function loadActiveSessions() {
   const sessionsList = document.getElementById('sessions-list');
-  const user = JSON.parse(localStorage.getItem('user'));
   
-  // Simulated sessions data
-  const sessions = [
+  // Get from localStorage or use default
+  const savedSessions = JSON.parse(localStorage.getItem('user_sessions') || 'null');
+  const sessions = savedSessions || [
     {
       device: 'Chrome on Windows',
       location: 'Accra, Ghana',
-      ip: '192.168.1.1',
-      lastActive: 'Now',
+      ip: 'Current IP',
+      lastActive: new Date().toISOString(),
       current: true
-    },
-    {
-      device: 'Safari on iPhone',
-      location: 'Accra, Ghana',
-      ip: '192.168.1.2',
-      lastActive: '2 hours ago',
-      current: false
     }
   ];
   
   sessionsList.innerHTML = sessions.map(session => `
     <div class="session-item ${session.current ? 'current' : ''}">
       <div class="session-icon">
-        <i class="fas fa-${session.current ? 'desktop' : 'mobile-alt'}"></i>
+        <i class="fas fa-${session.device.toLowerCase().includes('mobile') ? 'mobile-alt' : 'desktop'}"></i>
       </div>
       <div class="session-info">
         <h4>${session.device} ${session.current ? '<span class="current-badge">Current</span>' : ''}</h4>
-        <p>${session.location} • IP: ${session.ip}</p>
-        <small>Last active: ${session.lastActive}</small>
+        <p>${session.location || 'Unknown'} • IP: ${session.ip || 'N/A'}</p>
+        <small>Last active: ${formatActivityTime(session.lastActive)}</small>
       </div>
       ${!session.current ? `
         <button class="btn-danger-outline btn-sm" onclick="revokeSession('${session.ip}')">
@@ -1384,19 +1504,68 @@ function loadActiveSessions() {
 }
 
 function showAllSessions() {
-  showNotification('Showing all active sessions', 'info');
+  showNotification('Showing all active sessions from server', 'info');
+  loadActiveSessionsFromServer();
 }
 
-function revokeSession(ip) {
-  if (confirm(`Revoke session from ${ip}?`)) {
-    showNotification('Session revoked', 'success');
-    loadActiveSessions();
-    logActivity('security', `Session revoked: ${ip}`);
+async function revokeSession(sessionId) {
+  if (confirm('Are you sure you want to revoke this session?')) {
+    try {
+      const res = await authFetch(`${API_BASE}/auth/sessions/${sessionId}`, {
+        method: 'DELETE'
+      });
+      
+      if (res && res.ok) {
+        showNotification('Session revoked successfully', 'success');
+        loadActiveSessionsFromServer();
+        logActivity('security', 'Session revoked');
+      } else {
+        showNotification('Failed to revoke session', 'error');
+      }
+    } catch (err) {
+      console.error('Error revoking session:', err);
+      showNotification('Error revoking session', 'error');
+    }
   }
 }
 
-// Activity Log
-function loadActivityLog() {
+// Activity Log - Load from Server
+async function loadActivityLogFromServer() {
+  try {
+    const res = await authFetch(`${API_BASE}/auth/activities`);
+    if (!res) {
+      // Fallback to localStorage
+      loadActivityLog();
+      return;
+    }
+    
+    const activities = await res.json();
+    const timeline = document.getElementById('activity-timeline');
+    
+    if (!activities || activities.length === 0) {
+      // Fallback to localStorage if no activities from server
+      loadActivityLog();
+      return;
+    }
+    
+    timeline.innerHTML = activities.map(activity => `
+      <div class="activity-item">
+        <div class="activity-icon ${activity.color || 'info'}">
+          <i class="fas ${activity.icon || 'fa-circle'}"></i>
+        </div>
+        <div class="activity-content">
+          <p class="activity-message">${activity.message}</p>
+          <small class="activity-time">${formatActivityTime(activity.timestamp)}</small>
+        </div>
+      </div>
+    `).join('');
+    
+  } catch (err) {
+    console.error('Error loading activity log:', err);
+    // Fallback to localStorage
+    loadActivityLog();
+  }
+}
   const timeline = document.getElementById('activity-timeline');
   const user = JSON.parse(localStorage.getItem('user'));
   
@@ -1487,8 +1656,8 @@ function exportActivityLog() {
 }
 
 // Preferences
-function loadPreferences() {
-  const preferences = JSON.parse(localStorage.getItem('user_preferences') || '{}');
+function loadPreferences(serverPreferences = null) {
+  const preferences = serverPreferences || JSON.parse(localStorage.getItem('user_preferences') || '{}');
   
   document.getElementById('language-select').value = preferences.language || 'en';
   document.getElementById('theme-select').value = preferences.theme || 'light';
@@ -1504,11 +1673,12 @@ function loadPreferences() {
   // Save preferences on change
   const preferenceSelects = document.querySelectorAll('.preference-select, #notify-orders, #notify-products, #notify-system, #notify-push');
   preferenceSelects.forEach(select => {
+    select.removeEventListener('change', savePreferences);
     select.addEventListener('change', savePreferences);
   });
 }
 
-function savePreferences() {
+async function savePreferences() {
   const preferences = {
     language: document.getElementById('language-select').value,
     theme: document.getElementById('theme-select').value,
@@ -1522,9 +1692,27 @@ function savePreferences() {
     }
   };
   
-  localStorage.setItem('user_preferences', JSON.stringify(preferences));
-  showNotification('Preferences saved!', 'success');
-  logActivity('profile', 'Preferences updated');
+  // Save to server
+  try {
+    const res = await authFetch(`${API_BASE}/auth/preferences`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ preferences })
+    });
+    
+    if (res && res.ok) {
+      localStorage.setItem('user_preferences', JSON.stringify(preferences));
+      showNotification('Preferences saved!', 'success');
+      logActivity('profile', 'Preferences updated');
+    } else {
+      showNotification('Failed to save preferences', 'error');
+    }
+  } catch (err) {
+    console.error('Error saving preferences:', err);
+    // Save locally as fallback
+    localStorage.setItem('user_preferences', JSON.stringify(preferences));
+    showNotification('Preferences saved locally', 'info');
+  }
 }
 
 // Account Deletion/Deactivation
@@ -1547,8 +1735,8 @@ function confirmDeleteAccount() {
           <li> Cancel all pending orders</li>
         </ul>
         <div class="form-group">
-          <label for="confirm-delete-text">Type <strong>DELETE</strong> to confirm:</label>
-          <input type="text" id="confirm-delete-text" placeholder="DELETE">
+          <label for="confirm-delete-password">Enter your password to confirm:</label>
+          <input type="password" id="confirm-delete-password" placeholder="Enter your password">
         </div>
       </div>
       <div class="confirm-actions">
@@ -1560,21 +1748,24 @@ function confirmDeleteAccount() {
   
   document.body.appendChild(modal);
   
-  const confirmInput = document.getElementById('confirm-delete-text');
+  const passwordInput = document.getElementById('confirm-delete-password');
   const confirmBtn = document.getElementById('confirm-delete-btn');
   
-  confirmInput.addEventListener('input', function() {
-    confirmBtn.disabled = this.value !== 'DELETE';
+  passwordInput.addEventListener('input', function() {
+    confirmBtn.disabled = this.value.length < 6;
   });
   
   confirmBtn.addEventListener('click', async () => {
+    const password = passwordInput.value;
+    
     try {
-      const res = await fetch(`${API_BASE}/auth/users/${user.id}`, {
+      const res = await authFetch(`${API_BASE}/auth/account`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
       });
       
-      if (res.ok) {
+      if (res && res.ok) {
         showNotification('Account deleted successfully.', 'success');
         setTimeout(() => {
           localStorage.clear();
@@ -1592,17 +1783,28 @@ function confirmDeleteAccount() {
   });
 }
 
-function deactivateAccount() {
-  const user = JSON.parse(localStorage.getItem('user'));
-  
+async function deactivateAccount() {
   if (confirm('Are you sure you want to deactivate your account? You can reactivate later by logging in.')) {
-    showNotification('Account deactivated. You can reactivate by logging in.', 'info');
-    logActivity('security', 'Account deactivated');
-    
-    setTimeout(() => {
-      localStorage.clear();
-      window.location.href = 'admin-login.html';
-    }, 1500);
+    try {
+      const res = await authFetch(`${API_BASE}/auth/deactivate`, {
+        method: 'POST'
+      });
+      
+      if (res && res.ok) {
+        showNotification('Account deactivated. You can reactivate by logging in.', 'info');
+        logActivity('security', 'Account deactivated');
+        
+        setTimeout(() => {
+          localStorage.clear();
+          window.location.href = 'admin-login.html';
+        }, 1500);
+      } else {
+        showNotification('Error deactivating account', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification('Error deactivating account.', 'error');
+    }
   }
 }
 
