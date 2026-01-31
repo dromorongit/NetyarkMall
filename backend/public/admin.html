@@ -5,63 +5,340 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NetyarkMall AIMS - Admin Dashboard</title>
   <link rel="stylesheet" href="admin.css">
-  <style>
-    .stock-status-section {
-      margin: 15px 0;
-      padding: 10px;
-      background-color: #f5f5f5;
-      border-radius: 5px;
-    }
-    .stock-status-section h4 {
-      margin: 5px 0 10px 0;
-      font-size: 16px;
-    }
-    .stock-status-section label {
-      margin-right: 15px;
-      font-weight: normal;
-    }
-  </style>
 </head>
 <body>
-  <header id="header">
-    <img src="Netyark.jfif" alt="Netyark Mall Logo" id="logo">
-    <h1>NetyarkMall Admin & Inventory Management System</h1>
-    <button id="logout-btn">Logout</button>
-  </header>
-  <div id="dashboard">
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="products">Products</button>
-      <button class="tab-btn" data-tab="daily-deals">Daily Deals</button>
-      <button class="tab-btn" data-tab="orders">Orders</button>
-      <button class="tab-btn" data-tab="messages">Messages</button>
-      <button class="tab-btn" data-tab="users">Users</button>
-      <button class="tab-btn" data-tab="profile">Profile</button>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="Netyark.jfif" alt="Netyark Mall Logo" class="sidebar-logo">
+      <span class="sidebar-title">NetyarkMall</span>
     </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-tab="products">
+        <span class="nav-icon">📦</span>
+        <span class="nav-text">Products</span>
+      </a>
+      <a href="#" class="nav-item" data-tab="daily-deals">
+        <span class="nav-icon">🔥</span>
+        <span class="nav-text">Daily Deals</span>
+      </a>
+      <a href="#" class="nav-item" data-tab="orders">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Orders</span>
+      </a>
+      <a href="#" class="nav-item" data-tab="messages">
+        <span class="nav-icon">💬</span>
+        <span class="nav-text">Messages</span>
+      </a>
+      <a href="#" class="nav-item" data-tab="users" id="users-nav-item">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Users</span>
+      </a>
+      <a href="#" class="nav-item" data-tab="profile">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">Profile</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="logout-btn" class="logout-btn">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-text">Logout</span>
+      </button>
+    </div>
+  </aside>
 
-    <div id="products-tab" class="tab-content">
-      <h2>Manage Products</h2>
-      <div id="create-staff-section" style="display: none; margin-bottom: 30px;">
-        <h3>Create Staff Account *</h3>
-        <form id="create-staff-form">
-          <input type="text" id="staff-name" placeholder="Name *" required>
-          <input type="email" id="staff-email" placeholder="Email *" required>
-          <input type="password" id="staff-password" placeholder="Password *" required>
-          <button type="submit">Create Staff</button>
-        </form>
+  <!-- Mobile Toggle -->
+  <button class="sidebar-toggle" id="sidebar-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <h1>Admin & Inventory Management System</h1>
       </div>
-      <div class="form-section">
-        <h3>Add New Product *</h3>
-        <form id="product-form">
-          <input type="text" id="product-name" placeholder="Name *" required>
-          <input type="text" id="product-short-description" placeholder="Short Description *" required>
-          <textarea id="product-long-description" placeholder="Long Description"></textarea>
-          <input type="text" id="product-brand" placeholder="Brand">
-          <input type="text" id="product-colors" placeholder="Colors (comma-separated)">
-          <input type="text" id="product-sizes" placeholder="Sizes (comma-separated)">
-          <input type="number" id="product-price" placeholder="Price (GHS) *" required>
-          <input type="number" id="product-original-price" placeholder="Original Price (GHS) - for daily deals">
-          <input type="number" id="product-stock" placeholder="Stock *" required>
-          <select id="product-category" required>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <span class="user-name" id="user-name">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+      <!-- Products Tab -->
+      <div id="products-tab" class="tab-content active">
+        <div class="tab-header">
+          <h2>Manage Products</h2>
+          <p class="tab-description">Add, edit, and manage your product inventory</p>
+        </div>
+        
+        <div id="create-staff-section" class="staff-section" style="display: none;">
+          <div class="staff-card">
+            <h3>Create Staff Account *</h3>
+            <form id="create-staff-form" class="staff-form">
+              <input type="text" id="staff-name" placeholder="Name *" required>
+              <input type="email" id="staff-email" placeholder="Email *" required>
+              <input type="password" id="staff-password" placeholder="Password *" required>
+              <button type="submit" class="btn-primary">Create Staff</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-toggle">
+            <button class="toggle-btn active" data-toggle="add-product">Add Product</button>
+            <button class="toggle-btn" data-toggle="product-list">View Products</button>
+          </div>
+          
+          <div id="add-product-form" class="form-panel active">
+            <h3>Add New Product *</h3>
+            <form id="product-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="product-name">Product Name *</label>
+                  <input type="text" id="product-name" placeholder="Enter product name" required>
+                </div>
+                <div class="form-group">
+                  <label for="product-brand">Brand</label>
+                  <input type="text" id="product-brand" placeholder="Enter brand name">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="product-short-description">Short Description *</label>
+                <input type="text" id="product-short-description" placeholder="Brief product description" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="product-long-description">Long Description</label>
+                <textarea id="product-long-description" placeholder="Detailed product description" rows="4"></textarea>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="product-colors">Colors (comma-separated)</label>
+                  <input type="text" id="product-colors" placeholder="Red, Blue, Green">
+                </div>
+                <div class="form-group">
+                  <label for="product-sizes">Sizes (comma-separated)</label>
+                  <input type="text" id="product-sizes" placeholder="S, M, L, XL">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="product-price">Price (GHS) *</label>
+                  <input type="number" id="product-price" placeholder="0.00" step="0.01" required>
+                </div>
+                <div class="form-group">
+                  <label for="product-original-price">Original Price (GHS)</label>
+                  <input type="number" id="product-original-price" placeholder="For daily deals" step="0.01">
+                </div>
+                <div class="form-group">
+                  <label for="product-stock">Stock *</label>
+                  <input type="number" id="product-stock" placeholder="0" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="product-category">Category *</label>
+                <select id="product-category" required>
+                  <option value="">Select Category *</option>
+                  <option value="Kitchen Appliances">Kitchen Appliances</option>
+                  <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+                  <option value="Photography & Content Creation Tools">Photography & Content Creation Tools</option>
+                  <option value="Nail Supplies">Nail Supplies</option>
+                  <option value="Kids & Babies">Kids & Babies</option>
+                  <option value="Home Essentials">Home Essentials</option>
+                  <option value="Lighting & Home Decor">Lighting & Home Decor</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="product-image">Product Image</label>
+                <input type="file" id="product-image" accept="image/*" class="file-input">
+              </div>
+              
+              <div class="additional-media">
+                <h4>Additional Media</h4>
+                <label for="product-additional-media">Upload Additional Images/Videos:</label>
+                <input type="file" id="product-additional-media" accept="image/*,video/*" multiple class="file-input">
+              </div>
+              
+              <div class="form-row checkbox-row">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="product-wholesale"> Wholesale Product
+                </label>
+                <div class="form-group wholesale-group" style="display: none;">
+                  <label for="product-moq">Min Order Qty</label>
+                  <input type="number" id="product-moq" value="1" min="1">
+                </div>
+                <div class="form-group wholesale-group" style="display: none;">
+                  <label for="product-wholesale-price">Wholesale Price (GHS)</label>
+                  <input type="number" id="product-wholesale-price" placeholder="0.00" step="0.01">
+                </div>
+              </div>
+              
+              <div class="section-checkboxes">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="product-new-arrival"> New Arrivals
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="product-fast-selling"> Fast-Selling Items
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="product-shop-category"> Shop by Category
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="product-daily-deal"> Daily Deal
+                </label>
+              </div>
+              
+              <div class="stock-status-section">
+                <h4>Stock Status</h4>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="stock-status" id="product-in-stock" value="in-stock" checked> In Stock
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="stock-status" id="product-out-of-stock" value="out-of-stock"> Out of Stock
+                  </label>
+                </div>
+              </div>
+              
+              <button type="submit" class="btn-primary btn-submit">
+                <span class="btn-icon">➕</span>
+                Add Product
+              </button>
+            </form>
+          </div>
+          
+          <div id="product-list-panel" class="form-panel">
+            <div class="products-grid" id="products-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Deals Tab -->
+      <div id="daily-deals-tab" class="tab-content">
+        <div class="tab-header">
+          <h2>Daily Deals Management</h2>
+          <p class="tab-description">Manage your daily deals and promotions</p>
+        </div>
+        
+        <div class="daily-deals-controls">
+          <div class="deals-header">
+            <h3>Current Daily Deals</h3>
+            <button id="refresh-daily-deals-btn" class="btn-secondary">
+              <span>🔄</span> Refresh
+            </button>
+          </div>
+          <div class="products-grid" id="daily-deals-list"></div>
+        </div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="orders-tab" class="tab-content">
+        <div class="tab-header">
+          <h2>Manage Orders</h2>
+          <p class="tab-description">Track and manage customer orders</p>
+        </div>
+        <div class="orders-grid" id="orders-list"></div>
+      </div>
+
+      <!-- Messages Tab -->
+      <div id="messages-tab" class="tab-content">
+        <div class="tab-header">
+          <h2>Live Chat Messages</h2>
+          <p class="tab-description">Respond to customer inquiries</p>
+        </div>
+        <div class="messages-container" id="messages-list"></div>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="users-tab" class="tab-content">
+        <div class="tab-header">
+          <h2>Manage Users</h2>
+          <p class="tab-description">Manage admin users and staff accounts</p>
+        </div>
+        <div class="users-grid" id="users-list"></div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div id="profile-tab" class="tab-content">
+        <div class="tab-header">
+          <h2>Profile</h2>
+          <p class="tab-description">Manage your account settings</p>
+        </div>
+        <div id="profile-info"></div>
+        <div class="profile-actions">
+          <button id="delete-account-btn" class="btn-danger">
+            <span>🗑️</span> Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Edit Product Modal -->
+  <div id="edit-product-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Product</h2>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form id="edit-product-form">
+        <input type="hidden" id="edit-product-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-product-name">Product Name *</label>
+            <input type="text" id="edit-product-name" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-product-brand">Brand</label>
+            <input type="text" id="edit-product-brand">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-product-short-description">Short Description *</label>
+          <input type="text" id="edit-product-short-description" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-product-long-description">Long Description</label>
+          <textarea id="edit-product-long-description" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-product-colors">Colors (comma-separated)</label>
+            <input type="text" id="edit-product-colors">
+          </div>
+          <div class="form-group">
+            <label for="edit-product-sizes">Sizes (comma-separated)</label>
+            <input type="text" id="edit-product-sizes">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-product-price">Price (GHS) *</label>
+            <input type="number" id="edit-product-price" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-product-stock">Stock *</label>
+            <input type="number" id="edit-product-stock" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-product-category">Category *</label>
+          <select id="edit-product-category" required>
             <option value="">Select Category *</option>
             <option value="Kitchen Appliances">Kitchen Appliances</option>
             <option value="Beauty & Personal Care">Beauty & Personal Care</option>
@@ -71,409 +348,31 @@
             <option value="Home Essentials">Home Essentials</option>
             <option value="Lighting & Home Decor">Lighting & Home Decor</option>
           </select>
-          <input type="file" id="product-image" accept="image/*">
-          <div class="additional-media">
-            <h4>Additional Media</h4>
-            <label for="product-additional-media">Upload Additional Images/Videos:</label>
-            <input type="file" id="product-additional-media" accept="image/*,video/*" multiple>
-          </div>
-          <label><input type="checkbox" id="product-wholesale"> Wholesale Product</label>
-          <input type="number" id="product-moq" placeholder="Min Order Qty" value="1" min="1">
-          <input type="number" id="product-wholesale-price" placeholder="Wholesale Price (GHS)" style="display: none;">
-          <div class="section-checkboxes">
-            <label><input type="checkbox" id="product-new-arrival"> New Arrivals</label>
-            <label><input type="checkbox" id="product-fast-selling"> Fast-Selling Items</label>
-            <label><input type="checkbox" id="product-shop-category"> Shop by Category</label>
-            <label><input type="checkbox" id="product-daily-deal"> Daily Deal</label>
-          </div>
-          <div class="stock-status-section">
-            <h4>Stock Status</h4>
-            <label><input type="radio" name="stock-status" id="product-in-stock" value="in-stock" checked> In Stock</label>
-            <label><input type="radio" name="stock-status" id="product-out-of-stock" value="out-of-stock"> Out of Stock</label>
-          </div>
-          <button type="submit">Add Product</button>
-        </form>
-      </div>
-      <div id="products-list"></div>
-    </div>
-
-    <div id="daily-deals-tab" class="tab-content" style="display: none;">
-      <h2>Daily Deals Management</h2>
-      <div class="daily-deals-controls">
-        <h3>Current Daily Deals</h3>
-        <div id="daily-deals-list"></div>
-        <div class="daily-deals-actions">
-          <button id="refresh-daily-deals-btn">Refresh Daily Deals</button>
         </div>
-      </div>
-    </div>
-
-    <div id="orders-tab" class="tab-content" style="display: none;">
-      <h2>Manage Orders</h2>
-      <div id="orders-list"></div>
-    </div>
-
-    <div id="messages-tab" class="tab-content" style="display: none;">
-      <h2>Live Chat Messages</h2>
-      <div id="messages-list"></div>
-      <style>
-        .conversation-item {
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          margin-bottom: 15px;
-          padding: 15px;
-          background-color: #f9f9f9;
-        }
-
-        .conversation-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 10px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #eee;
-        }
-
-        .conversation-status {
-          padding: 3px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: bold;
-          text-transform: uppercase;
-        }
-
-        .conversation-status.open {
-          background-color: #d4edda;
-          color: #155724;
-        }
-
-        .conversation-status.closed {
-          background-color: #f8d7da;
-          color: #721c24;
-        }
-
-        .close-conversation-btn {
-          background-color: #dc3545;
-          color: white;
-          border: none;
-          padding: 5px 10px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 12px;
-        }
-
-        .close-conversation-btn:hover {
-          background-color: #c82333;
-        }
-
-        .conversation-messages {
-          margin: 15px 0;
-          max-height: 300px;
-          overflow-y: auto;
-          border: 1px solid #eee;
-          padding: 10px;
-          border-radius: 5px;
-          background-color: white;
-        }
-
-        .message-bubble {
-          margin-bottom: 10px;
-          padding: 8px 12px;
-          border-radius: 18px;
-          max-width: 80%;
-          word-wrap: break-word;
-        }
-
-        .user-message {
-          background-color: #e3f2fd;
-          margin-left: 0;
-          margin-right: auto;
-          border-bottom-left-radius: 4px;
-        }
-
-        .admin-message {
-          background-color: #f1f1f1;
-          margin-left: auto;
-          margin-right: 0;
-          border-bottom-right-radius: 4px;
-        }
-
-        .response-bubble {
-          background-color: #e8f5e9;
-          padding: 8px;
-          border-radius: 8px;
-          margin-top: 5px;
-          font-size: 14px;
-        }
-
-        .conversation-actions {
-          display: flex;
-          gap: 10px;
-          margin-top: 10px;
-        }
-
-        .conversation-actions textarea {
-          flex-grow: 1;
-          padding: 8px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          resize: vertical;
-          min-height: 60px;
-        }
-
-        .conversation-actions button {
-          padding: 8px 16px;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        .conversation-actions button:hover {
-          background-color: #0056b3;
-        }
-      </style>
-    </div>
-
-    <div id="users-tab" class="tab-content" style="display: none;">
-      <h2>Manage Users</h2>
-      <div id="users-list"></div>
-    </div>
-
-    <div id="profile-tab" class="tab-content" style="display: none;">
-      <h2>Profile</h2>
-      <div id="profile-info"></div>
-      <div class="profile-actions">
-        <button id="delete-account-btn" class="delete-btn">Delete Account</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="admin.js"></script>
-
-  <!-- Edit Product Modal -->
-  <div id="edit-product-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span class="close" onclick="closeEditModal()">&times;</span>
-      <h2>Edit Product</h2>
-      <form id="edit-product-form">
-        <input type="hidden" id="edit-product-id">
-        <input type="text" id="edit-product-name" placeholder="Name *" required>
-        <input type="text" id="edit-product-short-description" placeholder="Short Description *" required>
-        <textarea id="edit-product-long-description" placeholder="Long Description"></textarea>
-        <input type="text" id="edit-product-brand" placeholder="Brand">
-        <input type="text" id="edit-product-colors" placeholder="Colors (comma-separated)">
-        <input type="text" id="edit-product-sizes" placeholder="Sizes (comma-separated)">
-        <input type="number" id="edit-product-price" placeholder="Price (GHS) *" required>
-        <input type="number" id="edit-product-stock" placeholder="Stock *" required>
-        <select id="edit-product-category" required>
-          <option value="">Select Category *</option>
-          <option value="Kitchen Appliances">Kitchen Appliances</option>
-          <option value="Beauty & Personal Care">Beauty & Personal Care</option>
-          <option value="Photography & Content Creation Tools">Photography & Content Creation Tools</option>
-          <option value="Nail Supplies">Nail Supplies</option>
-          <option value="Kids & Babies">Kids & Babies</option>
-          <option value="Home Essentials">Home Essentials</option>
-          <option value="Lighting & Home Decor">Lighting & Home Decor</option>
-        </select>
         <div class="image-upload-section">
           <label for="edit-product-image">Product Image:</label>
-          <input type="file" id="edit-product-image" accept="image/*">
-          <div id="current-image-preview" style="margin-top: 10px;"></div>
+          <input type="file" id="edit-product-image" accept="image/*" class="file-input">
+          <div id="current-image-preview" class="image-preview"></div>
         </div>
         <div class="stock-status-section">
           <h4>Stock Status</h4>
-          <label><input type="radio" name="edit-stock-status" value="in-stock"> In Stock</label>
-          <label><input type="radio" name="edit-stock-status" value="out-of-stock"> Out of Stock</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="edit-stock-status" value="in-stock"> In Stock
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="edit-stock-status" value="out-of-stock"> Out of Stock
+            </label>
+          </div>
         </div>
         <div class="modal-buttons">
-          <button type="button" onclick="closeEditModal()">Cancel</button>
-          <button type="submit">Save Changes</button>
+          <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Changes</button>
         </div>
       </form>
     </div>
   </div>
 
-  <style>
-    /* Modal Styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
-
-    .modal-content {
-      background-color: #fefefe;
-      margin: 5% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%;
-      max-width: 600px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .close:hover {
-      color: black;
-    }
-
-    .modal-buttons {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    .modal-buttons button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .modal-buttons button:first-child {
-      background-color: #f44336;
-      color: white;
-    }
-
-    .modal-buttons button:last-child {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    #edit-product-form input, #edit-product-form select, #edit-product-form textarea {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0;
-      box-sizing: border-box;
-    }
-
-    #edit-product-form textarea {
-      height: 100px;
-      resize: vertical;
-    }
-
-    /* Order Details Modal Styles */
-    .order-details-modal {
-      display: block;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
-
-    .order-details-content {
-      background-color: #fefefe;
-      margin: 5% auto;
-      padding: 0;
-      border: 1px solid #888;
-      width: 80%;
-      max-width: 800px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .order-details-header {
-      background-color: #f8f9fa;
-      padding: 20px;
-      border-bottom: 1px solid #dee2e6;
-      border-radius: 8px 8px 0 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .order-details-header h2 {
-      margin: 0;
-      color: #333;
-    }
-
-    .order-details-header button {
-      background: none;
-      border: none;
-      font-size: 28px;
-      cursor: pointer;
-      color: #666;
-    }
-
-    .order-details-body {
-      padding: 20px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    .order-info-section {
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #f8f9fa;
-      border-radius: 5px;
-    }
-
-    .order-info-section h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      color: #333;
-      border-bottom: 1px solid #dee2e6;
-      padding-bottom: 5px;
-    }
-
-    .order-info-section p {
-      margin: 5px 0;
-      color: #555;
-    }
-
-    .order-item-detail {
-      background-color: white;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 3px;
-      border: 1px solid #e9ecef;
-    }
-
-    .order-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    .order-actions select {
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-    }
-
-    .order-actions button {
-      padding: 5px 10px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-
-    .order-actions button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+  <script src="admin.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const API_BASE = '/api'; // Adjust if needed
+const API_BASE = '/api';
 
 // Token management system
 let token = localStorage.getItem('token');
@@ -17,7 +17,6 @@ function setTokenExpiration() {
 function isTokenExpired() {
     if (!tokenExpiration) return true;
     const now = new Date();
-    // Consider token expired if it will expire in the next 5 minutes
     return now >= new Date(tokenExpiration.getTime() - 5 * 60 * 1000);
 }
 
@@ -56,11 +55,9 @@ async function refreshAuthToken() {
 
 // Wrapped fetch with automatic token refresh
 async function authFetch(url, options = {}) {
-    // Check and refresh token if needed
     if (isTokenExpired()) {
         const refreshSuccess = await refreshAuthToken();
         if (!refreshSuccess) {
-            // Token refresh failed, redirect to login
             showNotification('Session expired. Please log in again.', 'error');
             setTimeout(() => {
                 window.location.href = 'admin-login.html';
@@ -69,7 +66,6 @@ async function authFetch(url, options = {}) {
         }
     }
 
-    // Add authorization header
     const headers = {
         ...options.headers,
         'Authorization': `Bearer ${token}`
@@ -79,14 +75,11 @@ async function authFetch(url, options = {}) {
         const response = await fetch(url, { ...options, headers });
 
         if (response.status === 401) {
-            // Token might be invalid, try to refresh once more
             const refreshSuccess = await refreshAuthToken();
             if (refreshSuccess) {
-                // Retry with new token
                 headers['Authorization'] = `Bearer ${token}`;
                 return await fetch(url, { ...options, headers });
             } else {
-                // Still unauthorized, redirect to login
                 showNotification('Session expired. Please log in again.', 'error');
                 setTimeout(() => {
                     window.location.href = 'admin-login.html';
@@ -103,48 +96,164 @@ async function authFetch(url, options = {}) {
     }
 }
 
-// Show notification helper
+// Toast notification helper
 function showNotification(message, type = 'error') {
-    const notification = document.createElement('div');
-    notification.style.position = 'fixed';
-    notification.style.top = '20px';
-    notification.style.right = '20px';
-    notification.style.padding = '15px';
-    notification.style.borderRadius = '5px';
-    notification.style.backgroundColor = type === 'error' ? '#ffebee' : '#e8f5e9';
-    notification.style.color = type === 'error' ? '#d32f2f' : '#2e7d32';
-    notification.style.border = type === 'error' ? '1px solid #d32f2f' : '1px solid #2e7d32';
-    notification.style.zIndex = '10000';
-    notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    notification.textContent = message;
-
-    document.body.appendChild(notification);
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${type === 'error' ? '❌' : '✅'}</span>
+        <span class="toast-message">${message}</span>
+    `;
+    container.appendChild(toast);
 
     setTimeout(() => {
-        notification.remove();
-    }, 3000);
+        toast.style.animation = 'toastIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
 }
 
 // Clear product cache across all tabs/windows
 function clearProductCacheAcrossTabs() {
-    // Update localStorage to signal cache invalidation
     const currentVersion = parseInt(localStorage.getItem('productCacheVersion') || '0');
     localStorage.setItem('productCacheVersion', (currentVersion + 1).toString());
     console.log('Product cache version incremented to:', currentVersion + 1);
+}
+
+// Sidebar toggle functionality
+function initSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            toggleBtn.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 1024) {
+                if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                    toggleBtn.classList.remove('active');
+                }
+            }
+        });
+    }
+}
+
+// Tab navigation with sidebar
+function initTabs() {
+    const navItems = document.querySelectorAll('.nav-item');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetTab = item.dataset.tab;
+
+            // Update active nav item
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+
+            // Show target tab
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === targetTab + '-tab') {
+                    content.classList.add('active');
+                }
+            });
+
+            // Close sidebar on mobile after selection
+            if (window.innerWidth <= 1024) {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebar-toggle').classList.remove('active');
+            }
+
+            // Load tab data if needed
+            loadTabData(targetTab);
+        });
+    });
+}
+
+// Form toggle functionality
+function initFormToggle() {
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    const formPanels = document.querySelectorAll('.form-panel');
+
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.toggle;
+
+            toggleBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            formPanels.forEach(panel => {
+                panel.classList.remove('active');
+                if (panel.id === target + '-panel') {
+                    panel.classList.add('active');
+                }
+            });
+        });
+    });
+}
+
+// Load tab data on demand
+function loadTabData(tabName) {
+    switch(tabName) {
+        case 'products':
+            loadProducts();
+            break;
+        case 'daily-deals':
+            loadDailyDeals();
+            break;
+        case 'orders':
+            loadOrders();
+            break;
+        case 'messages':
+            loadMessages();
+            break;
+        case 'users':
+            loadUsers();
+            break;
+        case 'profile':
+            loadProfile();
+            break;
+    }
 }
 
 // Check if user is logged in
 if (!token) {
   window.location.href = 'admin-login.html';
 } else {
-  // Initialize token management
   if (refreshToken) {
     setTokenExpiration();
   }
   loadDashboard();
 }
 
+// Initialize sidebar and tabs
+initSidebar();
+initTabs();
+initFormToggle();
 
+// Update user info in header
+function updateUserInfo() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        if (userAvatar) {
+            userAvatar.textContent = user.name.charAt(0).toUpperCase();
+        }
+        if (userName) {
+            userName.textContent = user.name;
+        }
+    }
+}
+
+// Logout functionality
 document.getElementById('logout-btn').addEventListener('click', () => {
   localStorage.removeItem('token');
   localStorage.removeItem('refreshToken');
@@ -156,107 +265,119 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   window.location.href = 'admin-login.html';
 });
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab + '-tab').style.display = 'block';
-  });
-});
-
+// Wholesale checkbox handling
 document.getElementById('product-wholesale').addEventListener('change', function() {
-  const wholesalePriceField = document.getElementById('product-wholesale-price');
+  const wholesaleGroups = document.querySelectorAll('.wholesale-group');
+  const moqInput = document.getElementById('product-moq');
+  const wholesalePriceInput = document.getElementById('product-wholesale-price');
+  
   if (this.checked) {
-    wholesalePriceField.style.display = 'block';
-    wholesalePriceField.required = true;
+    wholesaleGroups.forEach(group => group.style.display = 'flex');
+    moqInput.parentElement.style.display = 'flex';
+    moqInput.required = true;
   } else {
-    wholesalePriceField.style.display = 'none';
-    wholesalePriceField.required = false;
-    wholesalePriceField.value = '';
+    wholesaleGroups.forEach(group => group.style.display = 'none');
+    moqInput.parentElement.style.display = 'none';
+    moqInput.required = false;
+    moqInput.value = '1';
+    wholesalePriceInput.value = '';
   }
 });
 
-// Add Daily Deals checkbox handling
-document.getElementById('product-daily-deal').addEventListener('change', function() {
-  // This checkbox doesn't need special handling, just ensure it's included in form submission
-});
-
+// Product form submission
 document.getElementById('product-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     console.log('Product form submitted');
+    
+    const submitBtn = e.target.querySelector('.btn-submit');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Adding...';
+    submitBtn.disabled = true;
+
     const formData = new FormData();
     formData.append('name', document.getElementById('product-name').value);
     formData.append('shortDescription', document.getElementById('product-short-description').value);
     formData.append('longDescription', document.getElementById('product-long-description').value);
     formData.append('brand', document.getElementById('product-brand').value);
+    
     const colors = document.getElementById('product-colors').value.split(',').map(c => c.trim()).filter(c => c);
     colors.forEach(color => formData.append('colors', color));
+    
     const sizes = document.getElementById('product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
     sizes.forEach(size => formData.append('sizes', size));
+    
     formData.append('price', Math.round(parseFloat(document.getElementById('product-price').value) * 100) / 100);
+    
     const originalPrice = document.getElementById('product-original-price').value;
     if (originalPrice) {
       formData.append('originalPrice', Math.round(parseFloat(originalPrice) * 100) / 100);
     }
+    
     formData.append('stock', parseInt(document.getElementById('product-stock').value));
     formData.append('category', document.getElementById('product-category').value);
-    formData.append('image', document.getElementById('product-image').files[0]);
+    
+    const imageFile = document.getElementById('product-image').files[0];
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+    
     const additionalMedia = document.getElementById('product-additional-media').files;
     for (let i = 0; i < additionalMedia.length; i++) {
       formData.append('additionalMedia', additionalMedia[i]);
     }
+    
     formData.append('isWholesale', document.getElementById('product-wholesale').checked);
     formData.append('minOrderQty', parseInt(document.getElementById('product-moq').value) || 1);
+    
     if (document.getElementById('product-wholesale').checked) {
       formData.append('wholesalePrice', parseFloat(document.getElementById('product-wholesale-price').value) || 0);
     }
+    
     formData.append('isNewArrival', document.getElementById('product-new-arrival').checked);
     formData.append('isFastSelling', document.getElementById('product-fast-selling').checked);
     formData.append('isShopByCategory', document.getElementById('product-shop-category').checked);
     formData.append('isDailyDeal', document.getElementById('product-daily-deal').checked);
-    // Add stock status field
+    
     const stockStatus = document.querySelector('input[name="stock-status"]:checked').value;
     formData.append('stockStatus', stockStatus);
-    console.log('FormData contents:');
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
-      } else {
-        console.log(`${key}: ${value}`);
-      }
-    }
-    console.log('Sending request to /api/products');
+
     try {
       const res = await authFetch(`${API_BASE}/products`, {
         method: 'POST',
         body: formData
       });
-      console.log('Response received:', res ? `status ${res.status}` : 'null');
+      
       if (res && !res.ok) {
         const errorData = await res.json();
         console.log('Error data:', errorData);
         showNotification(errorData.message || 'Failed to add product', 'error');
       } else if (res) {
         console.log('Product added successfully');
-        showNotification('Product added successfully! Images are now stored on Cloudinary and will persist across redeployments.', 'success');
+        showNotification('Product added successfully! Images are stored on Cloudinary.', 'success');
         loadProducts();
-        // Clear frontend cache to reflect new product
         clearProductCacheAcrossTabs();
-        document.getElementById('product-form').reset();
+        e.target.reset();
         document.getElementById('product-moq').value = '1';
+        // Reset wholesale fields
+        document.getElementById('product-wholesale').checked = false;
+        document.querySelectorAll('.wholesale-group').forEach(g => g.style.display = 'none');
       }
     } catch (err) {
       console.error('Error in form submission:', err);
       showNotification('Error adding product', 'error');
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
-  });
+});
 
+// Staff creation form
 document.getElementById('create-staff-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('staff-name').value;
   const email = document.getElementById('staff-email').value;
   const password = document.getElementById('staff-password').value;
+  
   try {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
@@ -266,26 +387,34 @@ document.getElementById('create-staff-form').addEventListener('submit', async (e
       },
       body: JSON.stringify({ name, email, password, role: 'staff' })
     });
+    
     if (res.ok) {
-      alert('Staff account created successfully');
+      showNotification('Staff account created successfully!', 'success');
       document.getElementById('create-staff-form').reset();
     } else {
       const data = await res.json();
-      alert(data.message);
+      showNotification(data.message || 'Failed to create staff', 'error');
     }
   } catch (err) {
     console.error(err);
+    showNotification('Error creating staff account', 'error');
   }
 });
 
+// Load dashboard data
 async function loadDashboard() {
   const user = JSON.parse(localStorage.getItem('user'));
+  
+  // Update user info in header
+  updateUserInfo();
+  
   if (user && user.role === 'superadmin') {
     document.getElementById('create-staff-section').style.display = 'block';
-    document.querySelector('[data-tab="users"]').style.display = 'inline-block';
+    document.getElementById('users-nav-item').style.display = 'flex';
   } else {
-    document.querySelector('[data-tab="users"]').style.display = 'none';
+    document.getElementById('users-nav-item').style.display = 'none';
   }
+  
   loadProducts();
   loadOrders();
   loadMessages();
@@ -294,51 +423,67 @@ async function loadDashboard() {
   loadDailyDeals();
 }
 
+// Load products
 async function loadProducts() {
   try {
     const res = await authFetch(`${API_BASE}/products`);
-    if (!res) return; // Handle token expiration
+    if (!res) return;
 
     const products = await res.json();
     const list = document.getElementById('products-list');
+    
+    if (!products || products.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📦</div>
+          <h3>No Products Yet</h3>
+          <p>Add your first product to get started.</p>
+        </div>
+      `;
+      return;
+    }
+    
     list.innerHTML = products.map(p => `
       <div class="product-item">
         <h3>${p.name}</h3>
         <p><strong>Short Desc:</strong> ${p.shortDescription}</p>
-        ${p.longDescription ? `<p><strong>Long Desc:</strong> ${p.longDescription}</p>` : ''}
         ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
         ${p.colors && p.colors.length ? `<p><strong>Colors:</strong> ${p.colors.join(', ')}</p>` : ''}
         ${p.sizes && p.sizes.length ? `<p><strong>Sizes:</strong> ${p.sizes.join(', ')}</p>` : ''}
         <p><strong>Price:</strong> GHS ${p.price}</p>
         <p><strong>Stock:</strong> ${p.stock}</p>
         <p><strong>Category:</strong> ${p.category}</p>
-        <p><strong>Wholesale:</strong> ${p.isWholesale ? 'Yes (MOQ: ' + p.minOrderQty + ')' : 'No'}</p>
         <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
-        <p><strong>Sections:</strong> ${[
-          p.isNewArrival ? 'New Arrivals' : '',
-          p.isFastSelling ? 'Fast-Selling Items' : '',
-          p.isShopByCategory ? 'Shop by Category' : ''
-        ].filter(s => s).join(', ') || 'None'}</p>
-        <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
-        <button onclick="editProduct('${p._id}')">Edit</button>
-        <button onclick="deleteProduct('${p._id}')">Delete</button>
+        <div class="product-actions">
+          <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
+          <button onclick="editProduct('${p._id}')">Edit</button>
+          <button class="delete-btn" onclick="deleteProduct('${p._id}')">Delete</button>
+        </div>
       </div>
     `).join('');
   } catch (err) {
     console.error(err);
+    showNotification('Error loading products', 'error');
   }
 }
 
+// Load daily deals
 async function loadDailyDeals() {
   try {
     const res = await authFetch(`${API_BASE}/products/daily-deals`);
-    if (!res) return; // Handle token expiration
+    if (!res) return;
 
     const dailyDeals = await res.json();
     const list = document.getElementById('daily-deals-list');
 
     if (!dailyDeals || dailyDeals.length === 0) {
-      list.innerHTML = '<p>No daily deals found.</p>';
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🔥</div>
+          <h3>No Daily Deals</h3>
+          <p>Products marked as Daily Deals will appear here.</p>
+        </div>
+      `;
       return;
     }
 
@@ -346,35 +491,37 @@ async function loadDailyDeals() {
       <div class="product-item">
         <h3>${p.name}</h3>
         <p><strong>Short Desc:</strong> ${p.shortDescription}</p>
-        ${p.longDescription ? `<p><strong>Long Desc:</strong> ${p.longDescription}</p>` : ''}
         ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
-        ${p.colors && p.colors.length ? `<p><strong>Colors:</strong> ${p.colors.join(', ')}</p>` : ''}
-        ${p.sizes && p.sizes.length ? `<p><strong>Sizes:</strong> ${p.sizes.join(', ')}</p>` : ''}
         <p><strong>Price:</strong> GHS ${p.price}</p>
+        ${p.originalPrice ? `<p><strong>Original:</strong> GHS ${p.originalPrice}</p>` : ''}
         <p><strong>Stock:</strong> ${p.stock}</p>
         <p><strong>Category:</strong> ${p.category}</p>
-        <p><strong>Daily Deal:</strong> Yes</p>
         <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
-        <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
-        <button onclick="editProduct('${p._id}')">Edit</button>
-        <button onclick="deleteProduct('${p._id}')">Delete</button>
+        <div class="product-actions">
+          <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
+          <button onclick="editProduct('${p._id}')">Edit</button>
+          <button class="delete-btn" onclick="deleteProduct('${p._id}')">Delete</button>
+        </div>
       </div>
     `).join('');
-
-    // Add refresh button functionality
-    document.getElementById('refresh-daily-deals-btn').addEventListener('click', loadDailyDeals);
-
   } catch (err) {
     console.error('Error loading daily deals:', err);
-    document.getElementById('daily-deals-list').innerHTML = '<p>Error loading daily deals. Please try again.</p>';
+    showNotification('Error loading daily deals', 'error');
   }
 }
 
+// Refresh daily deals button
+document.getElementById('refresh-daily-deals-btn').addEventListener('click', () => {
+    loadDailyDeals();
+    showNotification('Daily deals refreshed!', 'success');
+});
+
+// Load orders
 async function loadOrders() {
   try {
     console.log('Loading orders...');
     const res = await authFetch(`${API_BASE}/orders`);
-    if (!res) return; // Handle token expiration
+    if (!res) return;
 
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -386,12 +533,17 @@ async function loadOrders() {
     const list = document.getElementById('orders-list');
 
     if (!orders || orders.length === 0) {
-      list.innerHTML = '<p>No orders found.</p>';
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <h3>No Orders Yet</h3>
+          <p>Customer orders will appear here.</p>
+        </div>
+      `;
       return;
     }
 
     list.innerHTML = orders.map(o => {
-      // Safe access to customer data
       const customerName = o.user ? o.user.name :
         (o.customer && o.customer.firstName && o.customer.lastName) ?
         `${o.customer.firstName} ${o.customer.lastName} (Guest)` :
@@ -406,7 +558,7 @@ async function loadOrders() {
 
       return `
         <div class="order-item">
-          <p><strong>Order ID:</strong> ${o._id || 'N/A'}</p>
+          <h3>Order #${o._id ? o._id.substring(0, 8) : 'N/A'}</h3>
           <p><strong>Customer:</strong> ${customerName}</p>
           <p><strong>Email:</strong> ${customerEmail}</p>
           <p><strong>Phone:</strong> ${customerPhone}</p>
@@ -425,18 +577,19 @@ async function loadOrders() {
             <button onclick="viewOrderDetails('${o._id || ''}')">View Details</button>
           </div>
         </div>
-        `;
+      `;
     }).join('');
   } catch (err) {
     console.error('Error loading orders:', err);
-    document.getElementById('orders-list').innerHTML = '<p>Error loading orders. Please try again.</p>';
+    showNotification('Error loading orders', 'error');
   }
 }
 
+// Load messages
 async function loadMessages() {
   try {
     const res = await authFetch(`${API_BASE}/messages`);
-    if (!res) return; // Handle token expiration
+    if (!res) return;
 
     const messages = await res.json();
 
@@ -450,6 +603,18 @@ async function loadMessages() {
     });
 
     const list = document.getElementById('messages-list');
+
+    if (Object.keys(conversations).length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">💬</div>
+          <h3>No Messages</h3>
+          <p>Customer messages will appear here.</p>
+        </div>
+      `;
+      return;
+    }
+
     list.innerHTML = Object.entries(conversations).map(([convId, msgs]) => {
       const latestMsg = msgs[msgs.length - 1];
       const senderInfo = msgs.find(m => m.sender !== 'admin') || latestMsg;
@@ -459,8 +624,10 @@ async function loadMessages() {
         <div class="conversation-item" data-conversation-id="${convId}">
           <div class="conversation-header">
             <h4>${senderInfo.senderName || senderInfo.sender} (${senderInfo.senderEmail || 'No email'})</h4>
-            <span class="conversation-status ${status}">${status}</span>
-            <button class="close-conversation-btn" onclick="closeConversation('${convId}')">Close</button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span class="conversation-status ${status}">${status}</span>
+              <button class="close-conversation-btn" onclick="closeConversation('${convId}')">Close</button>
+            </div>
           </div>
           <div class="conversation-messages">
             ${msgs.map(m => `
@@ -481,13 +648,15 @@ async function loadMessages() {
             <button onclick="respondToMessage('${convId}')">Send Response</button>
           </div>
         </div>
-        `;
+      `;
     }).join('');
   } catch (err) {
     console.error(err);
+    showNotification('Error loading messages', 'error');
   }
 }
 
+// Update stock
 async function updateStock(id, currentStock) {
   const newStock = prompt('Enter new stock:', currentStock);
   if (newStock !== null) {
@@ -500,18 +669,19 @@ async function updateStock(id, currentStock) {
         },
         body: JSON.stringify({ stock: parseInt(newStock) })
       });
+      showNotification('Stock updated successfully!', 'success');
       loadProducts();
-      // Clear frontend cache to reflect stock update
       clearProductCacheAcrossTabs();
     } catch (err) {
       console.error(err);
+      showNotification('Error updating stock', 'error');
     }
   }
 }
 
+// Edit product
 async function editProduct(id) {
   try {
-    // Fetch the product data
     const response = await fetch(`${API_BASE}/products/${id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -522,7 +692,6 @@ async function editProduct(id) {
 
     const product = await response.json();
 
-    // Populate the edit modal with product data
     document.getElementById('edit-product-id').value = product._id;
     document.getElementById('edit-product-name').value = product.name;
     document.getElementById('edit-product-short-description').value = product.shortDescription;
@@ -534,7 +703,6 @@ async function editProduct(id) {
     document.getElementById('edit-product-stock').value = product.stock;
     document.getElementById('edit-product-category').value = product.category;
 
-    // Set stock status radio buttons
     const stockStatusRadios = document.getElementsByName('edit-stock-status');
     stockStatusRadios.forEach(radio => {
       if (radio.value === (product.stockStatus || 'in-stock')) {
@@ -542,27 +710,23 @@ async function editProduct(id) {
       }
     });
 
-    // Handle image preview
     const currentImagePreview = document.getElementById('current-image-preview');
     if (product.image) {
       currentImagePreview.innerHTML = `
         <p><strong>Current Image:</strong></p>
-        <img src="${product.image}" alt="Current product image" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+        <img src="${product.image}" alt="Current product image">
         <p style="font-size: 12px; color: #666; margin-top: 5px;">Upload a new image to replace the current one</p>
       `;
     } else {
       currentImagePreview.innerHTML = '<p style="font-size: 12px; color: #666;">No image currently set</p>';
     }
 
-    // Clear the file input
     document.getElementById('edit-product-image').value = '';
-
-    // Show the edit modal
     document.getElementById('edit-product-modal').style.display = 'block';
 
   } catch (err) {
     console.error('Error editing product:', err);
-    alert('Error editing product: ' + err.message);
+    showNotification('Error editing product: ' + err.message, 'error');
   }
 }
 
@@ -570,110 +734,84 @@ function closeEditModal() {
   document.getElementById('edit-product-modal').style.display = 'none';
 }
 
-// Handle edit product form submission
+// Edit product form submission
 if (document.getElementById('edit-product-form')) {
   document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const productId = document.getElementById('edit-product-id').value;
-  const formData = new FormData();
+    const productId = document.getElementById('edit-product-id').value;
+    const formData = new FormData();
 
-  console.log('Frontend: Starting edit product submission for ID:', productId);
+    console.log('Frontend: Starting edit product submission for ID:', productId);
 
-  // Add basic product data
-  formData.append('name', document.getElementById('edit-product-name').value);
-  formData.append('shortDescription', document.getElementById('edit-product-short-description').value);
-  formData.append('longDescription', document.getElementById('edit-product-long-description').value);
-  formData.append('brand', document.getElementById('edit-product-brand').value);
+    formData.append('name', document.getElementById('edit-product-name').value);
+    formData.append('shortDescription', document.getElementById('edit-product-short-description').value);
+    formData.append('longDescription', document.getElementById('edit-product-long-description').value);
+    formData.append('brand', document.getElementById('edit-product-brand').value);
 
-  // Handle colors and sizes arrays
-  const colors = document.getElementById('edit-product-colors').value.split(',').map(c => c.trim()).filter(c => c);
-  colors.forEach(color => formData.append('colors', color));
+    const colors = document.getElementById('edit-product-colors').value.split(',').map(c => c.trim()).filter(c => c);
+    colors.forEach(color => formData.append('colors', color));
 
-  const sizes = document.getElementById('edit-product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
-  sizes.forEach(size => formData.append('sizes', size));
+    const sizes = document.getElementById('edit-product-sizes').value.split(',').map(s => s.trim()).filter(s => s);
+    sizes.forEach(size => formData.append('sizes', size));
 
-  formData.append('price', Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100);
-  formData.append('stock', parseInt(document.getElementById('edit-product-stock').value));
-  formData.append('category', document.getElementById('edit-product-category').value);
-  formData.append('stockStatus', document.querySelector('input[name="edit-stock-status"]:checked').value);
+    formData.append('price', Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100);
+    formData.append('stock', parseInt(document.getElementById('edit-product-stock').value));
+    formData.append('category', document.getElementById('edit-product-category').value);
+    formData.append('stockStatus', document.querySelector('input[name="edit-stock-status"]:checked').value);
 
-  // Handle image upload
-  const imageFile = document.getElementById('edit-product-image').files[0];
-  console.log('Frontend: Image file selected:', imageFile);
-  if (imageFile) {
-    formData.append('image', imageFile);
-    console.log('Frontend: Appended image to formData:', imageFile.name, 'Size:', imageFile.size);
-  } else {
-    console.log('Frontend: No image file selected');
-  }
-
-  // Log all formData entries
-  console.log('Frontend: FormData contents:');
-  for (let [key, value] of formData.entries()) {
-    if (value instanceof File) {
-      console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
-    } else {
-      console.log(`  ${key}: ${value}`);
+    const imageFile = document.getElementById('edit-product-image').files[0];
+    if (imageFile) {
+      formData.append('image', imageFile);
     }
-  }
 
-  try {
-    console.log('Frontend: Sending PUT request to:', `${API_BASE}/products/${productId}`);
-    const response = await authFetch(`${API_BASE}/products/${productId}`, {
-      method: 'PUT',
-      body: formData
-    });
-
-    console.log('Frontend: Response status:', response ? response.status : 'No response');
-
-   if (response && response.ok) {
-     const result = await response.json();
-     console.log('Frontend: Product updated successfully:', result);
-     showNotification('Product updated successfully! Images are stored on Cloudinary and will persist across redeployments.', 'success');
-     closeEditModal();
-     loadProducts();
-     // Clear frontend cache to reflect updated product
-     clearProductCacheAcrossTabs();
-   } else {
-     const errorData = await response.json();
-     console.log('Frontend: Failed to update product:', errorData);
-     showNotification('Failed to update product: ' + (errorData.message || 'Unknown error'), 'error');
-   }
-  } catch (err) {
-    console.error('Frontend: Error updating product:', err);
-    showNotification('Error updating product: ' + err.message, 'error');
-  }
-});
-}
-
-async function deleteProduct(id) {
-  if (confirm('Delete this product?')) {
     try {
-      console.log('Deleting product:', id);
-      const response = await authFetch(`${API_BASE}/products/${id}`, {
-        method: 'DELETE'
+      const response = await authFetch(`${API_BASE}/products/${productId}`, {
+        method: 'PUT',
+        body: formData
       });
-      if (!response) return; // Handle token expiration
 
-      console.log('Delete response status:', response.status);
-      if (response.ok) {
-        console.log('Product deleted successfully');
+      if (response && response.ok) {
+        showNotification('Product updated successfully!', 'success');
+        closeEditModal();
         loadProducts();
-        // Clear frontend cache to reflect deleted product
         clearProductCacheAcrossTabs();
       } else {
         const errorData = await response.json();
-        console.error('Delete failed:', errorData);
-        alert('Failed to delete product: ' + (errorData.message || 'Unknown error'));
+        showNotification('Failed to update product: ' + (errorData.message || 'Unknown error'), 'error');
+      }
+    } catch (err) {
+      console.error('Frontend: Error updating product:', err);
+      showNotification('Error updating product: ' + err.message, 'error');
+    }
+  });
+}
+
+// Delete product
+async function deleteProduct(id) {
+  if (confirm('Delete this product?')) {
+    try {
+      const response = await authFetch(`${API_BASE}/products/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response) return;
+
+      if (response.ok) {
+        showNotification('Product deleted successfully!', 'success');
+        loadProducts();
+        clearProductCacheAcrossTabs();
+      } else {
+        const errorData = await response.json();
+        showNotification('Failed to delete product: ' + (errorData.message || 'Unknown error'), 'error');
       }
     } catch (err) {
       console.error('Error deleting product:', err);
-      alert('Error deleting product: ' + err.message);
+      showNotification('Error deleting product: ' + err.message, 'error');
     }
   }
 }
 
+// Update order status
 async function updateOrderStatus(id, status) {
   try {
     await fetch(`${API_BASE}/orders/${id}/status`, {
@@ -684,12 +822,15 @@ async function updateOrderStatus(id, status) {
       },
       body: JSON.stringify({ status })
     });
-    loadOrders(); // Refresh the orders list
+    showNotification('Order status updated!', 'success');
+    loadOrders();
   } catch (err) {
     console.error(err);
+    showNotification('Error updating order status', 'error');
   }
 }
 
+// View order details
 async function viewOrderDetails(orderId) {
   try {
     const res = await fetch(`${API_BASE}/orders/${orderId}`, {
@@ -702,7 +843,6 @@ async function viewOrderDetails(orderId) {
 
     const order = await res.json();
 
-    // Create a modal to show order details
     const modal = document.createElement('div');
     modal.className = 'order-details-modal';
     modal.innerHTML = `
@@ -753,32 +893,31 @@ async function viewOrderDetails(orderId) {
 
   } catch (err) {
     console.error('Error viewing order details:', err);
-    alert('Error loading order details: ' + err.message);
+    showNotification('Error loading order details: ' + err.message, 'error');
   }
 }
 
+// Respond to message
 async function respondToMessage(conversationId) {
   const response = document.getElementById(`response-${conversationId}`).value;
   if (!response) {
-    alert('Please enter a response');
+    showNotification('Please enter a response', 'error');
     return;
   }
 
   try {
-    // Get the latest message in this conversation to respond to
     const res = await fetch(`${API_BASE}/messages/conversation/${conversationId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
     const messages = await res.json();
     if (messages.length === 0) {
-      alert('No messages found in this conversation');
+      showNotification('No messages found in this conversation', 'error');
       return;
     }
 
     const latestMessage = messages[messages.length - 1];
 
-    // Send the response
     await fetch(`${API_BASE}/messages/${latestMessage._id}/respond`, {
       method: 'PATCH',
       headers: {
@@ -794,37 +933,31 @@ async function respondToMessage(conversationId) {
       })
     });
 
-    // Clear the response field
     document.getElementById(`response-${conversationId}`).value = '';
-
-    // Refresh messages
     loadMessages();
-
-    // Notify the user (this would be implemented on the frontend)
-    console.log('Response sent, should notify user:', conversationId);
+    showNotification('Response sent!', 'success');
 
   } catch (err) {
     console.error(err);
-    alert('Error sending response');
+    showNotification('Error sending response', 'error');
   }
 }
 
+// Close conversation
 async function closeConversation(conversationId) {
   try {
-    // Get the latest message in this conversation to close
     const res = await fetch(`${API_BASE}/messages/conversation/${conversationId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
     const messages = await res.json();
     if (messages.length === 0) {
-      alert('No messages found in this conversation');
+      showNotification('No messages found in this conversation', 'error');
       return;
     }
 
     const latestMessage = messages[messages.length - 1];
 
-    // Close the conversation
     await fetch(`${API_BASE}/messages/${latestMessage._id}/close`, {
       method: 'PATCH',
       headers: {
@@ -833,34 +966,50 @@ async function closeConversation(conversationId) {
       }
     });
 
-    // Refresh messages
     loadMessages();
+    showNotification('Conversation closed!', 'success');
 
   } catch (err) {
     console.error(err);
-    alert('Error closing conversation');
+    showNotification('Error closing conversation', 'error');
   }
 }
 
+// Load users
 async function loadUsers() {
   try {
     const res = await authFetch(`${API_BASE}/auth/users`);
-    if (!res) return; // Handle token expiration
+    if (!res) return;
 
     const users = await res.json();
     const list = document.getElementById('users-list');
+
+    if (!users || users.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">👥</div>
+          <h3>No Users</h3>
+          <p>No users found in the system.</p>
+        </div>
+      `;
+      return;
+    }
+
     list.innerHTML = users.map(u => `
       <div class="user-item">
-        <h3>${u.name} (${u.role})</h3>
+        <h3>${u.name}</h3>
         <p>${u.email}</p>
-        <button onclick="deleteUser('${u._id}')">Delete</button>
+        <p><strong>Role:</strong> ${u.role}</p>
+        <button onclick="deleteUser('${u._id}')">Delete User</button>
       </div>
     `).join('');
   } catch (err) {
     console.error(err);
+    showNotification('Error loading users', 'error');
   }
 }
 
+// Delete user
 async function deleteUser(id) {
   if (confirm('Delete this user?')) {
     try {
@@ -868,13 +1017,16 @@ async function deleteUser(id) {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      showNotification('User deleted successfully!', 'success');
       loadUsers();
     } catch (err) {
       console.error(err);
+      showNotification('Error deleting user', 'error');
     }
   }
 }
 
+// Load profile
 function loadProfile() {
   const user = JSON.parse(localStorage.getItem('user'));
   document.getElementById('profile-info').innerHTML = `
@@ -892,6 +1044,7 @@ function loadProfile() {
   `;
 }
 
+// Delete account
 document.getElementById('delete-account-btn').addEventListener('click', async () => {
   if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -901,16 +1054,36 @@ document.getElementById('delete-account-btn').addEventListener('click', async ()
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
-        alert('Account deleted successfully.');
-        localStorage.clear();
-        window.location.href = 'admin-login.html';
+        showNotification('Account deleted successfully.', 'success');
+        setTimeout(() => {
+          localStorage.clear();
+          window.location.href = 'admin-login.html';
+        }, 1500);
       } else {
         const data = await res.json();
-        alert(data.message);
+        showNotification(data.message || 'Error deleting account', 'error');
       }
     } catch (err) {
       console.error(err);
-      alert('Error deleting account.');
+      showNotification('Error deleting account.', 'error');
     }
+  }
+});
+
+// Close modal on outside click
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('edit-product-modal');
+  if (e.target === modal) {
+    closeEditModal();
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  // ESC to close modals
+  if (e.key === 'Escape') {
+    closeEditModal();
+    const orderModals = document.querySelectorAll('.order-details-modal');
+    orderModals.forEach(modal => modal.remove());
   }
 });
