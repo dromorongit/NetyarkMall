@@ -636,17 +636,22 @@ async function loadMessages() {
       const latestMsg = msgs[msgs.length - 1];
       const senderInfo = msgs.find(m => m.sender !== 'admin') || latestMsg;
       const status = latestMsg.status || 'open';
+      const isClosed = status === 'closed';
 
       return `
-        <div class="conversation-item" data-conversation-id="${convId}">
+        <div class="conversation-item ${isClosed ? 'closed' : ''}" data-conversation-id="${convId}">
           <div class="conversation-header">
             <h4>${senderInfo.senderName || senderInfo.sender} (${senderInfo.senderEmail || 'No email'})</h4>
             <div style="display: flex; gap: 10px; align-items: center;">
               <span class="conversation-status ${status}">${status}</span>
-              <button class="close-conversation-btn" onclick="closeConversation('${convId}')">Close</button>
+              ${isClosed ? 
+                `<button class="btn-secondary btn-sm" onclick="openConversation('${convId}')">Open</button>` : 
+                `<button class="close-conversation-btn" onclick="closeConversation('${convId}')">Close</button>`
+              }
+              <button class="btn-danger-outline btn-sm" onclick="deleteConversation('${convId}')">Delete</button>
             </div>
           </div>
-          <div class="conversation-messages">
+          <div class="conversation-messages" style="${isClosed ? 'display: none;' : ''}">
             ${msgs.map(m => `
               <div class="message-bubble ${m.sender === 'admin' ? 'admin-message' : 'user-message'}">
                 <p><strong>${m.sender === 'admin' ? 'You (Admin)' : m.senderName || m.sender}:</strong> ${m.message}</p>
@@ -660,7 +665,7 @@ async function loadMessages() {
               </div>
             `).join('')}
           </div>
-          <div class="conversation-actions">
+          <div class="conversation-actions" style="${isClosed ? 'display: none;' : ''}">
             <textarea placeholder="Type your response..." id="response-${convId}"></textarea>
             <button onclick="respondToMessage('${convId}')">Send Response</button>
           </div>
@@ -989,6 +994,53 @@ async function closeConversation(conversationId) {
   } catch (err) {
     console.error(err);
     showNotification('Error closing conversation', 'error');
+  }
+}
+
+// Open conversation (reopen a closed conversation)
+async function openConversation(conversationId) {
+  try {
+    const res = await fetch(`${API_BASE}/messages/conversation/${conversationId}/open`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (res.ok) {
+      showNotification('Conversation reopened!', 'success');
+      loadMessages();
+    } else {
+      showNotification('Error reopening conversation', 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    showNotification('Error reopening conversation', 'error');
+  }
+}
+
+// Delete conversation
+async function deleteConversation(conversationId) {
+  if (confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+    try {
+      const res = await fetch(`${API_BASE}/messages/conversation/${conversationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        showNotification('Conversation deleted!', 'success');
+        loadMessages();
+      } else {
+        showNotification('Error deleting conversation', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification('Error deleting conversation', 'error');
+    }
   }
 }
 

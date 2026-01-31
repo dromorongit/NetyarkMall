@@ -133,4 +133,27 @@ router.patch('/mark-shown/:conversationId', async (req, res) => {
   }
 });
 
+// Open conversation (reopen a closed conversation)
+router.patch('/conversation/:conversationId/open', auth, adminAuth, async (req, res) => {
+  try {
+    await Message.updateMany(
+      { conversationId: req.params.conversationId },
+      { status: 'open' }
+    );
+    res.json({ success: true, message: 'Conversation reopened' });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Delete conversation by conversationId
+router.delete('/conversation/:conversationId', auth, adminAuth, async (req, res) => {
+  try {
+    await Message.deleteMany({ conversationId: req.params.conversationId });
+    res.json({ success: true, message: 'Conversation deleted' });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;
