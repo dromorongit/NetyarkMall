@@ -846,11 +846,11 @@ a:hover {
     transform: scale(1.2);
 }
 
-/* Product Grid */
+/* Product Grid - Mobile First: 2 columns, Desktop: 3 columns */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
     margin-top: 2rem;
 }
 
@@ -2400,14 +2400,12 @@ a:hover {
     }
     
     .product-grid {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
-        display: grid;
-        width: 100%;
     }
 
     .category-grid {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
     
@@ -2462,10 +2460,8 @@ a:hover {
     }
 
     .product-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
-        display: grid;
-        width: 100%;
     }
 
     .section-title {
