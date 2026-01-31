@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'backend/uploads')));
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/netyarkmall').then(() => console.log('MongoDB connected'))
+mongoose.connect('mongodb://mongo:xRWSeCCyiBjRyKUUKjzQrBGuQAjdzuuL@mongodb.railway.internal:27017').then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
 const authRoutes = require('./routes/auth');
