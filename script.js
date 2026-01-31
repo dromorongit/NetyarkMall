@@ -1292,9 +1292,9 @@ function createProductCard(product) {
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
                 <div class="quantity-controls" style="display: flex; align-items: center; gap: 8px; margin: 10px 0;">
-                    <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+                    <button class="quantity-btn decrease" data-product-id="${productId}" data-delta="-1" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
                     <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount || 999}" ${!available ? 'disabled' : ''} style="width: 50px; text-align: center; padding: 6px; border: 1px solid var(--light-gray); border-radius: 4px;">
-                    <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                    <button class="quantity-btn increase" data-product-id="${productId}" data-delta="1" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
                 </div>
                 <div class="product-card-actions">
                     <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
@@ -1665,74 +1665,19 @@ function selectVariant(button, type, value) {
 
 // Event handlers for add to cart buttons
 document.addEventListener('click', function(e) {
-    // Handle quantity decrease buttons
-    if (e.target.classList.contains('quantity-btn') && e.target.classList.contains('decrease') || e.target.closest('.quantity-btn.decrease')) {
+    // Handle quantity buttons (using data attributes to avoid duplicate execution)
+    if (e.target.classList.contains('quantity-btn') && e.target.hasAttribute('data-product-id')) {
         e.preventDefault();
         e.stopPropagation();
         
-        const button = e.target.classList.contains('quantity-btn') ? e.target : e.target.closest('.quantity-btn.decrease');
-        const productCard = button.closest('[data-product-id]');
+        const button = e.target;
+        const productId = button.getAttribute('data-product-id');
+        const delta = parseInt(button.getAttribute('data-delta'));
         
-        if (productCard) {
-            const productId = productCard.getAttribute('data-product-id');
-            console.log('DEBUG: Decrease button clicked for product:', productId);
-            
-            // Find the quantity input within this product card
-            const quantityInput = productCard.querySelector('input[type="number"]');
-            if (quantityInput) {
-                const currentValue = parseInt(quantityInput.value) || 1;
-                const minValue = parseInt(quantityInput.min) || 1;
-                const maxValue = parseInt(quantityInput.max) || 999;
-                let newValue = currentValue - 1;
-                
-                // Prevent decreasing below minimum
-                if (newValue < minValue) {
-                    newValue = minValue;
-                }
-                
-                quantityInput.value = newValue;
-                console.log('DEBUG: Quantity decreased to:', newValue);
-            } else {
-                // Fallback: call adjustCardQuantity
-                adjustCardQuantity(productId, -1);
-            }
-        }
-        return;
-    }
-    
-    // Handle quantity increase buttons
-    if (e.target.classList.contains('quantity-btn') && e.target.classList.contains('increase') || e.target.closest('.quantity-btn.increase')) {
-        e.preventDefault();
-        e.stopPropagation();
+        console.log('DEBUG: Quantity button clicked for product:', productId, 'delta:', delta);
         
-        const button = e.target.classList.contains('quantity-btn') ? e.target : e.target.closest('.quantity-btn.increase');
-        const productCard = button.closest('[data-product-id]');
-        
-        if (productCard) {
-            const productId = productCard.getAttribute('data-product-id');
-            console.log('DEBUG: Increase button clicked for product:', productId);
-            
-            // Find the quantity input within this product card
-            const quantityInput = productCard.querySelector('input[type="number"]');
-            if (quantityInput) {
-                const currentValue = parseInt(quantityInput.value) || 1;
-                const minValue = parseInt(quantityInput.min) || 1;
-                const maxValue = parseInt(quantityInput.max) || 999;
-                let newValue = currentValue + 1;
-                
-                // Prevent increasing above maximum
-                if (newValue > maxValue) {
-                    newValue = maxValue;
-                    showNotification(`Only ${maxValue} items available in stock.`, 'warning');
-                }
-                
-                quantityInput.value = newValue;
-                console.log('DEBUG: Quantity increased to:', newValue);
-            } else {
-                // Fallback: call adjustCardQuantity
-                adjustCardQuantity(productId, 1);
-            }
-        }
+        // Call the adjustCardQuantity function with the correct delta
+        adjustCardQuantity(productId, delta);
         return;
     }
     
