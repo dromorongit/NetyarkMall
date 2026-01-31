@@ -846,10 +846,10 @@ a:hover {
     transform: scale(1.2);
 }
 
-/* Product Grid - Mobile First: 2 columns, Desktop: 3 columns */
+/* Product Grid - Mobile First: 1 column, Desktop: 3 columns */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
     gap: 1rem;
     margin-top: 2rem;
 }
@@ -1128,8 +1128,10 @@ a:hover {
 .category-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: var(--transition);
+    padding: 10px;
+    background: transparent;
 }
 
 .category-card:hover .category-image img {
@@ -2400,12 +2402,14 @@ a:hover {
     }
     
     .product-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr);
         gap: 1rem;
+        display: grid;
+        width: 100%;
     }
 
     .category-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr);
         gap: 1rem;
     }
     
@@ -2460,8 +2464,10 @@ a:hover {
     }
 
     .product-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr);
         gap: 1rem;
+        display: grid;
+        width: 100%;
     }
 
     .section-title {
