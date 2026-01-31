@@ -1290,6 +1290,12 @@ function createProductCard(product) {
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
+                ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
+                <div class="quantity-controls" style="display: flex; align-items: center; gap: 8px; margin: 10px 0;">
+                    <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+                    <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount || 999}" ${!available ? 'disabled' : ''} style="width: 50px; text-align: center; padding: 6px; border: 1px solid var(--light-gray); border-radius: 4px;">
+                    <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                </div>
                 <div class="product-card-actions">
                     <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i> Add to Cart
@@ -1452,6 +1458,12 @@ function createDealCard(product) {
                     <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                </div>
+                ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
+                <div class="quantity-controls" style="display: flex; align-items: center; gap: 8px; margin: 10px 0;">
+                    <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+                    <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount || 999}" ${!available ? 'disabled' : ''} style="width: 50px; text-align: center; padding: 6px; border: 1px solid var(--light-gray); border-radius: 4px;">
+                    <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
                 </div>
                 <div class="product-card-actions">
                     <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
