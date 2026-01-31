@@ -707,6 +707,11 @@ function getFullImageUrl(imagePath) {
         return imagePath;
     }
 
+    // Handle full URLs (http/https)
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+
     // Handle uploads path - try multiple base URLs to handle different deployment scenarios
     if (imagePath.startsWith('/uploads/')) {
         const baseUrls = [
@@ -736,8 +741,14 @@ function getFullImageUrl(imagePath) {
         return imagePath;
     }
 
-    // Handle full URLs (http/https)
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    // Check if it's a local file (has a common image extension)
+    // If so, return it as-is for local file serving
+    const localImageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.jfif'];
+    const isLocalImage = localImageExtensions.some(ext => imagePath.toLowerCase().includes(ext));
+    
+    // If it's a local image file (doesn't start with http, doesn't start with /, doesn't start with ./ or ../)
+    // and doesn't contain cloudinary, return it as-is
+    if (isLocalImage && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
         return imagePath;
     }
 
