@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Debug Diagnosis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #555;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #console-output {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Product Display Diagnosis Tool</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: API Connectivity Check</h2>
+        <button onclick="testAPIConnectivity()">Run API Connectivity Test</button>
+        <div id="api-test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Product Fetch Test</h2>
+        <button onclick="testProductFetch()">Run Product Fetch Test</button>
+        <div id="product-fetch-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Category Mapping Test</h2>
+        <button onclick="testCategoryMapping()">Run Category Mapping Test</button>
+        <div id="category-test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Stock Status Check</h2>
+        <button onclick="testStockStatus()">Run Stock Status Test</button>
+        <div id="stock-test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 5: Admin vs Frontend Database Comparison</h2>
+        <button onclick="compareDatabases()">Compare Admin & Frontend Databases</button>
+        <div id="database-compare-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <button onclick="clearConsole()">Clear Console</button>
+        <pre id="console-output"></pre>
+    </div>
+
+    <!-- Load products.js for API functions -->
+    <script src="products.js"></script>
+    
+    <script>
+        // Capture console output
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+
+        function logToConsole(type, ...args) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            output.innerHTML += `[${timestamp}] [${type}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            
+            // Also log to original console
+            if (type === 'error') originalError.apply(console, args);
+            else if (type === 'warn') originalWarn.apply(console, args);
+            else originalLog.apply(console, args);
+        }
+
+        console.log = (...args) => logToConsole('LOG', ...args);
+        console.warn = (...args) => logToConsole('WARN', ...args);
+        console.error = (...args) => logToConsole('ERROR', ...args);
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '';
+        }
+
+        function showResult(elementId, success, message, data = null) {
+            const element = document.getElementById(elementId);
+            const className = success ? 'success' : 'error';
+            let html = `<div class="test-result ${className}">${message}</div>`;
+            if (data) {
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            element.innerHTML = html;
+        }
+
+        async function testAPIConnectivity() {
+            console.log('=== Testing API Connectivity ===');
+            
+            const apiUrls = [
+                'https://netyarkmall-production.up.railway.app/api',
+                'http://localhost:5000/api'
+            ];
+            
+            const results = [];
+            
+            for (const baseUrl of apiUrls) {
+                try {
+                    console.log(`Testing connectivity to: ${baseUrl}`);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    
+                    const response = await fetch(`${baseUrl}/products`, {
+                        signal: controller.signal,
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        console.log(`✅ ${baseUrl} - Connected successfully`);
+                        results.push({ url: baseUrl, status: 'success', products: await response.json() });
+                    } else {
+                        console.log(`❌ ${baseUrl} - HTTP ${response.status}`);
+                        results.push({ url: baseUrl, status: 'error', error: `HTTP ${response.status}` });
+                    }
+                } catch (error) {
+                    console.log(`❌ ${baseUrl} - ${error.message}`);
+                    results.push({ url: baseUrl, status: 'error', error: error.message });
+                }
+            }
+            
+            const workingUrl = results.find(r => r.status === 'success');
+            if (workingUrl) {
+                showResult('api-test-result', true, 
+                    `✅ API is accessible at: ${workingUrl.url}<br>
+                     Total products in database: ${workingUrl.products.length}`,
+                    workingUrl.products.slice(0, 3) // Show first 3 products
+                );
+            } else {
+                showResult('api-test-result', false, 
+                    `❌ All API endpoints failed<br>
+                     Check console for details`);
+            }
+            
+            return results;
+        }
+
+        async function testProductFetch() {
+            console.log('=== Testing Product Fetch ===');
+            
+            try {
+                const products = await getAllProducts();
+                console.log(`Fetched ${products.length} products`);
+                
+                if (products.length === 0) {
+                    showResult('product-fetch-result', false, 
+                        `❌ No products found in database<br>
+                         Possible causes:<br>
+                         • Products not added to database<br>
+                         • Database is empty<br>
+                         • Wrong database connected`);
+                } else {
+                    showResult('product-fetch-result', true, 
+                        `✅ Successfully fetched ${products.length} products`,
+                        products.slice(0, 3)
+                    );
+                }
+                
+                return products;
+            } catch (error) {
+                showResult('product-fetch-result', false, 
+                    `❌ Error fetching products: ${error.message}`);
+                return [];
+            }
+        }
+
+        async function testCategoryMapping() {
+            console.log('=== Testing Category Mapping ===');
+            
+            const products = await getAllProducts();
+            const categoryMap = {
+                'kitchen-appliances': 'Kitchen Appliances',
+                'beauty-personal-care': 'Beauty & Personal Care',
+                'photography-content-creation-tools': 'Photography & Content Creation Tools',
+                'nail-supplies': 'Nail Supplies',
+                'kids-babies': 'Kids & Babies',
+                'home-essentials': 'Home Essentials',
+                'lighting-home-decor': 'Lighting & Home Decor'
+            };
+            
+            // Get unique categories from products
+            const productCategories = [...new Set(products.map(p => p.category))];
+            console.log('Categories in products:', productCategories);
+            
+            // Test filtering for each category
+            const filterResults = {};
+            
+            for (const [frontendCat, apiCat] of Object.entries(categoryMap)) {
+                const filtered = products.filter(p => 
+                    p.category === apiCat || p.category === frontendCat
+                );
+                filterResults[frontendCat] = {
+                    expected: apiCat,
+                    found: filtered.length,
+                    sample: filtered.slice(0, 2).map(p => ({ name: p.name, category: p.category }))
+                };
+                console.log(`Category "${frontendCat}" (${apiCat}): ${filtered.length} products`);
+            }
+            
+            const hasProducts = Object.values(filterResults).some(r => r.found > 0);
+            
+            if (hasProducts) {
+                showResult('category-test-result', true, 
+                    `✅ Category filtering working<br>
+                     Found products in ${Object.values(filterResults).filter(r => r.found > 0).length} categories`);
+            } else {
+                showResult('category-test-result', false, 
+                    `❌ No products found in any expected category<br>
+                     Product categories: ${productCategories.join(', ')}<br>
+                     Expected categories: ${Object.values(categoryMap).join(', ')}`,
+                    { productCategories, filterResults });
+            }
+            
+            return filterResults;
+        }
+
+        async function testStockStatus() {
+            console.log('=== Testing Stock Status ===');
+            
+            const products = await getAllProducts();
+            
+            // Analyze stock status distribution
+            const stockStatusCounts = {};
+            products.forEach(p => {
+                const status = p.stockStatus || 'undefined';
+                stockStatusCounts[status] = (stockStatusCounts[status] || 0) + 1;
+            });
+            
+            console.log('Stock status distribution:', stockStatusCounts);
+            
+            // Check if products are filtered out by stock status
+            const inStockProducts = products.filter(p => 
+                p.stockStatus === 'in-stock' || (!p.stockStatus && p.stock > 0)
+            );
+            const outOfStockProducts = products.filter(p => 
+                p.stockStatus === 'out-of-stock' || p.stock === 0
+            );
+            
+            if (inStockProducts.length === 0 && products.length > 0) {
+                showResult('stock-test-result', false, 
+                    `⚠️ All ${products.length} products may be filtered out due to stock status<br>
+                     Stock status distribution: ${JSON.stringify(stockStatusCounts)}<br>
+                     Check if products have stockStatus: 'in-stock' or stock > 0`);
+            } else {
+                showResult('stock-test-result', true, 
+                    `✅ Stock status looks good<br>
+                     In-stock: ${inStockProducts.length}<br>
+                     Out-of-stock: ${outOfStockProducts.length}<br>
+                     Status distribution: ${JSON.stringify(stockStatusCounts)}`);
+            }
+            
+            return { stockStatusCounts, inStockCount: inStockProducts.length };
+        }
+
+        async function compareDatabases() {
+            console.log('=== Comparing Admin vs Frontend Databases ===');
+            
+            // Try to fetch from both possible endpoints
+            const adminUrl = 'http://localhost:5000/api'; // Admin panel typically uses this
+            const frontendUrl = 'https://netyarkmall-production.up.railway.app/api';
+            
+            let adminProducts = [];
+            let frontendProducts = [];
+            
+            // Fetch from admin URL
+            try {
+                console.log(`Fetching from admin URL: ${adminUrl}`);
+                const response = await fetch(`${adminUrl}/products`);
+                if (response.ok) {
+                    adminProducts = await response.json();
+                    console.log(`Admin database: ${adminProducts.length} products`);
+                }
+            } catch (error) {
+                console.log(`Admin URL error: ${error.message}`);
+            }
+            
+            // Fetch from frontend URL
+            try {
+                console.log(`Fetching from frontend URL: ${frontendUrl}`);
+                const response = await fetch(`${frontendUrl}/products`);
+                if (response.ok) {
+                    frontendProducts = await response.json();
+                    console.log(`Frontend database: ${frontendProducts.length} products`);
+                }
+            } catch (error) {
+                console.log(`Frontend URL error: ${error.message}`);
+            }
+            
+            // Compare
+            if (adminProducts.length !== frontendProducts.length) {
+                showResult('database-compare-result', false, 
+                    `❌ MISMATCH DETECTED!<br>
+                     Admin database: ${adminProducts.length} products<br>
+                     Frontend database: ${frontendProducts.length} products<br>
+                     <strong>This means different databases are being used!</strong>`,
+                    { adminCount: adminProducts.length, frontendCount: frontendProducts.length }
+                );
+            } else if (adminProducts.length === 0 && frontendProducts.length === 0) {
+                showResult('database-compare-result', false, 
+                    `❌ Both databases are empty<br>
+                     No products found in either database`);
+            } else {
+                showResult('database-compare-result', true, 
+                    `✅ Both databases have ${adminProducts.length} products<br>
+                     They appear to be connected to the same database`);
+            }
+            
+            return { adminProducts, frontendProducts };
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', () => {
+            console.log('🔍 Product Debug Diagnosis Tool loaded');
+            console.log('API_BASE:', API_BASE);
+        });
+    </script>
+</body>
+</html>

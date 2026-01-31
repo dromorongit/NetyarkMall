@@ -1999,7 +1999,7 @@ window.addEventListener('resize', handleResize);
 
 // Smooth scrolling for anchor links
 document.addEventListener('click', function(e) {
-    if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
+    if (e.target.tagName === 'A' && e.target.getAttribute('href') && e.target.getAttribute('href').startsWith('#')) {
         e.preventDefault();
         const target = document.querySelector(e.target.getAttribute('href'));
         if (target) {
@@ -2755,30 +2755,6 @@ function initializeShippingCalculator() {
     if (shippingZone) {
         shippingZone.addEventListener('change', updateShippingOptions);
     }
-}
-
-// Add to cart page initialization
-function initializeCartPage() {
-    updateCartDisplay();
-
-    // Initialize shipping calculator
-    initializeShippingCalculator();
-
-    // Clear cart button
-    const clearCartBtn = document.getElementById('clearCartBtn');
-    if (clearCartBtn) {
-        clearCartBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to clear your cart?')) {
-                clearCart();
-            }
-        });
-    }
-
-    // Checkout button - now redirects to checkout page
-    // (handled by HTML link)
-
-    // Suggested products
-    loadSuggestedProducts();
 }
 
 // Checkout page initialization
