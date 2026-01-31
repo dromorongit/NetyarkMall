@@ -1469,103 +1469,7 @@ async function loadActiveSessionsFromServer() {
 }
 
 // Legacy function for fallback
-function loadActiveSessions() {
-  const sessionsList = document.getElementById('sessions-list');
-  
-  // Get from localStorage or use default
-  const savedSessions = JSON.parse(localStorage.getItem('user_sessions') || 'null');
-  const sessions = savedSessions || [
-    {
-      device: 'Chrome on Windows',
-      location: 'Accra, Ghana',
-      ip: 'Current IP',
-      lastActive: new Date().toISOString(),
-      current: true
-    }
-  ];
-  
-  sessionsList.innerHTML = sessions.map(session => `
-    <div class="session-item ${session.current ? 'current' : ''}">
-      <div class="session-icon">
-        <i class="fas fa-${session.device.toLowerCase().includes('mobile') ? 'mobile-alt' : 'desktop'}"></i>
-      </div>
-      <div class="session-info">
-        <h4>${session.device} ${session.current ? '<span class="current-badge">Current</span>' : ''}</h4>
-        <p>${session.location || 'Unknown'} • IP: ${session.ip || 'N/A'}</p>
-        <small>Last active: ${formatActivityTime(session.lastActive)}</small>
-      </div>
-      ${!session.current ? `
-        <button class="btn-danger-outline btn-sm" onclick="revokeSession('${session.ip}')">
-          Revoke
-        </button>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-function showAllSessions() {
-  showNotification('Showing all active sessions from server', 'info');
-  loadActiveSessionsFromServer();
-}
-
-async function revokeSession(sessionId) {
-  if (confirm('Are you sure you want to revoke this session?')) {
-    try {
-      const res = await authFetch(`${API_BASE}/auth/sessions/${sessionId}`, {
-        method: 'DELETE'
-      });
-      
-      if (res && res.ok) {
-        showNotification('Session revoked successfully', 'success');
-        loadActiveSessionsFromServer();
-        logActivity('security', 'Session revoked');
-      } else {
-        showNotification('Failed to revoke session', 'error');
-      }
-    } catch (err) {
-      console.error('Error revoking session:', err);
-      showNotification('Error revoking session', 'error');
-    }
-  }
-}
-
-// Activity Log - Load from Server
-async function loadActivityLogFromServer() {
-  try {
-    const res = await authFetch(`${API_BASE}/auth/activities`);
-    if (!res) {
-      // Fallback to localStorage
-      loadActivityLog();
-      return;
-    }
-    
-    const activities = await res.json();
-    const timeline = document.getElementById('activity-timeline');
-    
-    if (!activities || activities.length === 0) {
-      // Fallback to localStorage if no activities from server
-      loadActivityLog();
-      return;
-    }
-    
-    timeline.innerHTML = activities.map(activity => `
-      <div class="activity-item">
-        <div class="activity-icon ${activity.color || 'info'}">
-          <i class="fas ${activity.icon || 'fa-circle'}"></i>
-        </div>
-        <div class="activity-content">
-          <p class="activity-message">${activity.message}</p>
-          <small class="activity-time">${formatActivityTime(activity.timestamp)}</small>
-        </div>
-      </div>
-    `).join('');
-    
-  } catch (err) {
-    console.error('Error loading activity log:', err);
-    // Fallback to localStorage
-    loadActivityLog();
-  }
-}
+function loadActivityLog() {
   const timeline = document.getElementById('activity-timeline');
   const user = JSON.parse(localStorage.getItem('user'));
   
@@ -1583,17 +1487,19 @@ async function loadActivityLogFromServer() {
     ];
   }
   
-  timeline.innerHTML = activities.map(activity => `
-    <div class="activity-item">
-      <div class="activity-icon ${activity.color}">
-        <i class="fas ${activity.icon}"></i>
+  if (timeline) {
+    timeline.innerHTML = activities.map(activity => `
+      <div class="activity-item">
+        <div class="activity-icon ${activity.color}">
+          <i class="fas ${activity.icon}"></i>
+        </div>
+        <div class="activity-content">
+          <p class="activity-message">${activity.message}</p>
+          <small class="activity-time">${formatActivityTime(activity.timestamp)}</small>
+        </div>
       </div>
-      <div class="activity-content">
-        <p class="activity-message">${activity.message}</p>
-        <small class="activity-time">${formatActivityTime(activity.timestamp)}</small>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
+  }
 }
 
 function logActivity(type, message) {
