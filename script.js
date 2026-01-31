@@ -1315,7 +1315,7 @@ function createCategoryCard(category) {
     return `
         <div class="category-card" onclick="navigateToCategory('${category.id}')">
             <div class="category-image">
-                <img src="${category.image}" alt="${category.name}" loading="lazy">
+                <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(category.image) : category.image}" alt="${category.name}" loading="lazy">
             </div>
             <div class="category-content">
                 <h3>${category.name}</h3>
