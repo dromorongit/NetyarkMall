@@ -2770,9 +2770,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 50px;
   cursor: pointer;
   font-size: 0.9em;
   font-weight: 500;
