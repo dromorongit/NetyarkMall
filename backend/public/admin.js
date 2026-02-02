@@ -1110,15 +1110,19 @@ async function loadUsers() {
     const res = await authFetch(`${API_BASE}/auth/users`);
     if (!res) return;
 
-    const users = await res.json();
+    const allUsers = await res.json();
+    
+    // Filter to only show admin/staff accounts (exclude customer accounts)
+    const users = allUsers.filter(u => u.role === 'superadmin' || u.role === 'staff');
+    
     const list = document.getElementById('users-list');
 
     if (!users || users.length === 0) {
       list.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">👥</div>
-          <h3>No Users</h3>
-          <p>No users found in the system.</p>
+          <h3>No Admin Users</h3>
+          <p>No admin or staff accounts found.</p>
         </div>
       `;
       return;
@@ -1128,7 +1132,7 @@ async function loadUsers() {
       <div class="user-item">
         <h3>${u.name}</h3>
         <p>${u.email}</p>
-        <p><strong>Role:</strong> ${u.role}</p>
+        <p><strong>Role:</strong> ${u.role === 'superadmin' ? 'Super Admin' : 'Staff'}</p>
         <button onclick="deleteUser('${u._id}')">Delete User</button>
       </div>
     `).join('');

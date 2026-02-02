@@ -439,10 +439,12 @@ router.delete('/account', auth, async (req, res) => {
   }
 });
 
-// Get all users (superadmin only)
+// Get all users (superadmin only - only returns admin/staff accounts, not customers)
 router.get('/users', auth, superAdminAuth, async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    // Only return users with role 'superadmin' or 'staff'
+    // This excludes regular customer accounts created from the frontend
+    const users = await User.find({ role: { $in: ['superadmin', 'staff'] } }).select('-password');
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
