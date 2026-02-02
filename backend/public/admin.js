@@ -582,26 +582,41 @@ async function loadOrders() {
       const orderStatus = o.status || 'pending';
       const itemCount = o.products ? o.products.length : 0;
       const orderDate = o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'Unknown';
+      const orderId = o._id || '';
 
       return `
-        <div class="order-item">
-          <h3>Order #${o._id ? o._id.substring(0, 8) : 'N/A'}</h3>
-          <p><strong>Customer:</strong> ${customerName}</p>
-          <p><strong>Email:</strong> ${customerEmail}</p>
-          <p><strong>Phone:</strong> ${customerPhone}</p>
-          <p><strong>Total:</strong> ₵${orderTotal}</p>
-          <p><strong>Status:</strong> ${orderStatus}</p>
-          <p><strong>Items:</strong> ${itemCount} item(s)</p>
-          <p><strong>Date:</strong> ${orderDate}</p>
-          <div class="order-actions">
-            <select onchange="updateOrderStatus('${o._id || ''}', this.value)">
+        <div class="order-item" data-order-id="${orderId}">
+          <div class="order-header">
+            <h3>Order #${orderId.substring(0, 8)}</h3>
+            <div class="order-actions">
+              <button onclick="printOrder('${orderId}')" class="btn-print" title="Print Order">
+                <i class="fas fa-print"></i> Print
+              </button>
+              <button onclick="deleteOrder('${orderId}')" class="btn-delete" title="Delete Order">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+          <div class="order-details">
+            <p><strong>Customer:</strong> ${customerName}</p>
+            <p><strong>Email:</strong> ${customerEmail}</p>
+            <p><strong>Phone:</strong> ${customerPhone}</p>
+            <p><strong>Total:</strong> ₵${orderTotal}</p>
+            <p><strong>Status:</strong> 
+              <span class="status-badge status-${orderStatus}">${orderStatus}</span>
+            </p>
+            <p><strong>Items:</strong> ${itemCount} item(s)</p>
+            <p><strong>Date:</strong> ${orderDate}</p>
+          </div>
+          <div class="order-status-update">
+            <label>Update Status:</label>
+            <select onchange="updateOrderStatus('${orderId}', this.value)">
               <option value="pending" ${orderStatus === 'pending' ? 'selected' : ''}>Pending</option>
               <option value="processing" ${orderStatus === 'processing' ? 'selected' : ''}>Processing</option>
               <option value="shipped" ${orderStatus === 'shipped' ? 'selected' : ''}>Shipped</option>
               <option value="delivered" ${orderStatus === 'delivered' ? 'selected' : ''}>Delivered</option>
               <option value="cancelled" ${orderStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
-            <button onclick="viewOrderDetails('${o._id || ''}')">View Details</button>
           </div>
         </div>
       `;
@@ -898,6 +913,270 @@ async function updateOrderStatus(id, status) {
   }
 }
 
+// Delete order permanently
+async function deleteOrder(id) {
+  if (confirm('Are you sure you want to delete this order permanently? This action cannot be undone.')) {
+    try {
+      const res = await authFetch(`${API_BASE}/orders/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (res && res.ok) {
+        showNotification('Order deleted successfully!', 'success');
+        loadOrders();
+      } else {
+        const errorData = await res.json();
+        showNotification(errorData.message || 'Error deleting order', 'error');
+      }
+    } catch (err) {
+      console.error('Error deleting order:', err);
+      showNotification('Error deleting order', 'error');
+    }
+  }
+}
+
+// Print order
+async function printOrder(orderId) {
+  try {
+    const res = await fetch(`${API_BASE}/orders/${orderId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch order details');
+    }
+
+    const order = await res.json();
+    
+    // Create printable content
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Order #${order._id.substring(0, 8)} - Netyark Mall</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+            background: #fff;
+          }
+          .print-header {
+            text-align: center;
+            border-bottom: 2px solid #008000;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+          }
+          .print-header h1 {
+            color: #008000;
+            font-size: 28px;
+          }
+          .print-header p {
+            color: #666;
+            font-size: 14px;
+          }
+          .order-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+          }
+          .order-info h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+          }
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+          }
+          .info-row:last-child {
+            border-bottom: none;
+          }
+          .info-label {
+            font-weight: 600;
+            color: #555;
+          }
+          .info-value {
+            color: #333;
+          }
+          .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .items-table th {
+            background: #008000;
+            color: white;
+            padding: 12px;
+            text-align: left;
+          }
+          .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+          }
+          .items-table tr:nth-child(even) {
+            background: #f9f9f9;
+          }
+          .order-total {
+            text-align: right;
+            font-size: 20px;
+            font-weight: bold;
+            color: #008000;
+            padding: 15px 0;
+            border-top: 2px solid #008000;
+            margin-top: 20px;
+          }
+          .print-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 12px;
+          }
+          .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+          .status-pending { background: #fff3cd; color: #856404; }
+          .status-processing { background: #cce5ff; color: #004085; }
+          .status-shipped { background: #d4edda; color: #155724; }
+          .status-delivered { background: #28a745; color: white; }
+          .status-cancelled { background: #f8d7da; color: #721c24; }
+          @media print {
+            body {
+              padding: 10px;
+            }
+            .no-print {
+              display: none !important;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-header">
+          <h1>Netyark Mall</h1>
+          <p>Order Invoice</p>
+        </div>
+        
+        <div class="order-info">
+          <h2>Order Information</h2>
+          <div class="info-row">
+            <span class="info-label">Order ID:</span>
+            <span class="info-value">#${order._id}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Order Date:</span>
+            <span class="info-value">${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Status:</span>
+            <span class="info-value"><span class="status-badge status-${order.status}">${order.status}</span></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Payment Method:</span>
+            <span class="info-value">${order.paymentMethod ? order.paymentMethod.replace('-', ' ').toUpperCase() : 'N/A'}</span>
+          </div>
+        </div>
+        
+        <div class="order-info">
+          <h2>Customer Information</h2>
+          <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span class="info-value">${(order.customer && order.customer.firstName && order.customer.lastName) ? `${order.customer.firstName} ${order.customer.lastName}` : 'N/A'}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value">${(order.customer && order.customer.email) ? order.customer.email : 'N/A'}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">${(order.customer && order.customer.phone) ? order.customer.phone : 'N/A'}</span>
+          </div>
+        </div>
+        
+        <div class="order-info">
+          <h2>Shipping Address</h2>
+          <div class="info-row">
+            <span class="info-label">Address:</span>
+            <span class="info-value">${(order.shipping && order.shipping.address) ? order.shipping.address : 'N/A'}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">City:</span>
+            <span class="info-value">${(order.shipping && order.shipping.city) ? order.shipping.city : 'N/A'}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Region:</span>
+            <span class="info-value">${(order.shipping && order.shipping.region) ? order.shipping.region.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}</span>
+          </div>
+        </div>
+        
+        <h2>Order Items</h2>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(order.products && order.products.length > 0) ? order.products.map(item => `
+              <tr>
+                <td>${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</td>
+                <td>${item.quantity || 0}</td>
+                <td>₵${(item.product && typeof item.product === 'object' ? item.product.price : 0).toLocaleString()}</td>
+                <td>₵${((item.product && typeof item.product === 'object' ? item.product.price : 0) * (item.quantity || 0)).toLocaleString()}</td>
+              </tr>
+            `).join('') : '<tr><td colspan="4" style="text-align: center;">No items found</td></tr>'}
+          </tbody>
+        </table>
+        
+        <div class="order-total">
+          Total: ₵${(order.total || 0).toLocaleString()}
+        </div>
+        
+        <div class="print-footer">
+          <p>Thank you for shopping with Netyark Mall!</p>
+          <p>Santa Maria, Accra, Ghana | info@netyarkmall.com</p>
+          <p>Printed on: ${new Date().toLocaleString()}</p>
+        </div>
+        
+        <div class="no-print" style="text-align: center; margin-top: 20px;">
+          <button onclick="window.print()" style="padding: 10px 30px; font-size: 16px; background: #008000; color: white; border: none; border-radius: 5px; cursor: pointer;">Print Order</button>
+          <button onclick="window.close()" style="padding: 10px 30px; font-size: 16px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">Close</button>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Open print window
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+  } catch (err) {
+    console.error('Error printing order:', err);
+    showNotification('Error loading order details for printing', 'error');
+  }
+}
+
 // View order details
 async function viewOrderDetails(orderId) {
   try {
@@ -916,8 +1195,16 @@ async function viewOrderDetails(orderId) {
     modal.innerHTML = `
       <div class="order-details-content">
         <div class="order-details-header">
-          <h2>Order Details - ${order._id}</h2>
-          <button onclick="this.closest('.order-details-modal').remove()">&times;</button>
+          <h2>Order Details - #${order._id ? order._id.substring(0, 8) : 'N/A'}</h2>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="printOrder('${order._id}')" class="btn-print" title="Print Order">
+              <i class="fas fa-print"></i> Print
+            </button>
+            <button onclick="closeOrderDetails(this)" class="btn-back" title="Back to Orders">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button onclick="this.closest('.order-details-modal').remove()">&times;</button>
+          </div>
         </div>
         <div class="order-details-body">
           <div class="order-info-section">
@@ -931,7 +1218,7 @@ async function viewOrderDetails(orderId) {
             <h3>Shipping Information</h3>
             <p><strong>Address:</strong> ${(order.shipping && order.shipping.address) ? order.shipping.address : 'N/A'}</p>
             <p><strong>City:</strong> ${(order.shipping && order.shipping.city) ? order.shipping.city : 'N/A'}</p>
-            <p><strong>Region:</strong> ${(order.shipping && order.shipping.region) ? order.shipping.region : 'N/A'}</p>
+            <p><strong>Region:</strong> ${(order.shipping && order.shipping.region) ? order.shipping.region.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}</p>
             <p><strong>Zone:</strong> ${(order.shipping && order.shipping.zone) ? order.shipping.zone : 'N/A'}</p>
             <p><strong>Method:</strong> ${(order.shipping && order.shipping.method) ? order.shipping.method : 'N/A'}</p>
           </div>
@@ -942,6 +1229,8 @@ async function viewOrderDetails(orderId) {
               <div class="order-item-detail">
                 <p><strong>Product:</strong> ${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</p>
                 <p><strong>Quantity:</strong> ${item.quantity || 0}</p>
+                <p><strong>Price:</strong> ₵${(item.product && typeof item.product === 'object' ? item.product.price : 0).toLocaleString()}</p>
+                <p><strong>Subtotal:</strong> ₵${((item.product && typeof item.product === 'object' ? item.product.price : 0) * (item.quantity || 0)).toLocaleString()}</p>
               </div>
             `).join('') : '<p>No items found</p>'}
           </div>
@@ -949,8 +1238,8 @@ async function viewOrderDetails(orderId) {
           <div class="order-info-section">
             <h3>Order Summary</h3>
             <p><strong>Total:</strong> ₵${(order.total || 0).toLocaleString()}</p>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
-            <p><strong>Status:</strong> ${order.status || 'pending'}</p>
+            <p><strong>Payment Method:</strong> ${order.paymentMethod ? order.paymentMethod.replace('-', ' ').toUpperCase() : 'N/A'}</p>
+            <p><strong>Status:</strong> <span class="status-badge status-${order.status}">${order.status}</span></p>
             <p><strong>Order Date:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown'}</p>
           </div>
         </div>
@@ -963,6 +1252,11 @@ async function viewOrderDetails(orderId) {
     console.error('Error viewing order details:', err);
     showNotification('Error loading order details: ' + err.message, 'error');
   }
+}
+
+// Close order details modal
+function closeOrderDetails(button) {
+  button.closest('.order-details-modal').remove();
 }
 
 // Respond to message
