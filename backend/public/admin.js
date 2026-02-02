@@ -1386,12 +1386,24 @@ async function openConversation(conversationId) {
 
 // Delete conversation
 async function deleteConversation(conversationId) {
-  console.log('deleteConversation called with:', conversationId);
+  console.log('deleteConversation called with:', conversationId, 'type:', typeof conversationId);
   
   // Validate conversationId
-  if (!conversationId || conversationId === 'undefined' || conversationId === 'unknown') {
+  if (!conversationId || 
+      conversationId === 'undefined' || 
+      conversationId === 'null' ||
+      conversationId === 'unknown' ||
+      conversationId.trim() === '' ||
+      conversationId.length < 3) {
     console.error('Invalid conversationId:', conversationId);
     showNotification('Error: Invalid conversation ID', 'error');
+    return;
+  }
+  
+  // Additional validation: ensure it's a valid string format
+  if (typeof conversationId !== 'string') {
+    console.error('conversationId is not a string:', conversationId);
+    showNotification('Error: Invalid conversation ID format', 'error');
     return;
   }
   

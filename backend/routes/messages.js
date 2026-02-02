@@ -149,9 +149,29 @@ router.patch('/conversation/:conversationId/open', auth, adminAuth, async (req, 
 // Delete conversation by conversationId
 router.delete('/conversation/:conversationId', auth, adminAuth, async (req, res) => {
   try {
-    await Message.deleteMany({ conversationId: req.params.conversationId });
+    const { conversationId } = req.params;
+    
+    // Validate conversationId
+    if (!conversationId || conversationId === 'undefined' || conversationId === 'null' || conversationId.trim() === '') {
+      return res.status(400).json({ message: 'Invalid Conversation ID' });
+    }
+    
+    // Validate conversationId format (should be a valid string identifier)
+    if (conversationId.length < 3) {
+      return res.status(400).json({ message: 'Invalid Conversation ID: Too short' });
+    }
+    
+    // Check if conversation exists before deleting
+    const conversationExists = await Message.exists({ conversationId });
+    if (!conversationExists) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+    
+    // Delete all messages in the conversation
+    await Message.deleteMany({ conversationId });
     res.json({ success: true, message: 'Conversation deleted' });
   } catch (err) {
+    console.error('Error deleting conversation:', err);
     res.status(400).json({ message: err.message });
   }
 });
