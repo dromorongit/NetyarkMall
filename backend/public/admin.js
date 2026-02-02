@@ -1197,6 +1197,7 @@ async function viewOrderDetails(orderId) {
     modal.className = 'order-details-modal';
     modal.innerHTML = `
       <div class="order-details-content">
+        <button onclick="this.closest('.order-details-modal').remove()" class="btn-close-modal" title="Close">&times;</button>
         <div class="order-details-header">
           <div class="order-header-left">
             <h2>Order Details</h2>
@@ -1211,7 +1212,6 @@ async function viewOrderDetails(orderId) {
               <span class="btn-icon"><i class="fas fa-arrow-left"></i></span>
               <span class="btn-text">Back</span>
             </button>
-            <button onclick="this.closest('.order-details-modal').remove()" class="btn-close-modal" title="Close">&times;</button>
           </div>
         </div>
         <div class="order-details-body">

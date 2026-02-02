@@ -2918,6 +2918,82 @@ body {
   font-weight: 700;
 }
 
+/* Mobile Responsive for Modal Buttons */
+@media (max-width: 768px) {
+  .order-details-header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 20px;
+  }
+
+  .order-header-left {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .order-header-left h2 {
+    font-size: 1.2em;
+  }
+
+  .order-id-badge {
+    font-size: 0.8em;
+    padding: 4px 12px;
+  }
+
+  .order-header-actions {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .btn-modal {
+    padding: 10px 20px;
+    font-size: 0.85em;
+    border-radius: 50px;
+    flex: 1;
+    max-width: 160px;
+    justify-content: center;
+  }
+
+  .btn-modal .btn-icon {
+    font-size: 1em;
+  }
+
+  .btn-close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.3em;
+  }
+
+  .order-details-content {
+    margin: 10% auto;
+    width: 95%;
+    max-width: none;
+  }
+
+  .order-details-body {
+    padding: 20px;
+    max-height: 75vh;
+  }
+
+  .order-info-section {
+    padding: 16px;
+  }
+
+  .summary-total {
+    padding: 12px 16px;
+  }
+
+  .total-amount {
+    font-size: 1.3em;
+  }
+}
+
 .order-status-update {
   display: flex;
   align-items: center;
