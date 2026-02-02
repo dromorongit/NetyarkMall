@@ -1198,27 +1198,32 @@ async function viewOrderDetails(orderId) {
     modal.innerHTML = `
       <div class="order-details-content">
         <div class="order-details-header">
-          <h2>Order Details - #${order._id ? order._id.substring(0, 8) : 'N/A'}</h2>
-          <div style="display: flex; gap: 10px;">
-            <button onclick="printOrder('${order._id}')" class="btn-print" title="Print Order">
-              <i class="fas fa-print"></i> Print
+          <div class="order-header-left">
+            <h2>Order Details</h2>
+            <span class="order-id-badge">#${order._id ? order._id.substring(0, 8) : 'N/A'}</span>
+          </div>
+          <div class="order-header-actions">
+            <button onclick="printOrder('${order._id}')" class="btn-modal btn-print-modal" title="Print Order">
+              <span class="btn-icon"><i class="fas fa-print"></i></span>
+              <span class="btn-text">Print Invoice</span>
             </button>
-            <button onclick="closeOrderDetails(this)" class="btn-back" title="Back to Orders">
-              <i class="fas fa-arrow-left"></i> Back
+            <button onclick="closeOrderDetails(this)" class="btn-modal btn-back-modal" title="Back to Orders">
+              <span class="btn-icon"><i class="fas fa-arrow-left"></i></span>
+              <span class="btn-text">Back</span>
             </button>
-            <button onclick="this.closest('.order-details-modal').remove()">&times;</button>
+            <button onclick="this.closest('.order-details-modal').remove()" class="btn-close-modal" title="Close">&times;</button>
           </div>
         </div>
         <div class="order-details-body">
           <div class="order-info-section">
-            <h3>Customer Information</h3>
+            <h3><i class="fas fa-user"></i> Customer Information</h3>
             <p><strong>Name:</strong> ${(order.customer && order.customer.firstName && order.customer.lastName) ? `${order.customer.firstName} ${order.customer.lastName}` : 'N/A'}</p>
             <p><strong>Email:</strong> ${(order.customer && order.customer.email) ? order.customer.email : 'N/A'}</p>
             <p><strong>Phone:</strong> ${(order.customer && order.customer.phone) ? order.customer.phone : 'N/A'}</p>
           </div>
 
           <div class="order-info-section">
-            <h3>Shipping Information</h3>
+            <h3><i class="fas fa-shipping-fast"></i> Shipping Information</h3>
             <p><strong>Address:</strong> ${(order.shipping && order.shipping.address) ? order.shipping.address : 'N/A'}</p>
             <p><strong>City:</strong> ${(order.shipping && order.shipping.city) ? order.shipping.city : 'N/A'}</p>
             <p><strong>Region:</strong> ${(order.shipping && order.shipping.region) ? order.shipping.region.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}</p>
@@ -1227,23 +1232,39 @@ async function viewOrderDetails(orderId) {
           </div>
 
           <div class="order-info-section">
-            <h3>Order Items</h3>
+            <h3><i class="fas fa-box-open"></i> Order Items</h3>
             ${(order.products && order.products.length > 0) ? order.products.map(item => `
               <div class="order-item-detail">
-                <p><strong>Product:</strong> ${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</p>
-                <p><strong>Quantity:</strong> ${item.quantity || 0}</p>
-                <p><strong>Price:</strong> ₵${(item.product && typeof item.product === 'object' ? item.product.price : 0).toLocaleString()}</p>
-                <p><strong>Subtotal:</strong> ₵${((item.product && typeof item.product === 'object' ? item.product.price : 0) * (item.quantity || 0)).toLocaleString()}</p>
+                <div class="item-header">
+                  <span class="item-name">${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</span>
+                  <span class="item-price">₵${((item.product && typeof item.product === 'object' ? item.product.price : 0) * (item.quantity || 0)).toLocaleString()}</span>
+                </div>
+                <div class="item-details">
+                  <span><strong>Qty:</strong> ${item.quantity || 0}</span>
+                  <span><strong>Unit Price:</strong> ₵${(item.product && typeof item.product === 'object' ? item.product.price : 0).toLocaleString()}</span>
+                </div>
               </div>
             `).join('') : '<p>No items found</p>'}
           </div>
 
-          <div class="order-info-section">
-            <h3>Order Summary</h3>
-            <p><strong>Total:</strong> ₵${(order.total || 0).toLocaleString()}</p>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod ? order.paymentMethod.replace('-', ' ').toUpperCase() : 'N/A'}</p>
-            <p><strong>Status:</strong> <span class="status-badge status-${order.status}">${order.status}</span></p>
-            <p><strong>Order Date:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown'}</p>
+          <div class="order-info-section order-summary">
+            <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+            <div class="summary-row">
+              <span>Payment Method:</span>
+              <span>${order.paymentMethod ? order.paymentMethod.replace('-', ' ').toUpperCase() : 'N/A'}</span>
+            </div>
+            <div class="summary-row">
+              <span>Status:</span>
+              <span class="status-badge status-${order.status}">${order.status}</span>
+            </div>
+            <div class="summary-row">
+              <span>Order Date:</span>
+              <span>${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown'}</span>
+            </div>
+            <div class="summary-total">
+              <span>Total:</span>
+              <span class="total-amount">₵${(order.total || 0).toLocaleString()}</span>
+            </div>
           </div>
         </div>
       </div>

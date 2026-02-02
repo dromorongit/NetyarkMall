@@ -2727,6 +2727,228 @@ body {
   box-shadow: 0 4px 12px rgba(111,66,193,0.4);
 }
 
+/* Professional Modal Header Styles */
+.order-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: none;
+}
+
+.order-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.order-header-left h2 {
+  margin: 0;
+  color: white;
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.order-id-badge {
+  background: rgba(40,167,69,0.3);
+  color: #20c997;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+  border: 1px solid rgba(40,167,69,0.5);
+}
+
+.order-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: all var(--transition-speed) ease;
+}
+
+.btn-modal .btn-icon {
+  font-size: 1.1em;
+}
+
+.btn-print-modal {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(13,110,253,0.3);
+}
+
+.btn-print-modal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13,110,253,0.5);
+}
+
+.btn-back-modal {
+  background: linear-gradient(135deg, var(--secondary-color) 0%, #e8680f 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(253,126,20,0.3);
+}
+
+.btn-back-modal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253,126,20,0.5);
+}
+
+.btn-close-modal {
+  width: 42px;
+  height: 42px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: rgba(255,255,255,0.8);
+  transition: all var(--transition-speed) ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close-modal:hover {
+  background: rgba(220,53,69,0.8);
+  color: white;
+  transform: rotate(90deg);
+}
+
+/* Professional Modal Body */
+.order-details-body {
+  padding: 30px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--background-color);
+}
+
+.order-info-section {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.order-info-section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-size: 1.1em;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-info-section h3 i {
+  color: var(--primary-color);
+}
+
+.order-info-section p {
+  margin: 10px 0;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--background-color);
+  border-radius: var(--radius-sm);
+}
+
+.order-info-section p strong {
+  color: var(--text-primary);
+}
+
+/* Order Item Details */
+.order-item-detail {
+  background: var(--background-color);
+  padding: 16px;
+  margin: 12px 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.item-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1em;
+}
+
+.item-price {
+  font-weight: 700;
+  color: var(--primary-color);
+  font-size: 1.1em;
+}
+
+.item-details {
+  display: flex;
+  gap: 20px;
+  color: var(--text-secondary);
+  font-size: 0.9em;
+}
+
+/* Order Summary */
+.order-summary {
+  background: linear-gradient(135deg, rgba(40,167,69,0.08) 0%, rgba(40,167,69,0.03) 100%);
+  border: 2px solid var(--primary-color);
+}
+
+.order-summary h3 {
+  border-bottom-color: var(--primary-color);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--surface-color);
+  border-radius: var(--radius-md);
+  margin: 8px 0;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  border-radius: var(--radius-md);
+  margin-top: 16px;
+  color: white;
+}
+
+.summary-total span:first-child {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.total-amount {
+  font-size: 1.5em;
+  font-weight: 700;
+}
+
 .order-status-update {
   display: flex;
   align-items: center;
