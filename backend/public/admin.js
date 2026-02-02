@@ -12,7 +12,7 @@ let tokenExpiration = localStorage.getItem('tokenExpiration') ? new Date(localSt
 // Set token expiration (1 hour from now)
 function setTokenExpiration() {
     const expiration = new Date();
-    expiration.setHours(expiration.getHours() + 1);
+    expiration.setDate(expiration.getDate() + 7);
     localStorage.setItem('tokenExpiration', expiration.toISOString());
     tokenExpiration = expiration;
 }

@@ -79,106 +79,219 @@
             </div>
             <div class="mobile-search-results" id="mobileSearchResults"></div>
         </div>
-    </div></header>
+    </header>
 
     <!-- Profile Section -->
-    <main class="main-content">
+    <main class="main-content profile-main">
         <div class="container">
-            <div class="profile-container">
-                <!-- Profile Sidebar -->
-                <aside class="profile-sidebar">
-                    <div class="profile-avatar">
-                        <img src="https://via.placeholder.com/100x100?text=User" alt="Profile Picture" id="profileAvatar">
-                        <h3 id="userName">User Name</h3>
+            <!-- Profile Header Card -->
+            <div class="profile-header-card">
+                <div class="profile-cover"></div>
+                <div class="profile-header-content">
+                    <div class="profile-avatar-large">
+                        <img src="https://ui-avatars.com/api/?name=User&background=008000&color=fff&size=150" alt="Profile Picture" id="profileAvatarLarge">
+                        <button class="edit-avatar-btn" onclick="document.getElementById('avatarUpload').click()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
                     </div>
-                    <ul class="profile-menu">
-                        <li><a href="#profile" class="active">Profile Information</a></li>
-                        <li><a href="#orders">My Orders</a></li>
-                        <li><a href="#wishlist">Wishlist</a></li>
-                        <li><a href="#reviews">My Reviews</a></li>
-                        <li><a href="#settings">Account Settings</a></li>
-                    </ul>
-                </aside>
+                    <div class="profile-header-info">
+                        <h1 id="userNameLarge">User Name</h1>
+                        <p id="userEmail">user@email.com</p>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="orderCount">0</span>
+                                <span class="stat-label">Orders</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="wishlistCount">0</span>
+                                <span class="stat-label">Wishlist</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="reviewCount">0</span>
+                                <span class="stat-label">Reviews</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-header-actions">
+                        <button class="btn btn-outline" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Profile Content -->
-                <div class="profile-content">
-                    <!-- Profile Information -->
-                    <section id="profile" class="profile-section">
-                        <h3>Profile Information</h3>
-                        <form id="profileForm">
+            <!-- Profile Tabs -->
+            <div class="profile-tabs">
+                <button class="profile-tab active" data-tab="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </button>
+                <button class="profile-tab" data-tab="orders">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Orders</span>
+                </button>
+                <button class="profile-tab" data-tab="wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span>Wishlist</span>
+                </button>
+                <button class="profile-tab" data-tab="reviews">
+                    <i class="fas fa-star"></i>
+                    <span>Reviews</span>
+                </button>
+                <button class="profile-tab" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </button>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content-wrapper">
+                <!-- Profile Information Tab -->
+                <div class="profile-tab-content active" id="profile-tab">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-user-circle"></i> Personal Information</h2>
+                            <span class="badge badge-success">Verified</span>
+                        </div>
+                        <form id="profileForm" class="profile-form">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="firstName">First Name</label>
-                                    <input type="text" id="firstName" name="firstName" required>
+                                    <label for="firstName">
+                                        <i class="fas fa-user"></i> First Name
+                                    </label>
+                                    <input type="text" id="firstName" name="firstName" required placeholder="Enter your first name">
                                 </div>
                                 <div class="form-group">
-                                    <label for="lastName">Last Name</label>
-                                    <input type="text" id="lastName" name="lastName" required>
+                                    <label for="lastName">
+                                        <i class="fas fa-user"></i> Last Name
+                                    </label>
+                                    <input type="text" id="lastName" name="lastName" required placeholder="Enter your last name">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" required readonly>
+                                <label for="email">
+                                    <i class="fas fa-envelope"></i> Email Address
+                                </label>
+                                <input type="email" id="email" name="email" required readonly placeholder="your@email.com">
+                                <small><i class="fas fa-lock"></i> Email cannot be changed</small>
                             </div>
                             <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" required>
+                                <label for="phone">
+                                    <i class="fas fa-phone"></i> Phone Number
+                                </label>
+                                <input type="tel" id="phone" name="phone" required placeholder="+233 XX XXX XXXX">
                             </div>
-                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
                         </form>
-                    </section>
+                    </div>
+                </div>
 
-                    <!-- Orders History -->
-                    <section id="orders" class="profile-section" style="display: none;">
-                        <h3>My Orders</h3>
-                        <div id="ordersList">
+                <!-- Orders Tab -->
+                <div class="profile-tab-content" id="orders-tab">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-shopping-bag"></i> My Orders</h2>
+                            <span class="badge badge-info">Recent</span>
+                        </div>
+                        <div id="ordersList" class="orders-list">
                             <!-- Orders will be loaded here -->
                         </div>
-                    </section>
+                    </div>
+                </div>
 
-                    <!-- Wishlist -->
-                    <section id="wishlist" class="profile-section" style="display: none;">
-                        <h3>My Wishlist</h3>
+                <!-- Wishlist Tab -->
+                <div class="profile-tab-content" id="wishlist-tab">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-heart"></i> My Wishlist</h2>
+                            <span class="badge badge-warning" id="wishlistBadge">0 Items</span>
+                        </div>
                         <div class="product-grid" id="wishlistGrid">
                             <!-- Wishlist items will be loaded here -->
                         </div>
-                    </section>
+                    </div>
+                </div>
 
-                    <!-- Reviews -->
-                    <section id="reviews" class="profile-section" style="display: none;">
-                        <h3>My Reviews</h3>
-                        <div id="reviewsList">
+                <!-- Reviews Tab -->
+                <div class="profile-tab-content" id="reviews-tab">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-star"></i> My Reviews</h2>
+                        </div>
+                        <div id="reviewsList" class="reviews-list">
                             <!-- Reviews will be loaded here -->
                         </div>
-                    </section>
+                    </div>
+                </div>
 
-                    <!-- Account Settings -->
-                    <section id="settings" class="profile-section" style="display: none;">
-                        <h3>Account Settings</h3>
-                        <div class="settings-section">
-                            <h4>Change Password</h4>
-                            <form id="passwordForm">
+                <!-- Settings Tab -->
+                <div class="profile-tab-content" id="settings-tab">
+                    <div class="settings-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-key"></i> Change Password</h2>
+                            </div>
+                            <form id="passwordForm" class="profile-form">
                                 <div class="form-group">
-                                    <label for="currentPassword">Current Password</label>
-                                    <input type="password" id="currentPassword" name="currentPassword" required>
+                                    <label for="currentPassword">
+                                        <i class="fas fa-lock"></i> Current Password
+                                    </label>
+                                    <div class="password-input">
+                                        <input type="password" id="currentPassword" name="currentPassword" required placeholder="Enter current password">
+                                        <button type="button" class="toggle-password" onclick="togglePassword('currentPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="newPassword">New Password</label>
-                                    <input type="password" id="newPassword" name="newPassword" required minlength="6">
+                                    <label for="newPassword">
+                                        <i class="fas fa-lock"></i> New Password
+                                    </label>
+                                    <div class="password-input">
+                                        <input type="password" id="newPassword" name="newPassword" required minlength="6" placeholder="Enter new password">
+                                        <button type="button" class="toggle-password" onclick="togglePassword('newPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <small><i class="fas fa-info-circle"></i> Password must be at least 6 characters</small>
                                 </div>
                                 <div class="form-group">
-                                    <label for="confirmNewPassword">Confirm New Password</label>
-                                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+                                    <label for="confirmNewPassword">
+                                        <i class="fas fa-lock"></i> Confirm New Password
+                                    </label>
+                                    <div class="password-input">
+                                        <input type="password" id="confirmNewPassword" name="confirmNewPassword" required placeholder="Confirm new password">
+                                        <button type="button" class="toggle-password" onclick="togglePassword('confirmNewPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Change Password</button>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-key"></i> Change Password
+                                    </button>
+                                </div>
                             </form>
                         </div>
-                        <div class="settings-section">
-                            <h4>Delete Account</h4>
-                            <p>Once you delete your account, there is no going back. Please be certain.</p>
-                            <button class="btn btn-outline" style="color: var(--error); border-color: var(--error);" onclick="deleteAccount()">Delete Account</button>
+
+                        <div class="content-card danger-zone">
+                            <div class="card-header">
+                                <h2><i class="fas fa-exclamation-triangle"></i> Danger Zone</h2>
+                            </div>
+                            <p class="danger-text">
+                                <i class="fas fa-exclamation-circle"></i>
+                                Once you delete your account, there is no going back. Please be certain.
+                            </p>
+                            <button class="btn btn-outline-danger" onclick="deleteAccount()">
+                                <i class="fas fa-trash"></i> Delete Account
+                            </button>
                         </div>
-                    </section>
+                    </div>
                 </div>
             </div>
         </div>
@@ -324,6 +437,3 @@
     <script src="profile.js"></script>
 </body>
 </html>
-
-
-
