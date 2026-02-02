@@ -1,5 +1,9 @@
 const API_BASE = '/api';
 
+// Version for cache busting
+const APP_VERSION = '2.0.0';
+console.log('Admin JS loaded, version:', APP_VERSION);
+
 // Token management system
 let token = localStorage.getItem('token');
 let refreshToken = localStorage.getItem('refreshToken');
@@ -254,6 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup other event listeners
   setupEventListeners();
 });
+
+// Setup other event listeners
+function setupEventListeners() {
+  console.log('Setting up event listeners...');
+  // Add any global event listeners here
+}
 
 // Update user info in header
 function updateUserInfo() {
@@ -619,16 +629,24 @@ async function loadMessages() {
 
     const messages = await res.json();
     console.log('Messages received:', messages);
+    
+    // Debug: Log the conversationId of each message
+    messages.forEach((m, index) => {
+      console.log(`Message ${index}: conversationId = ${m.conversationId}, type = ${typeof m.conversationId}`);
+    });
 
     // Group messages by conversation
     const conversations = {};
     messages.forEach(m => {
-      if (!conversations[m.conversationId]) {
-        conversations[m.conversationId] = [];
+      const convId = m.conversationId;
+      console.log('Processing message with conversationId:', convId);
+      if (!conversations[convId]) {
+        conversations[convId] = [];
       }
-      conversations[m.conversationId].push(m);
+      conversations[convId].push(m);
     });
 
+    console.log('Conversations object keys:', Object.keys(conversations));
     console.log('Conversations found:', Object.keys(conversations).length);
 
     const list = document.getElementById('messages-list');
@@ -1219,6 +1237,42 @@ async function loadProfile() {
   }
 }
 
+// Load activity log from server
+async function loadActivityLogFromServer() {
+  try {
+    const res = await authFetch(`${API_BASE}/auth/activity`);
+    if (!res || !res.ok) {
+      // Fallback to localStorage
+      loadActivityLog();
+      return;
+    }
+    
+    const activities = await res.json();
+    const timeline = document.getElementById('activity-timeline');
+    
+    if (timeline && activities && activities.length > 0) {
+      timeline.innerHTML = activities.map(activity => `
+        <div class="activity-item">
+          <div class="activity-icon ${activity.color || 'info'}">
+            <i class="fas ${activity.icon || 'fa-circle'}"></i>
+          </div>
+          <div class="activity-content">
+            <p class="activity-message">${activity.message}</p>
+            <small class="activity-time">${formatActivityTime(activity.timestamp)}</small>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      // Fallback to localStorage
+      loadActivityLog();
+    }
+  } catch (err) {
+    console.error('Error loading activity log from server:', err);
+    // Fallback to localStorage
+    loadActivityLog();
+  }
+}
+
 // Initialize profile navigation immediately
 function initProfileNavigation() {
   const navItems = document.querySelectorAll('.profile-nav-item');
@@ -1586,6 +1640,27 @@ async function loadActiveSessionsFromServer() {
     console.error('Error loading sessions:', err);
     // Fallback to localStorage
     loadActiveSessions();
+  }
+}
+
+// Revoke session
+async function revokeSession(sessionId) {
+  if (confirm('Are you sure you want to revoke this session?')) {
+    try {
+      const res = await authFetch(`${API_BASE}/auth/sessions/${sessionId}`, {
+        method: 'DELETE'
+      });
+      
+      if (res && res.ok) {
+        showNotification('Session revoked successfully', 'success');
+        loadActiveSessionsFromServer();
+      } else {
+        showNotification('Error revoking session', 'error');
+      }
+    } catch (err) {
+      console.error('Error revoking session:', err);
+      showNotification('Error revoking session', 'error');
+    }
   }
 }
 
