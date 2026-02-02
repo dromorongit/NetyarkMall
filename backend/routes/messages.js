@@ -176,4 +176,36 @@ router.delete('/conversation/:conversationId', auth, adminAuth, async (req, res)
   }
 });
 
+// Fix legacy messages without conversationId (admin)
+router.post('/fix-legacy', auth, adminAuth, async (req, res) => {
+  try {
+    // Find all messages without a valid conversationId
+    const legacyMessages = await Message.find({
+      $or: [
+        { conversationId: { $exists: false } },
+        { conversationId: null },
+        { conversationId: 'undefined' },
+        { conversationId: 'null' },
+        { conversationId: '' }
+      ]
+    });
+    
+    let fixedCount = 0;
+    for (const msg of legacyMessages) {
+      msg.conversationId = msg._id.toString();
+      await msg.save();
+      fixedCount++;
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Fixed ${fixedCount} legacy messages without conversationId`,
+      fixedCount 
+    });
+  } catch (err) {
+    console.error('Error fixing legacy messages:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

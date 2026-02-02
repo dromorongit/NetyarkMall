@@ -653,6 +653,15 @@ async function loadMessages() {
       console.log(`Message ${index}: conversationId = ${m.conversationId}, type = ${typeof m.conversationId}`);
     });
 
+    // Fix legacy data: Generate conversationId for messages that don't have one
+    messages.forEach(m => {
+      if (!m.conversationId || m.conversationId === undefined || m.conversationId === 'undefined' || m.conversationId === 'null') {
+        // Use the message's MongoDB _id as the conversationId for legacy messages
+        m.conversationId = m._id;
+        console.log(`Generated conversationId for message ${m._id}: ${m.conversationId}`);
+      }
+    });
+
     // Group messages by conversation
     const conversations = {};
     messages.forEach(m => {
