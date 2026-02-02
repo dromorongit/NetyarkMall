@@ -271,11 +271,31 @@ function updateUserInfo() {
     if (user) {
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name');
-        if (userAvatar) {
-            userAvatar.textContent = user.name.charAt(0).toUpperCase();
-        }
         if (userName) {
             userName.textContent = user.name;
+        }
+        if (userAvatar) {
+            // Check if user has a profile picture
+            if (user.profilePicture) {
+                // Create an img element for the profile picture
+                let avatarImg = userAvatar.querySelector('img');
+                if (!avatarImg) {
+                    avatarImg = document.createElement('img');
+                    avatarImg.style.width = '100%';
+                    avatarImg.style.height = '100%';
+                    avatarImg.style.borderRadius = '50%';
+                    avatarImg.style.objectFit = 'cover';
+                    userAvatar.textContent = '';
+                    userAvatar.appendChild(avatarImg);
+                }
+                avatarImg.src = user.profilePicture;
+                avatarImg.style.display = 'block';
+            } else {
+                // Show initial if no profile picture
+                userAvatar.innerHTML = '';
+                userAvatar.textContent = user.name.charAt(0).toUpperCase();
+                userAvatar.style.display = 'flex';
+            }
         }
     }
 }
@@ -1867,6 +1887,8 @@ if (avatarEditBtn && profilePictureInput) {
         localStorage.setItem('user', JSON.stringify(user));
         showNotification('Profile picture updated!', 'success');
         logActivity('profile', 'Profile picture updated');
+        // Update header avatar
+        updateUserInfo();
       } else {
         const errorData = await response.json();
         showNotification(errorData.message || 'Failed to upload profile picture', 'error');
