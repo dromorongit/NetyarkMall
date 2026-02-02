@@ -646,22 +646,26 @@ async function loadMessages() {
     }
 
     list.innerHTML = Object.entries(conversations).map(([convId, msgs]) => {
+      console.log('Rendering conversation:', convId);
       const latestMsg = msgs[msgs.length - 1];
       const senderInfo = msgs.find(m => m.sender !== 'admin') || latestMsg;
       const status = latestMsg.status || 'open';
       const isClosed = status === 'closed';
 
+      // Ensure convId is a valid string
+      const safeConvId = convId ? String(convId) : 'unknown';
+
       return `
-        <div class="conversation-item ${isClosed ? 'closed' : ''}" data-conversation-id="${convId}">
+        <div class="conversation-item ${isClosed ? 'closed' : ''}" data-conversation-id="${safeConvId}">
           <div class="conversation-header">
             <h4>${senderInfo.senderName || senderInfo.sender} (${senderInfo.senderEmail || 'No email'})</h4>
             <div style="display: flex; gap: 10px; align-items: center;">
               <span class="conversation-status ${status}">${status}</span>
               ${isClosed ? 
-                `<button class="btn-secondary btn-sm" onclick="openConversation('${convId}')">Open</button>` : 
-                `<button class="close-conversation-btn" onclick="closeConversation('${convId}')">Close</button>`
+                `<button class="btn-secondary btn-sm" onclick="openConversation('${safeConvId}')">Open</button>` : 
+                `<button class="close-conversation-btn" onclick="closeConversation('${safeConvId}')">Close</button>`
               }
-              <button class="btn-danger-outline btn-sm" onclick="deleteConversation('${convId}')">Delete</button>
+              <button class="btn-danger-outline btn-sm" onclick="deleteConversation('${safeConvId}')">Delete</button>
             </div>
           </div>
           <div class="conversation-messages" style="${isClosed ? 'display: none;' : ''}">
@@ -1046,10 +1050,19 @@ async function openConversation(conversationId) {
 
 // Delete conversation
 async function deleteConversation(conversationId) {
+  console.log('deleteConversation called with:', conversationId);
+  
+  // Validate conversationId
+  if (!conversationId || conversationId === 'undefined' || conversationId === 'unknown') {
+    console.error('Invalid conversationId:', conversationId);
+    showNotification('Error: Invalid conversation ID', 'error');
+    return;
+  }
+  
   if (confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
     console.log('Deleting conversation:', conversationId);
     try {
-      const res = await authFetch(`${API_BASE}/messages/conversation/${conversationId}`, {
+      const res = await authFetch(`${API_BASE}/messages/conversation/${encodeURIComponent(conversationId)}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
