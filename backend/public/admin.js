@@ -617,6 +617,9 @@ async function loadOrders() {
               <option value="delivered" ${orderStatus === 'delivered' ? 'selected' : ''}>Delivered</option>
               <option value="cancelled" ${orderStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
+            <button onclick="viewOrderDetails('${orderId}')" class="btn-view-details">
+              <i class="fas fa-eye"></i> View Details
+            </button>
           </div>
         </div>
       `;

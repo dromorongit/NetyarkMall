@@ -2705,3 +2705,58 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(253,126,20,0.4);
 }
+
+/* View Details Button */
+.btn-view-details {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: all var(--transition-speed) ease;
+}
+
+.btn-view-details:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(111,66,193,0.4);
+}
+
+.order-status-update {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.order-status-update label {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.order-status-update select {
+  flex: 1;
+  min-width: 150px;
+  max-width: 200px;
+  padding: 10px 14px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.9em;
+  background: var(--surface-color);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.order-status-update select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
