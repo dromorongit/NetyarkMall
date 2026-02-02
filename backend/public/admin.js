@@ -608,6 +608,10 @@ async function loadMessages() {
     const res = await authFetch(`${API_BASE}/messages`);
     if (!res) return;
 
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
     const messages = await res.json();
 
     // Group messages by conversation
@@ -673,8 +677,19 @@ async function loadMessages() {
       `;
     }).join('');
   } catch (err) {
-    console.error(err);
+    console.error('Error loading messages:', err);
     showNotification('Error loading messages', 'error');
+    // Show empty state on error
+    const list = document.getElementById('messages-list');
+    if (list) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">💬</div>
+          <h3>No Messages</h3>
+          <p>Customer messages will appear here.</p>
+        </div>
+      `;
+    }
   }
 }
 
@@ -1024,18 +1039,19 @@ async function openConversation(conversationId) {
 async function deleteConversation(conversationId) {
   if (confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
     try {
-      const res = await fetch(`${API_BASE}/messages/conversation/${conversationId}`, {
+      const res = await authFetch(`${API_BASE}/messages/conversation/${conversationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      if (res.ok) {
+      if (res && res.ok) {
         showNotification('Conversation deleted!', 'success');
         loadMessages();
       } else {
-        showNotification('Error deleting conversation', 'error');
+        const errorData = await res.json();
+        showNotification(errorData.message || 'Error deleting conversation', 'error');
       }
     } catch (err) {
       console.error(err);
