@@ -161,15 +161,45 @@ router.delete('/conversation/:conversationId', auth, adminAuth, async (req, res)
       return res.status(400).json({ message: 'Invalid Conversation ID: Too short' });
     }
     
-    // Check if conversation exists before deleting
-    const conversationExists = await Message.exists({ conversationId });
+    // Check if conversation exists by conversationId
+    let conversationExists = await Message.exists({ conversationId });
+    
+    // If not found, check if it might be a legacy message (conversationId stored as undefined/null)
+    // and the conversationId matches a message's _id
     if (!conversationExists) {
-      return res.status(404).json({ message: 'Conversation not found' });
+      try {
+        const mongoose = require('mongoose');
+        if (mongoose.Types.ObjectId.isValid(conversationId)) {
+          // Try to find by _id (for legacy messages)
+          conversationExists = await Message.exists({ 
+            $or: [
+              { _id: conversationId },
+              { _id: new mongoose.Types.ObjectId(conversationId) }
+            ]
+          });
+          
+          if (conversationExists) {
+            // Delete by _id for legacy messages
+            await Message.deleteMany({ 
+              $or: [
+                { _id: conversationId },
+                { _id: new mongoose.Types.ObjectId(conversationId) }
+              ]
+            });
+            return res.json({ success: true, message: 'Conversation deleted (legacy)' });
+          }
+        }
+      } catch (idError) {
+        console.error('Error checking legacy message:', idError);
+      }
+    } else {
+      // Delete all messages in the conversation
+      await Message.deleteMany({ conversationId });
+      return res.json({ success: true, message: 'Conversation deleted' });
     }
     
-    // Delete all messages in the conversation
-    await Message.deleteMany({ conversationId });
-    res.json({ success: true, message: 'Conversation deleted' });
+    // If we get here, the conversation was not found
+    return res.status(404).json({ message: 'Conversation not found' });
   } catch (err) {
     console.error('Error deleting conversation:', err);
     res.status(400).json({ message: err.message });
