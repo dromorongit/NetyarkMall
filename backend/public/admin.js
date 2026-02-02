@@ -604,15 +604,21 @@ async function loadOrders() {
 
 // Load messages
 async function loadMessages() {
+  console.log('loadMessages called');
   try {
     const res = await authFetch(`${API_BASE}/messages`);
-    if (!res) return;
+    if (!res) {
+      console.log('No response from server');
+      return;
+    }
 
     if (!res.ok) {
+      console.error('Server returned error:', res.status, res.statusText);
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     }
 
     const messages = await res.json();
+    console.log('Messages received:', messages);
 
     // Group messages by conversation
     const conversations = {};
@@ -623,9 +629,12 @@ async function loadMessages() {
       conversations[m.conversationId].push(m);
     });
 
+    console.log('Conversations found:', Object.keys(conversations).length);
+
     const list = document.getElementById('messages-list');
 
     if (Object.keys(conversations).length === 0) {
+      console.log('No conversations, showing empty state');
       list.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">💬</div>
@@ -1038,6 +1047,7 @@ async function openConversation(conversationId) {
 // Delete conversation
 async function deleteConversation(conversationId) {
   if (confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+    console.log('Deleting conversation:', conversationId);
     try {
       const res = await authFetch(`${API_BASE}/messages/conversation/${conversationId}`, {
         method: 'DELETE',
@@ -1046,15 +1056,18 @@ async function deleteConversation(conversationId) {
         }
       });
 
+      console.log('Delete response:', res);
       if (res && res.ok) {
+        console.log('Delete successful, reloading messages...');
         showNotification('Conversation deleted!', 'success');
         loadMessages();
       } else {
         const errorData = await res.json();
+        console.error('Delete failed:', errorData);
         showNotification(errorData.message || 'Error deleting conversation', 'error');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Delete error:', err);
       showNotification('Error deleting conversation', 'error');
     }
   }
