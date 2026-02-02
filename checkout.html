@@ -193,16 +193,6 @@
                                             </div>
                                         </label>
                                     </div>
-                                    <div class="payment-option">
-                                        <input type="radio" id="cash-on-delivery" name="paymentMethod" value="cash-on-delivery">
-                                        <label for="cash-on-delivery">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                            <div class="payment-details">
-                                                <div class="payment-name">Payment on Delivery</div>
-                                                <div class="payment-desc">Pay cash when your order is delivered to you</div>
-                                            </div>
-                                        </label>
-                                    </div>
                                 </div>
                                 <div id="paystackPaymentSection" style="display: block; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                                     <p style="margin-bottom: 10px;"><i class="fas fa-lock" style="color: #28a745;"></i> <strong>Secure Payment via Paystack</strong></p>
@@ -260,15 +250,25 @@
                 </div>
 
                 <!-- Payment Success Modal -->
-                <div id="paymentSuccessModal" class="payment-modal" style="display: none;">
-                    <div class="payment-modal-content">
-                        <div class="success-icon">
-                            <i class="fas fa-check-circle"></i>
+                <div id="paymentSuccessModal" class="payment-modal-overlay" style="display: none;">
+                    <div class="payment-modal">
+                        <div class="payment-modal-header" style="background: #28a745;">
+                            <h3><i class="fas fa-check-circle"></i> Payment Confirmed</h3>
                         </div>
-                        <h2>Payment Successful!</h2>
-                        <p>Your order has been placed successfully.</p>
-                        <p id="orderNumber"></p>
-                        <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                        <div class="payment-modal-body">
+                            <div class="success-icon-large">
+                                <i class="fas fa-check-circle" style="color: #28a745; font-size: 64px;"></i>
+                            </div>
+                            <h2 style="color: #28a745; margin: 20px 0 10px;">Payment Successful!</h2>
+                            <p style="font-size: 18px; margin-bottom: 10px;">Your payment has been made and your order has been confirmed.</p>
+                            <p id="orderNumber" style="font-weight: bold; margin-bottom: 20px;"></p>
+                            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                                <i class="fas fa-envelope"></i> A confirmation email has been sent to your email address.
+                            </p>
+                            <button id="continueShoppingBtn" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px;">
+                                <i class="fas fa-arrow-right"></i> Continue
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -611,11 +611,7 @@
                 currentOrder = orderResult.order;
                 
                 // Handle payment based on method
-                if (paymentMethod === 'cash-on-delivery') {
-                    // For cash on delivery, order is complete without payment
-                    hidePaymentProcessing();
-                    showPaymentSuccess(currentOrder.id, 'cash-on-delivery');
-                } else if (paymentMethod === 'card' || paymentMethod === 'mobile-money') {
+                if (paymentMethod === 'card' || paymentMethod === 'mobile-money') {
                     // Initialize Paystack payment for online payments
                     hidePaymentProcessing();
                     await initializePaystackPayment(currentOrder.id, formData.email, total, formData);
@@ -720,7 +716,7 @@
         }
         
         // Show payment success modal
-        function showPaymentSuccess(orderId, paymentMethod = 'online') {
+        function showPaymentSuccess(orderId) {
             // Clear cart
             cart = [];
             localStorage.setItem('cart', JSON.stringify(cart));
@@ -729,21 +725,35 @@
             // Show success modal
             const modal = document.getElementById('paymentSuccessModal');
             if (modal) {
-                if (paymentMethod === 'cash-on-delivery') {
-                    document.getElementById('orderNumber').innerHTML = `Order Number: ${orderId}<br><span style="font-size: 14px; color: #28a745;"><i class="fas fa-check-circle"></i> Payment on Delivery - Pay when your order arrives!</span>`;
-                } else {
-                    document.getElementById('orderNumber').textContent = `Order Number: ${orderId}`;
-                }
+                document.getElementById('orderNumber').textContent = `Order Number: ${orderId}`;
                 modal.style.display = 'flex';
                 modal.classList.add('show');
-            } else {
-                if (paymentMethod === 'cash-on-delivery') {
-                    showNotification('Order placed successfully! You will pay on delivery.', 'success');
-                } else {
-                    showNotification('Order placed successfully!', 'success');
+                
+                // Setup continue button to redirect based on login status
+                const continueBtn = document.getElementById('continueShoppingBtn');
+                if (continueBtn) {
+                    continueBtn.onclick = function() {
+                        // Check if user is logged in
+                        const token = localStorage.getItem('token');
+                        if (token) {
+                            // User is logged in, redirect to profile
+                            window.location.href = 'profile.html';
+                        } else {
+                            // Guest user, redirect to homepage
+                            window.location.href = 'index.html';
+                        }
+                    };
                 }
+            } else {
+                showNotification('Order placed successfully!', 'success');
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    // Check if user is logged in
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        window.location.href = 'profile.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
                 }, 2000);
             }
         }

@@ -9,7 +9,7 @@ let token = localStorage.getItem('token');
 let refreshToken = localStorage.getItem('refreshToken');
 let tokenExpiration = localStorage.getItem('tokenExpiration') ? new Date(localStorage.getItem('tokenExpiration')) : null;
 
-// Set token expiration (1 hour from now)
+// Set token expiration (7 days from now)
 function setTokenExpiration() {
     const expiration = new Date();
     expiration.setDate(expiration.getDate() + 7);
