@@ -1,7 +1,7 @@
 // Profile Page JavaScript
 // Handles user profile management, orders, wishlist, and reviews
 
-const API_BASE = '/api';
+// API_BASE is defined in products.js
 
 document.addEventListener('DOMContentLoaded', function() {
     // Check if user is logged in
