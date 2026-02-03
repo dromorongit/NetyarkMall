@@ -463,10 +463,22 @@
         function checkPaymentCallback() {
             const urlParams = new URLSearchParams(window.location.search);
             const paymentStatus = urlParams.get('payment');
-            const orderId = urlParams.get('orderId');
+            const reference = urlParams.get('reference');
             
-            if (paymentStatus === 'callback' && orderId) {
-                verifyPayment(orderId);
+            if (paymentStatus === 'callback' && reference) {
+                // Retrieve pending order data from localStorage
+                const pendingOrderData = localStorage.getItem('pendingOrderData');
+                if (pendingOrderData) {
+                    try {
+                        const orderData = JSON.parse(pendingOrderData);
+                        verifyPayment(null, reference, orderData);
+                    } catch (e) {
+                        console.error('Error parsing pending order data:', e);
+                        verifyPayment(null, reference, null);
+                    }
+                } else {
+                    verifyPayment(null, reference, null);
+                }
             }
         }
         
@@ -526,7 +538,7 @@
             }
         }
         
-        // Handle place order button click
+        // Handle place order button click - order is created ONLY after successful payment
         async function handlePlaceOrder() {
             console.log('handlePlaceOrder called');
             
@@ -556,7 +568,7 @@
             // Calculate total
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            // Prepare order data
+            // Prepare order data (will be used to create order after payment is verified)
             const orderData = {
                 products: cart.map(item => ({
                     product: item.id,
@@ -577,64 +589,30 @@
                 paymentMethod: paymentMethod
             };
             
+            // Store order data temporarily - will be used to create order after payment verification
+            localStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+            
             // Show processing overlay
             showPaymentProcessing();
             
             try {
-                console.log('Creating order...');
-                
-                // Get auth token if user is logged in
-                const token = localStorage.getItem('token');
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-                
-                // Create order
-                const orderResponse = await fetch(`${API_BASE}/orders`, {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(orderData)
-                });
-                
-                if (!orderResponse.ok) {
-                    const error = await orderResponse.json();
-                    throw new Error(error.message || 'Failed to create order');
-                }
-                
-                const orderResult = await orderResponse.json();
-                console.log('Order created:', orderResult);
-                
-                currentOrder = orderResult.order;
-                
-                // Handle payment based on method
-                if (paymentMethod === 'card' || paymentMethod === 'mobile-money') {
-                    // Initialize Paystack payment for online payments
-                    hidePaymentProcessing();
-                    await initializePaystackPayment(currentOrder.id, formData.email, total, formData);
-                } else {
-                    // For other payment methods, just show success
-                    hidePaymentProcessing();
-                    showPaymentSuccess(currentOrder.id);
-                }
+                // Initialize Paystack payment directly - order will be created AFTER payment verification
+                await initializePaystackPayment(null, formData.email, total, formData, orderData);
                 
             } catch (error) {
-                console.error('Error creating order:', error);
+                console.error('Error initializing payment:', error);
                 hidePaymentProcessing();
-                showNotification(error.message || 'Error creating order. Please try again.', 'error');
+                showNotification(error.message || 'Error initializing payment. Please try again.', 'error');
             }
         }
         
-        // Initialize Paystack payment - call directly from frontend to bypass server IP restriction
-        async function initializePaystackPayment(orderId, email, amount, customerInfo) {
+        // Initialize Paystack payment - order data is passed and will be used during payment verification
+        async function initializePaystackPayment(orderId, email, amount, customerInfo, orderData) {
             try {
-                console.log('Initializing Paystack payment for order:', orderId);
+                console.log('Initializing Paystack payment');
                 
                 // Generate a unique reference
-                const reference = `Netyark_${orderId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const reference = `Netyark_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 
                 // Use Paystack inline payment directly from frontend
                 if (typeof PaystackPop !== 'undefined') {
@@ -646,38 +624,50 @@
                         ref: reference,
                         callback_url: PAYSTACK_CALLBACK_URL,
                         metadata: {
-                            order_id: orderId,
                             customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
                             customer_phone: customerInfo.phone,
                             order_total: amount
                         },
                         callback: function(response) {
                             console.log('Paystack callback:', response);
-                            verifyPayment(orderId, response.reference);
+                            // Retrieve order data from localStorage and verify payment
+                            const pendingOrderData = localStorage.getItem('pendingOrderData');
+                            let parsedOrderData = null;
+                            if (pendingOrderData) {
+                                try {
+                                    parsedOrderData = JSON.parse(pendingOrderData);
+                                } catch (e) {
+                                    console.error('Error parsing pending order data:', e);
+                                }
+                            }
+                            verifyPayment(null, response.reference, parsedOrderData);
                         },
                         onClose: function() {
                             console.log('Payment window closed');
+                            hidePaymentProcessing();
                             showNotification('Payment was not completed. Please try again.', 'info');
                         }
                     });
                     
                     handler.openIframe();
                 } else {
+                    hidePaymentProcessing();
                     showNotification('Paystack payment system is not loaded. Please refresh the page.', 'error');
                 }
                 
             } catch (error) {
                 console.error('Error initializing Paystack payment:', error);
+                hidePaymentProcessing();
                 showNotification('Error initializing payment. Please try again.', 'error');
             }
         }
         
-        // Verify payment
-        async function verifyPayment(orderId, reference) {
+        // Verify payment and create order ONLY after successful payment
+        async function verifyPayment(orderId, reference, orderData) {
             showPaymentProcessing();
             
             try {
-                console.log('Verifying payment for order:', orderId, 'reference:', reference);
+                console.log('Verifying payment, reference:', reference);
                 
                 // If no reference provided, check URL params
                 if (!reference) {
@@ -685,12 +675,28 @@
                     reference = urlParams.get('reference');
                 }
                 
+                // If no orderData provided, try to retrieve from localStorage
+                if (!orderData) {
+                    const pendingOrderData = localStorage.getItem('pendingOrderData');
+                    if (pendingOrderData) {
+                        try {
+                            orderData = JSON.parse(pendingOrderData);
+                        } catch (e) {
+                            console.error('Error parsing pending order data:', e);
+                        }
+                    }
+                }
+                
+                // Verify payment and create order in one step
                 const response = await fetch(`${API_BASE}/payments/verify`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ reference: reference })
+                    body: JSON.stringify({ 
+                        reference: reference,
+                        orderData: orderData // Pass order data to create order after payment verification
+                    })
                 });
                 
                 const data = await response.json();
@@ -700,7 +706,11 @@
                 hidePaymentProcessing();
                 
                 if (data.success) {
-                    showPaymentSuccess(orderId || data.data?.orderId);
+                    // Clear pending order data
+                    localStorage.removeItem('pendingOrderData');
+                    
+                    // Show success with the new order ID
+                    showPaymentSuccess(data.data?.orderId);
                 } else {
                     showNotification(data.message || 'Payment verification failed. Please contact support.', 'error');
                 }
@@ -804,9 +814,15 @@
                 return;
             }
             
-            if (!currentOrder || !currentOrder.id) {
-                showNotification('Order not found. Please try again.', 'error');
-                return;
+            // Retrieve order data from localStorage
+            const pendingOrderData = localStorage.getItem('pendingOrderData');
+            let orderData = null;
+            if (pendingOrderData) {
+                try {
+                    orderData = JSON.parse(pendingOrderData);
+                } catch (e) {
+                    console.error('Error parsing pending order data:', e);
+                }
             }
             
             closePaymentModal();
@@ -814,7 +830,7 @@
             
             try {
                 // Generate a unique reference
-                const reference = `Netyark_${currentOrder.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const reference = `Netyark_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 
                 if (typeof PaystackPop !== 'undefined') {
                     const handler = PaystackPop.setup({
@@ -826,10 +842,11 @@
                         callback_url: PAYSTACK_CALLBACK_URL,
                         callback: function(response) {
                             console.log('Payment successful:', response);
-                            verifyPayment(currentOrder.id, response.reference);
+                            verifyPayment(null, response.reference, orderData);
                         },
                         onClose: function() {
                             console.log('Payment window closed');
+                            hidePaymentProcessing();
                             showNotification('Payment was not completed. Please try again.', 'info');
                         }
                     });

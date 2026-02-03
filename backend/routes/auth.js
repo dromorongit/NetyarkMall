@@ -206,12 +206,18 @@ router.get('/profile', auth, async (req, res) => {
 // Update profile
 router.patch('/profile', auth, async (req, res) => {
   try {
-    const { name, phone, bio, location } = req.body;
+    const { firstName, lastName, name, phone, bio, location } = req.body;
+    
+    // Handle both name formats (firstName + lastName or full name)
+    let fullName = name;
+    if (firstName || lastName) {
+      fullName = `${firstName || ''} ${lastName || ''}`.trim();
+    }
     
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { 
-        name, 
+        name: fullName, 
         phone, 
         bio, 
         location,

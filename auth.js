@@ -43,6 +43,47 @@ function clearCurrentUser() {
     localStorage.removeItem(CURRENT_USER_KEY);
 }
 
+// Get all users from localStorage
+function getUsers() {
+    const usersData = localStorage.getItem('netyark_users');
+    if (!usersData) return [];
+    return JSON.parse(usersData);
+}
+
+// Save users to localStorage
+function saveUsers(users) {
+    localStorage.setItem('netyark_users', JSON.stringify(users));
+}
+
+// Convert backend user format to frontend format
+function convertUserFromBackend(backendUser) {
+    const nameParts = backendUser.name ? backendUser.name.split(' ') : [];
+    return {
+        id: backendUser._id || backendUser.id,
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        name: backendUser.name,
+        email: backendUser.email,
+        phone: backendUser.phone || '',
+        role: backendUser.role || 'customer',
+        wishlist: backendUser.wishlist || [],
+        reviews: backendUser.reviews || [],
+        orders: backendUser.orders || [],
+        createdAt: backendUser.createdAt
+    };
+}
+
+// Convert frontend user format to backend format
+function convertUserToBackend(frontendUser) {
+    return {
+        _id: frontendUser.id,
+        name: `${frontendUser.firstName} ${frontendUser.lastName}`.trim(),
+        email: frontendUser.email,
+        phone: frontendUser.phone,
+        role: frontendUser.role || 'customer'
+    };
+}
+
 // Authentication functions
 async function handleLogin(e) {
     e.preventDefault();
@@ -60,10 +101,16 @@ async function handleLogin(e) {
 
         if (response.ok) {
             const data = await response.json();
-            const userData = data.user;
+            const backendUser = data.user;
             const token = data.token;
 
-            setCurrentUser(userData);
+            // Convert backend user format to frontend format
+            const frontendUser = convertUserFromBackend(backendUser);
+            setCurrentUser(frontendUser);
+
+            // Also store the raw user data for admin system
+            localStorage.setItem('user', JSON.stringify(backendUser));
+            localStorage.setItem('token', token);
 
             // Check if user is admin/staff and redirect to admin system
             if (userData.role === 'superadmin' || userData.role === 'staff') {
@@ -129,8 +176,12 @@ async function handleRegister(e) {
         });
 
         if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
+            const backendUser = await response.json();
+            
+            // Convert backend user format to frontend format
+            const frontendUser = convertUserFromBackend(backendUser);
+            setCurrentUser(frontendUser);
+            
             showNotification('Registration successful! Welcome to Netyark Mall.', 'success');
 
             // Redirect to home page after successful registration
@@ -215,17 +266,47 @@ function updateAuthUI() {
 }
 
 // User profile management
-function updateUserProfile(updates) {
+async function updateUserProfile(updates) {
     const currentUser = getCurrentUser();
     if (!currentUser) return false;
 
-    const users = getUsers();
-    const userIndex = users.findIndex(u => u.id === currentUser.id);
+    // Convert frontend format to backend format
+    const backendUpdates = {};
+    if (updates.firstName || updates.lastName) {
+        backendUpdates.name = `${updates.firstName || ''} ${updates.lastName || ''}`.trim();
+    }
+    if (updates.phone) backendUpdates.phone = updates.phone;
+    if (updates.bio) backendUpdates.bio = updates.bio;
+    if (updates.location) backendUpdates.location = updates.location;
 
-    if (userIndex !== -1) {
-        users[userIndex] = { ...users[userIndex], ...updates };
-        saveUsers(users);
-        return true;
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/auth/profile`, {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(backendUpdates)
+        });
+
+        if (response.ok) {
+            const updatedBackendUser = await response.json();
+            
+            // Update local storage with converted user data
+            const updatedFrontendUser = convertUserFromBackend(updatedBackendUser);
+            setCurrentUser(updatedFrontendUser);
+            
+            // Also update the admin system user data if exists
+            const adminUserData = localStorage.getItem('user');
+            if (adminUserData) {
+                localStorage.setItem('user', JSON.stringify(updatedBackendUser));
+            }
+            
+            return true;
+        }
+    } catch (error) {
+        console.error('Error updating profile on server:', error);
     }
 
     return false;
@@ -326,6 +407,12 @@ function addOrder(orderData) {
 
 // Export functions for use in other files
 window.getCurrentUser = getCurrentUser;
+window.setCurrentUser = setCurrentUser;
+window.clearCurrentUser = clearCurrentUser;
+window.getUsers = getUsers;
+window.saveUsers = saveUsers;
+window.convertUserFromBackend = convertUserFromBackend;
+window.convertUserToBackend = convertUserToBackend;
 window.isLoggedIn = isLoggedIn;
 window.logout = logout;
 window.addToWishlist = addToWishlist;
@@ -334,3 +421,4 @@ window.isInWishlist = isInWishlist;
 window.addReview = addReview;
 window.addOrder = addOrder;
 window.updateAuthUI = updateAuthUI;
+window.updateUserProfile = updateUserProfile;

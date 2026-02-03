@@ -126,12 +126,12 @@ router.post('/initialize', optionalAuth, async (req, res) => {
 
 /**
  * @route   POST /api/payments/verify
- * @desc    Verify a payment transaction
+ * @desc    Verify a payment transaction and create order only after successful payment
  * @access  Private
  */
 router.post('/verify', optionalAuth, async (req, res) => {
     try {
-        const { reference } = req.body;
+        const { reference, orderData } = req.body;
 
         if (!reference) {
             return res.status(400).json({
@@ -144,38 +144,74 @@ router.post('/verify', optionalAuth, async (req, res) => {
         const response = await paystack.transaction.verify(reference);
 
         if (response.status && response.data.status === 'success') {
-            // Find order by payment reference
-            const order = await Order.findOne({ paymentReference: reference });
+            // Check if this is a new order creation after payment
+            if (orderData) {
+                // Create the order only after payment is verified
+                let userId = null;
+                
+                // Check if user is authenticated
+                if (req.user) {
+                    userId = req.user._id;
+                }
 
-            if (!order) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Order not found for this payment'
+                const order = new Order({
+                    user: userId,
+                    products: orderData.products,
+                    total: orderData.total,
+                    customer: orderData.customer,
+                    shipping: orderData.shipping,
+                    paymentMethod: orderData.paymentMethod || 'card',
+                    status: 'confirmed',
+                    paymentStatus: 'paid',
+                    paymentReference: reference,
+                    paidAt: new Date()
+                });
+
+                await order.save();
+
+                res.json({
+                    success: true,
+                    message: 'Payment verified and order created successfully',
+                    data: {
+                        orderId: order._id,
+                        paymentStatus: order.paymentStatus,
+                        amount: response.data.amount / 100
+                    }
+                });
+            } else {
+                // Original flow: Find existing order by payment reference and update it
+                const order = await Order.findOne({ paymentReference: reference });
+
+                if (!order) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Order not found for this payment'
+                    });
+                }
+
+                // Update order payment status
+                order.paymentStatus = 'paid';
+                order.orderStatus = 'confirmed';
+                order.paymentMethod = response.data.channel || 'card';
+                order.paidAt = new Date();
+                
+                // Store authorization code for future payments if needed
+                if (response.data.authorization) {
+                    order.authorizationCode = response.data.authorization.authorization_code;
+                }
+
+                await order.save();
+
+                res.json({
+                    success: true,
+                    message: 'Payment verified successfully',
+                    data: {
+                        orderId: order._id,
+                        paymentStatus: order.paymentStatus,
+                        amount: response.data.amount / 100
+                    }
                 });
             }
-
-            // Update order payment status
-            order.paymentStatus = 'paid';
-            order.orderStatus = 'confirmed';
-            order.paymentMethod = response.data.channel || 'card';
-            order.paidAt = new Date();
-            
-            // Store authorization code for future payments if needed
-            if (response.data.authorization) {
-                order.authorizationCode = response.data.authorization.authorization_code;
-            }
-
-            await order.save();
-
-            res.json({
-                success: true,
-                message: 'Payment verified successfully',
-                data: {
-                    orderId: order._id,
-                    paymentStatus: order.paymentStatus,
-                    amount: response.data.amount / 100
-                }
-            });
         } else {
             res.status(400).json({
                 success: false,
