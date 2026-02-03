@@ -4,7 +4,6 @@ const Paystack = require('paystack');
 const Order = require('../models/Order');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const nodemailer = require('nodemailer');
 
 // Initialize Paystack with secret key from environment variables
 const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
@@ -20,168 +19,6 @@ if (paystackSecretKey) {
     }
 } else {
     console.warn('PAYSTACK_SECRET_KEY is not defined - payment routes will be disabled');
-}
-
-// Email configuration for order notifications
-const emailConfig = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER || 'your-email@gmail.com',
-        pass: process.env.SMTP_PASS || 'your-app-password'
-    }
-};
-
-// Create email transporter
-let emailTransporter = null;
-try {
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        emailTransporter = nodemailer.createTransport(emailConfig);
-        console.log('Email transporter initialized');
-    } else {
-        console.warn('SMTP credentials not set - email notifications disabled');
-    }
-} catch (err) {
-    console.error('Failed to create email transporter:', err.message);
-}
-
-// Admin email address
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@netyarkmall.com';
-
-// Send new order notification to admin
-async function sendOrderNotificationEmail(order) {
-    if (!emailTransporter) {
-        console.log('Email notifications disabled - skipping order notification');
-        return false;
-    }
-
-    try {
-        // Get product details
-        const productList = await Promise.all(order.products.map(async (item) => {
-            const product = await Order.findById(order._id).populate('products.product').then(() => {
-                // Simple fallback if populate doesn't work
-                return { name: `Product ID: ${item.product}`, price: 0 };
-            }).catch(() => ({
-                name: `Product ID: ${item.product}`,
-                price: 0
-            }));
-            return `• ${product.name || item.product} - Qty: ${item.quantity} - ₵${(item.price || 0).toLocaleString()}`;
-        }));
-
-        const customerName = order.customer 
-            ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim()
-            : 'Guest Customer';
-
-        const emailContent = `
-            <h2 style="color: #008000;">🛒 New Order Received!</h2>
-            <p><strong>Order ID:</strong> ${order._id}</p>
-            <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
-            
-            <h3>Customer Information</h3>
-            <p><strong>Name:</strong> ${customerName}</p>
-            <p><strong>Email:</strong> ${order.customer?.email || 'N/A'}</p>
-            <p><strong>Phone:</strong> ${order.customer?.phone || 'N/A'}</p>
-            
-            <h3>Shipping Address</h3>
-            <p><strong>Address:</strong> ${order.shipping?.address || 'N/A'}</p>
-            <p><strong>City:</strong> ${order.shipping?.city || 'N/A'}</p>
-            <p><strong>Region:</strong> ${order.shipping?.region ? order.shipping.region.replace(/-/g, ' ').toUpperCase() : 'N/A'}</p>
-            
-            <h3>Order Items</h3>
-            <ul>
-                ${order.products.map(item => `
-                    <li>${item.product?.name || 'Product'} - Qty: ${item.quantity} - ₵${((item.product?.price || 0) * item.quantity).toLocaleString()}</li>
-                `).join('')}
-            </ul>
-            
-            <h3>Payment Information</h3>
-            <p><strong>Total Amount:</strong> ₵${(order.total || 0).toLocaleString()}</p>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod ? order.paymentMethod.replace(/-/g, ' ').toUpperCase() : 'N/A'}</p>
-            <p><strong>Payment Status:</strong> ${order.paymentStatus.toUpperCase()}</p>
-            <p><strong>Payment Reference:</strong> ${order.paymentReference || 'N/A'}</p>
-            
-            <p style="margin-top: 20px; color: #666;">
-                Please process this order as soon as possible.
-                <br>View all orders in the <a href="https://netyarkmall-production.up.railway.app/admin.html">Admin Dashboard</a>
-            </p>
-        `;
-
-        const mailOptions = {
-            from: 'Netyark Mall <noreply@netyarkmall.com>',
-            to: ADMIN_EMAIL,
-            subject: `🛒 New Order #${order._id.toString().substring(0, 8)} - ₵${(order.total || 0).toLocaleString()}`,
-            html: emailContent
-        };
-
-        await emailTransporter.sendMail(mailOptions);
-        console.log('Order notification email sent to admin:', ADMIN_EMAIL);
-        return true;
-    } catch (error) {
-        console.error('Error sending order notification email:', error);
-        return false;
-    }
-}
-
-// Send order confirmation email to customer
-async function sendOrderConfirmationEmail(order) {
-    if (!emailTransporter || !order.customer?.email) {
-        console.log('Email notifications disabled or no customer email - skipping confirmation');
-        return false;
-    }
-
-    try {
-        const customerName = order.customer 
-            ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim()
-            : 'Valued Customer';
-
-        const emailContent = `
-            <h2 style="color: #008000;">✅ Order Confirmed!</h2>
-            <p>Dear ${customerName},</p>
-            <p>Thank you for your order with <strong>Netyark Mall</strong>!</p>
-            
-            <p><strong>Order ID:</strong> ${order._id}</p>
-            <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
-            <p><strong>Total:</strong> ₵${(order.total || 0).toLocaleString()}</p>
-            
-            <h3>Order Details</h3>
-            <ul>
-                ${order.products.map(item => `
-                    <li>${item.product?.name || 'Product'} - Qty: ${item.quantity} - ₵${((item.product?.price || 0) * item.quantity).toLocaleString()}</li>
-                `).join('')}
-            </ul>
-            
-            <h3>Shipping Address</h3>
-            <p>${order.shipping?.address || ''}</p>
-            <p>${order.shipping?.city || ''}, ${order.shipping?.region ? order.shipping.region.replace(/-/g, ' ').toUpperCase() : ''}</p>
-            
-            <p><strong>Phone:</strong> ${order.customer?.phone || 'N/A'}</p>
-            
-            <p style="margin-top: 20px;">
-                We will process your order and notify you when it ships.
-                <br>You can track your order status in your <a href="https://netyarkmall-production.up.railway.app/profile.html">profile</a>.
-            </p>
-            
-            <p style="margin-top: 20px; color: #666;">
-                Thank you for shopping with Netyark Mall!
-                <br>Santa Maria, Accra, Ghana
-            </p>
-        `;
-
-        const mailOptions = {
-            from: 'Netyark Mall <noreply@netyarkmall.com>',
-            to: order.customer.email,
-            subject: `✅ Order Confirmed - #${order._id.toString().substring(0, 8)}`,
-            html: emailContent
-        };
-
-        await emailTransporter.sendMail(mailOptions);
-        console.log('Order confirmation email sent to:', order.customer.email);
-        return true;
-    } catch (error) {
-        console.error('Error sending order confirmation email:', error);
-        return false;
-    }
 }
 
 // Optional auth middleware - works for both authenticated and guest users
@@ -347,19 +184,6 @@ router.post('/verify', optionalAuth, async (req, res) => {
                 await order.save();
 
                 console.log('Order created successfully:', order._id);
-                
-                // Send email notifications
-                console.log('Sending order notification emails...');
-                
-                // Send notification to admin
-                const adminEmailSent = await sendOrderNotificationEmail(order);
-                console.log('Admin email sent:', adminEmailSent);
-                
-                // Send confirmation to customer (only if email provided)
-                if (order.customer?.email) {
-                    const customerEmailSent = await sendOrderConfirmationEmail(order);
-                    console.log('Customer confirmation email sent:', customerEmailSent);
-                }
 
                 res.json({
                     success: true,
@@ -473,13 +297,6 @@ router.post('/webhook', async (req, res) => {
 
                     await order.save();
                     console.log(`Payment webhook: Order ${order._id} marked as paid`);
-                    
-                    // Send email notifications for webhook-triggered orders
-                    console.log('Webhook: Sending order notification emails...');
-                    await sendOrderNotificationEmail(order);
-                    if (order.customer?.email) {
-                        await sendOrderConfirmationEmail(order);
-                    }
                 } else {
                     console.log(`Payment webhook: No order found for reference: ${reference}`);
                 }
