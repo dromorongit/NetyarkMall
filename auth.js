@@ -113,10 +113,10 @@ async function handleLogin(e) {
             localStorage.setItem('token', token);
 
             // Check if user is admin/staff and redirect to admin system
-            if (userData.role === 'superadmin' || userData.role === 'staff') {
+            if (backendUser.role === 'superadmin' || backendUser.role === 'staff') {
                 // Set admin system tokens
                 localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(userData));
+                localStorage.setItem('user', JSON.stringify(backendUser));
 
                 showNotification('Admin login successful! Redirecting to admin panel.', 'success');
 
