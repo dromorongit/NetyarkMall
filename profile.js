@@ -38,6 +38,12 @@ async function initializeProfile() {
         passwordForm.addEventListener('submit', changePassword);
     }
 
+    // Avatar upload handling
+    const avatarUpload = document.getElementById('avatarUpload');
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', handleAvatarUpload);
+    }
+
     // Profile tab navigation
     setupProfileTabs();
     
@@ -145,9 +151,82 @@ function loadUserProfile() {
     document.getElementById('userNameLarge').textContent = fullName.trim();
     document.getElementById('userEmail').textContent = currentUser.email || '';
     
-    // Update avatar
-    const avatarUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName.trim()) + '&background=008000&color=fff&size=150';
-    document.getElementById('profileAvatarLarge').src = avatarUrl;
+    // Update avatar - use profilePicture from backend if available
+    const avatarImg = document.getElementById('profileAvatarLarge');
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        const backendUser = JSON.parse(storedUser);
+        if (backendUser.profilePicture) {
+            avatarImg.src = backendUser.profilePicture;
+        } else {
+            const avatarUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName.trim()) + '&background=008000&color=fff&size=150';
+            avatarImg.src = avatarUrl;
+        }
+    } else {
+        const avatarUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName.trim()) + '&background=008000&color=fff&size=150';
+        avatarImg.src = avatarUrl;
+    }
+}
+
+// Handle profile picture upload
+async function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        showNotification('Please select a valid image file (JPEG, PNG, GIF, or WebP).', 'error');
+        return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('Image file size must be less than 5MB.', 'error');
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('profilePicture', file);
+
+        showNotification('Uploading profile picture...', 'info');
+
+        const response = await fetch(`${API_BASE}/auth/profile/picture`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Update avatar display
+            document.getElementById('profileAvatarLarge').src = data.profilePicture;
+            
+            // Update stored user data
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const backendUser = JSON.parse(storedUser);
+                backendUser.profilePicture = data.profilePicture;
+                localStorage.setItem('user', JSON.stringify(backendUser));
+            }
+            
+            showNotification('Profile picture updated successfully!', 'success');
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Failed to upload profile picture.', 'error');
+        }
+    } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        showNotification('Failed to upload profile picture. Please try again.', 'error');
+    }
+    
+    // Reset file input
+    event.target.value = '';
 }
 
 async function updateProfileStats() {
@@ -169,12 +248,19 @@ async function updateProfileStats() {
 
         // Update stats display
         document.getElementById('orderCount').textContent = orderCount;
-        document.getElementById('wishlistCount').textContent = '0'; // Wishlist not implemented on backend yet
-        document.getElementById('reviewCount').textContent = '0'; // Reviews not implemented on backend yet
+        
+        // Get wishlist count from user data
+        const currentUser = getCurrentUser();
+        const wishlistCount = currentUser && currentUser.wishlist ? currentUser.wishlist.length : 0;
+        document.getElementById('wishlistCount').textContent = wishlistCount;
+        
+        // Get reviews count from user data
+        const reviewsCount = currentUser && currentUser.reviews ? currentUser.reviews.length : 0;
+        document.getElementById('reviewCount').textContent = reviewsCount;
         
         const wishlistBadge = document.getElementById('wishlistBadge');
         if (wishlistBadge) {
-            wishlistBadge.textContent = '0 Items';
+            wishlistBadge.textContent = `${wishlistCount} Items`;
         }
     } catch (error) {
         console.error('Error updating profile stats:', error);
@@ -184,25 +270,72 @@ async function updateProfileStats() {
 async function updateProfile(e) {
     e.preventDefault();
 
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const phone = document.getElementById('phone').value;
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
 
-    const updates = { 
-        firstName: firstName, 
-        lastName: lastName, 
-        phone: phone 
-    };
+    if (!firstName || !lastName) {
+        showNotification('Please enter your full name.', 'error');
+        return;
+    }
 
-    // Update on backend
-    const success = await updateUserProfile(updates);
-    
-    if (success) {
-        showNotification('Profile updated successfully!', 'success');
-        loadUserProfile(); // Refresh display
-        updateAuthUI(); // Update header
-    } else {
-        showNotification('Failed to update profile.', 'error');
+    if (!phone) {
+        showNotification('Please enter your phone number.', 'error');
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/auth/profile`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone
+            })
+        });
+
+        if (response.ok) {
+            const updatedUser = await response.json();
+            
+            // Update local storage with new user data
+            const fullName = `${firstName} ${lastName}`.trim();
+            const frontendUser = {
+                ...getCurrentUser(),
+                firstName: firstName,
+                lastName: lastName,
+                name: fullName,
+                phone: phone
+            };
+            setCurrentUser(frontendUser);
+            
+            // Also update admin system user data
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const backendUser = JSON.parse(storedUser);
+                backendUser.name = fullName;
+                backendUser.firstName = firstName;
+                backendUser.lastName = lastName;
+                backendUser.phone = phone;
+                localStorage.setItem('user', JSON.stringify(backendUser));
+            }
+            
+            // Update display
+            loadUserProfile();
+            updateAuthUI();
+            
+            showNotification('Profile updated successfully!', 'success');
+        } else {
+            const error = await response.json();
+            showNotification(error.message || 'Failed to update profile.', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        showNotification('Failed to update profile. Please try again.', 'error');
     }
 }
 
@@ -222,6 +355,12 @@ async function changePassword(e) {
     // Verify new password is different
     if (newPassword === currentPassword) {
         showNotification('New password must be different from current password.', 'error');
+        return;
+    }
+
+    // Verify password length
+    if (newPassword.length < 6) {
+        showNotification('New password must be at least 6 characters long.', 'error');
         return;
     }
 
@@ -405,6 +544,7 @@ async function cancelOrder(orderId) {
         if (response.ok) {
             showNotification('Order cancelled successfully!', 'success');
             loadUserOrders(); // Refresh the list
+            updateProfileStats(); // Update order count
         } else {
             const error = await response.json();
             showNotification(error.message || 'Failed to cancel order.', 'error');
@@ -484,18 +624,103 @@ async function showOrderDetails(orderId) {
     }
 }
 
-function loadUserWishlist() {
+async function loadUserWishlist() {
     const wishlistGrid = document.getElementById('wishlistGrid');
     if (!wishlistGrid) return;
 
-    wishlistGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-heart"></i><h3>Wishlist Coming Soon</h3><p>Your wishlist feature is being developed. Check back soon!</p><a href="categories.html" class="btn btn-primary"><i class="fas fa-compass"></i> Explore Products</a></div>';
+    const currentUser = getCurrentUser();
+    const wishlist = currentUser && currentUser.wishlist ? currentUser.wishlist : [];
+
+    if (wishlist.length === 0) {
+        wishlistGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-heart"></i><h3>Your Wishlist is Empty</h3><p>Save items you love to your wishlist and they\'ll appear here!</p><a href="categories.html" class="btn btn-primary"><i class="fas fa-compass"></i> Explore Products</a></div>';
+        return;
+    }
+
+    wishlistGrid.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading wishlist items...</p></div>';
+
+    try {
+        // Fetch product details for wishlist items
+        const products = [];
+        for (const productId of wishlist) {
+            try {
+                const response = await fetch(`${API_BASE}/products/${productId}`);
+                if (response.ok) {
+                    const product = await response.json();
+                    products.push(product);
+                }
+            } catch (err) {
+                console.error('Error fetching product:', err);
+            }
+        }
+
+        if (products.length === 0) {
+            wishlistGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-heart"></i><h3>Your Wishlist is Empty</h3><p>Save items you love to your wishlist and they\'ll appear here!</p><a href="categories.html" class="btn btn-primary"><i class="fas fa-compass"></i> Explore Products</a></div>';
+            return;
+        }
+
+        let wishlistHTML = '';
+        products.forEach(product => {
+            const imageUrl = product.images && product.images.length > 0 
+                ? (product.images[0].url || product.images[0]) 
+                : 'https://via.placeholder.com/200x200?text=No+Image';
+            
+            wishlistHTML += `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${imageUrl}" alt="${product.name}" loading="lazy">
+                        <button class="remove-wishlist-btn" onclick="removeFromWishlist('${product._id || product.id}')" title="Remove from wishlist">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h4 class="product-name">${product.name}</h4>
+                        <p class="product-price">GH₵${(product.price || 0).toLocaleString()}</p>
+                        <button class="btn btn-primary btn-sm" onclick="addToCartFromWishlist('${product._id || product.id}')">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        wishlistGrid.innerHTML = wishlistHTML;
+    } catch (error) {
+        console.error('Error loading wishlist:', error);
+        wishlistGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-heart"></i><h3>Error Loading Wishlist</h3><p>Unable to load your wishlist items. Please try again.</p><button class="btn btn-primary" onclick="loadUserWishlist()"><i class="fas fa-sync-alt"></i> Try Again</button></div>';
+    }
 }
 
-function loadUserReviews() {
+async function loadUserReviews() {
     const reviewsList = document.getElementById('reviewsList');
     if (!reviewsList) return;
 
-    reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><h3>Reviews Coming Soon</h3><p>Your reviews feature is being developed. Check back soon!</p></div>';
+    const currentUser = getCurrentUser();
+    const reviews = currentUser && currentUser.reviews ? currentUser.reviews : [];
+
+    if (reviews.length === 0) {
+        reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><h3>No Reviews Yet</h3><p>You haven\'t written any reviews yet. Your reviews will appear here after you rate products.</p></div>';
+        return;
+    }
+
+    let reviewsHTML = '';
+    reviews.forEach(review => {
+        const stars = Array(5).fill(0).map((_, i) => 
+            `<i class="fas fa-star ${i < review.rating ? 'filled' : ''}"></i>`
+        ).join('');
+
+        reviewsHTML += `
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="review-stars">${stars}</div>
+                    <span class="review-date">${new Date(review.date).toLocaleDateString()}</span>
+                </div>
+                <p class="review-comment">${review.comment}</p>
+                <span class="review-product">Product: ${review.productId || 'Unknown'}</span>
+            </div>
+        `;
+    });
+
+    reviewsList.innerHTML = reviewsHTML;
 }
 
 async function deleteAccount() {
@@ -508,6 +733,13 @@ async function deleteAccount() {
         return;
     }
 
+    // Ask for password confirmation
+    const password = prompt('Please enter your password to confirm account deletion:');
+    if (!password) {
+        showNotification('Password is required to delete account.', 'error');
+        return;
+    }
+
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE}/auth/account`, {
@@ -516,7 +748,7 @@ async function deleteAccount() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ confirm: true })
+            body: JSON.stringify({ password: password })
         });
 
         if (response.ok) {
@@ -554,6 +786,54 @@ function togglePassword(inputId) {
     }
 }
 
+// Remove from wishlist
+function removeFromWishlist(productId) {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+        showNotification('Please login to manage your wishlist.', 'info');
+        return;
+    }
+
+    const index = currentUser.wishlist.indexOf(productId);
+    if (index > -1) {
+        currentUser.wishlist.splice(index, 1);
+        
+        // Update on backend
+        updateUserProfile({ wishlist: currentUser.wishlist })
+            .then(success => {
+                if (success) {
+                    showNotification('Removed from wishlist.', 'info');
+                    loadUserWishlist();
+                    updateProfileStats();
+                } else {
+                    showNotification('Failed to remove from wishlist.', 'error');
+                }
+            });
+    }
+}
+
+// Add to cart from wishlist
+function addToCartFromWishlist(productId) {
+    if (typeof addToCart === 'function') {
+        addToCart(productId);
+    } else {
+        showNotification('Adding to cart...', 'info');
+        // Fallback to adding to localStorage cart
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingItem = cart.find(item => (item.productId || item.id) === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ productId: productId, quantity: 1 });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        showNotification('Added to cart!', 'success');
+    }
+}
+
 // Export functions for use in HTML
 window.loadUserProfile = loadUserProfile;
 window.loadUserOrders = loadUserOrders;
@@ -565,4 +845,6 @@ window.deleteAccount = deleteAccount;
 window.logout = logout;
 window.togglePassword = togglePassword;
 window.updateProfile = updateProfile;
-
+window.handleAvatarUpload = handleAvatarUpload;
+window.removeFromWishlist = removeFromWishlist;
+window.addToCartFromWishlist = addToCartFromWishlist;
