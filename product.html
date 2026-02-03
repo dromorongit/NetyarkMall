@@ -264,7 +264,54 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Review Modal -->
+    <div class="review-modal" id="reviewModal" style="display: none;">
+        <div class="review-modal-content">
+            <div class="review-modal-header">
+                <h3><i class="fas fa-star"></i> Write a Review</h3>
+                <button class="review-modal-close" id="reviewModalClose">&times;</button>
+            </div>
+            <div class="review-modal-body">
+                <form id="reviewForm">
+                    <input type="hidden" id="reviewProductId" value="">
+                    
+                    <!-- Star Rating -->
+                    <div class="form-group">
+                        <label>Your Rating <span class="required">*</span></label>
+                        <div class="star-rating-modal" id="starRatingModal">
+                            <i class="fas fa-star" data-rating="1"></i>
+                            <i class="fas fa-star" data-rating="2"></i>
+                            <i class="fas fa-star" data-rating="3"></i>
+                            <i class="fas fa-star" data-rating="4"></i>
+                            <i class="fas fa-star" data-rating="5"></i>
+                        </div>
+                        <div class="rating-label" id="ratingLabel">Select your rating</div>
+                    </div>
+                    
+                    <!-- Review Title -->
+                    <div class="form-group">
+                        <label for="reviewTitleModal">Review Title (Optional)</label>
+                        <input type="text" id="reviewTitleModal" placeholder="Summarize your experience" maxlength="100">
+                    </div>
+                    
+                    <!-- Review Text -->
+                    <div class="form-group">
+                        <label for="reviewTextModal">Your Review <span class="required">*</span></label>
+                        <textarea id="reviewTextModal" rows="4" placeholder="Share your thoughts about this product..." required maxlength="500"></textarea>
+                        <div class="char-count-modal"><span id="charCountModal">0</span>/500 characters</div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="review-modal-footer">
+                        <button type="button" class="btn btn-outline" id="cancelReviewBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitReviewBtn">
+                            <i class="fas fa-paper-plane"></i> Submit Review
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script src="products.js"></script>
     <script src="script.js"></script>
     <script src="auth.js"></script>
@@ -524,7 +571,7 @@
                         </div>
                     </div>
 
-                    <!-- Interactive Rating Section -->
+                    <!-- Interactive Rating Section (Modal-based) -->
                     <div class="rating-input-section" id="ratingInputSection" style="display: none;">
                         <div class="rating-form-container">
                             <h3>Rate this Product</h3>
@@ -952,7 +999,183 @@
         // Initialize rating system when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             initializeRatingSystem();
+            initializeReviewModal();
         });
+
+        // Review Modal Functionality
+        function initializeReviewModal() {
+            const reviewModal = document.getElementById('reviewModal');
+            const writeReviewBtn = document.getElementById('writeReviewBtn');
+            const reviewModalClose = document.getElementById('reviewModalClose');
+            const cancelReviewBtn = document.getElementById('cancelReviewBtn');
+            const reviewForm = document.getElementById('reviewForm');
+            const starRatingModal = document.getElementById('starRatingModal');
+            const ratingLabel = document.getElementById('ratingLabel');
+            const reviewTextModal = document.getElementById('reviewTextModal');
+            const charCountModal = document.getElementById('charCountModal');
+            
+            let selectedRating = 0;
+            
+            // Open modal
+            if (writeReviewBtn && reviewModal) {
+                writeReviewBtn.addEventListener('click', function() {
+                    // Check if user is logged in
+                    if (!localStorage.getItem('token')) {
+                        showNotification('Please log in to write a review', 'error');
+                        return;
+                    }
+                    
+                    // Get product ID
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const productId = urlParams.get('id');
+                    document.getElementById('reviewProductId').value = productId;
+                    
+                    // Reset form
+                    reviewForm.reset();
+                    selectedRating = 0;
+                    updateStarRating(0);
+                    charCountModal.textContent = '0';
+                    
+                    // Show modal
+                    reviewModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            
+            // Close modal
+            if (reviewModalClose) {
+                reviewModalClose.addEventListener('click', closeReviewModal);
+            }
+            
+            if (cancelReviewBtn) {
+                cancelReviewBtn.addEventListener('click', closeReviewModal);
+            }
+            
+            // Close on backdrop click
+            if (reviewModal) {
+                reviewModal.addEventListener('click', function(e) {
+                    if (e.target === reviewModal) {
+                        closeReviewModal();
+                    }
+                });
+            }
+            
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && reviewModal && reviewModal.style.display === 'flex') {
+                    closeReviewModal();
+                }
+            });
+            
+            function closeReviewModal() {
+                reviewModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            
+            // Star rating interaction
+            if (starRatingModal) {
+                const stars = starRatingModal.querySelectorAll('i');
+                stars.forEach(star => {
+                    star.addEventListener('mouseenter', function() {
+                        const rating = parseInt(this.dataset.rating);
+                        updateStarRating(rating);
+                    });
+                    
+                    star.addEventListener('mouseleave', function() {
+                        updateStarRating(selectedRating);
+                    });
+                    
+                    star.addEventListener('click', function() {
+                        selectedRating = parseInt(this.dataset.rating);
+                        updateStarRating(selectedRating);
+                    });
+                });
+            }
+            
+            function updateStarRating(rating) {
+                if (!starRatingModal) return;
+                
+                const stars = starRatingModal.querySelectorAll('i');
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.add('active');
+                        star.style.color = '#ffd700';
+                    } else {
+                        star.classList.remove('active');
+                        star.style.color = '#ddd';
+                    }
+                });
+                
+                // Update label
+                const labels = {
+                    0: 'Select your rating',
+                    1: 'Poor',
+                    2: 'Fair',
+                    3: 'Good',
+                    4: 'Very Good',
+                    5: 'Excellent'
+                };
+                if (ratingLabel) {
+                    ratingLabel.textContent = labels[rating] || 'Select your rating';
+                    ratingLabel.className = 'rating-label' + (rating > 0 ? ` rating-${rating}` : '');
+                }
+            }
+            
+            // Character count
+            if (reviewTextModal && charCountModal) {
+                reviewTextModal.addEventListener('input', function() {
+                    const count = this.value.length;
+                    charCountModal.textContent = count;
+                    charCountModal.style.color = count > 450 ? '#dc3545' : count > 400 ? '#ffc107' : '#6c757d';
+                });
+            }
+            
+            // Form submission
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    if (selectedRating === 0) {
+                        showNotification('Please select a rating', 'error');
+                        return;
+                    }
+                    
+                    const title = document.getElementById('reviewTitleModal').value.trim();
+                    const review = reviewTextModal.value.trim();
+                    
+                    if (!review) {
+                        showNotification('Please write a review', 'error');
+                        return;
+                    }
+                    
+                    const productId = document.getElementById('reviewProductId').value;
+                    
+                    const ratingData = {
+                        productId: productId,
+                        rating: selectedRating,
+                        title: title,
+                        review: review
+                    };
+                    
+                    try {
+                        const success = await submitProductRating(ratingData);
+                        
+                        if (success) {
+                            showNotification('Thank you for your review!', 'success');
+                            closeReviewModal();
+                            
+                            // Reload reviews and product rating
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        console.error('Error submitting review:', error);
+                        showNotification('Failed to submit review. Please try again.', 'error');
+                    }
+                });
+            }
+        }
     </script>
 </body>
 </html>

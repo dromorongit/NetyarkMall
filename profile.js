@@ -801,8 +801,8 @@ function removeFromWishlist(productId) {
     if (index > -1) {
         currentUser.wishlist.splice(index, 1);
         
-        // Update on backend
-        updateUserProfile({ wishlist: currentUser.wishlist })
+        // Update on backend using the new wishlist endpoint
+        updateWishlistOnBackend(currentUser.wishlist)
             .then(success => {
                 if (success) {
                     showNotification('Removed from wishlist.', 'info');
