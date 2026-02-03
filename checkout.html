@@ -611,17 +611,15 @@
             try {
                 console.log('Initializing Paystack payment');
                 
-                // Generate a unique reference
-                const reference = `Netyark_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                
                 // Use Paystack inline payment directly from frontend
+                // Note: Paystack will generate its own reference, we'll capture it in the callback
                 if (typeof PaystackPop !== 'undefined') {
                     const handler = PaystackPop.setup({
                         key: PAYSTACK_PUBLIC_KEY,
                         email: email,
                         amount: Math.round(amount * 100), // Convert to pesewas
                         currency: 'GHS',
-                        ref: reference,
+                        // Don't set 'ref' - Paystack will generate its own
                         callback_url: PAYSTACK_CALLBACK_URL,
                         metadata: {
                             customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
@@ -630,6 +628,9 @@
                         },
                         callback: function(response) {
                             console.log('Paystack callback:', response);
+                            // Store the actual Paystack reference for verification
+                            localStorage.setItem('paystack_reference', response.reference);
+                            
                             // Retrieve order data from localStorage and verify payment
                             const pendingOrderData = localStorage.getItem('pendingOrderData');
                             let parsedOrderData = null;
@@ -669,7 +670,12 @@
             try {
                 console.log('Verifying payment, reference:', reference);
                 
-                // If no reference provided, check URL params
+                // If no reference provided, try to get it from stored Paystack reference
+                if (!reference) {
+                    reference = localStorage.getItem('paystack_reference');
+                }
+                
+                // If still no reference, check URL params
                 if (!reference) {
                     const urlParams = new URLSearchParams(window.location.search);
                     reference = urlParams.get('reference');
@@ -685,6 +691,13 @@
                             console.error('Error parsing pending order data:', e);
                         }
                     }
+                }
+                
+                // If still no reference found, show error
+                if (!reference) {
+                    hidePaymentProcessing();
+                    showNotification('Payment reference not found. Please contact support.', 'error');
+                    return;
                 }
                 
                 // Verify payment and create order in one step
@@ -838,10 +851,12 @@
                         email: email,
                         amount: Math.round(parseFloat(amount) * 100),
                         currency: 'GHS',
-                        ref: reference,
+                        // Don't set 'ref' - Paystack will generate its own
                         callback_url: PAYSTACK_CALLBACK_URL,
                         callback: function(response) {
                             console.log('Payment successful:', response);
+                            // Store the actual Paystack reference
+                            localStorage.setItem('paystack_reference', response.reference);
                             verifyPayment(null, response.reference, orderData);
                         },
                         onClose: function() {

@@ -233,6 +233,15 @@
 
             console.log('Payment callback params:', { reference, status, orderId });
 
+            // Also check for stored Paystack reference
+            if (!reference) {
+                const storedReference = localStorage.getItem('paystack_reference');
+                if (storedReference) {
+                    console.log('Using stored Paystack reference:', storedReference);
+                    reference = storedReference;
+                }
+            }
+
             if (!reference) {
                 showError('No payment reference found. Please contact support.');
                 return;
@@ -242,12 +251,26 @@
                 // Verify payment with backend
                 console.log('Verifying payment with reference:', reference);
                 
+                // Get stored order data if available
+                const pendingOrderData = localStorage.getItem('pendingOrderData');
+                let orderData = null;
+                if (pendingOrderData) {
+                    try {
+                        orderData = JSON.parse(pendingOrderData);
+                    } catch (e) {
+                        console.error('Error parsing pending order data:', e);
+                    }
+                }
+                
                 const response = await fetch('https://netyarkmall-production.up.railway.app/api/payments/verify', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ reference })
+                    body: JSON.stringify({ 
+                        reference: reference,
+                        orderData: orderData
+                    })
                 });
 
                 const result = await response.json();
@@ -255,6 +278,10 @@
 
                 if (result.success) {
                     // Payment successful
+                    // Clear stored payment data
+                    localStorage.removeItem('paystack_reference');
+                    localStorage.removeItem('pendingOrderData');
+                    
                     showSuccess(result.data);
                 } else {
                     // Payment verification failed
