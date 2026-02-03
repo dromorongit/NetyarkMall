@@ -329,6 +329,36 @@ router.patch('/preferences', auth, async (req, res) => {
   }
 });
 
+// Update wishlist
+router.patch('/wishlist', auth, async (req, res) => {
+  try {
+    const { wishlist } = req.body;
+    
+    await User.findByIdAndUpdate(req.user.id, {
+      wishlist,
+      lastActivity: new Date()
+    });
+    
+    await logActivity(req.user.id, 'wishlist', 'Wishlist updated', req.ip);
+    
+    res.json({ message: 'Wishlist updated', wishlist });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get wishlist
+router.get('/wishlist', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('wishlist');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    res.json(user.wishlist || []);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Toggle two-factor authentication
 router.post('/2fa/toggle', auth, async (req, res) => {
   try {

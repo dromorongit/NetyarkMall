@@ -628,6 +628,9 @@ async function loadUserWishlist() {
     const wishlistGrid = document.getElementById('wishlistGrid');
     if (!wishlistGrid) return;
 
+    // First, sync wishlist from backend to ensure we have the latest data
+    await getWishlistFromBackend();
+    
     const currentUser = getCurrentUser();
     const wishlist = currentUser && currentUser.wishlist ? currentUser.wishlist : [];
 
@@ -848,3 +851,4 @@ window.updateProfile = updateProfile;
 window.handleAvatarUpload = handleAvatarUpload;
 window.removeFromWishlist = removeFromWishlist;
 window.addToCartFromWishlist = addToCartFromWishlist;
+window.getWishlistFromBackend = getWishlistFromBackend;

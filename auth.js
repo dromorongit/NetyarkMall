@@ -320,7 +320,7 @@ function addToWishlist(productId) {
 
     if (!currentUser.wishlist.includes(productId)) {
         currentUser.wishlist.push(productId);
-        updateUserProfile({ wishlist: currentUser.wishlist });
+        updateWishlistOnBackend(currentUser.wishlist);
         showNotification('Added to wishlist!', 'success');
         return true;
     }
@@ -335,12 +335,61 @@ function removeFromWishlist(productId) {
     const index = currentUser.wishlist.indexOf(productId);
     if (index > -1) {
         currentUser.wishlist.splice(index, 1);
-        updateUserProfile({ wishlist: currentUser.wishlist });
+        updateWishlistOnBackend(currentUser.wishlist);
         showNotification('Removed from wishlist.', 'info');
         return true;
     }
 
     return false;
+}
+
+async function updateWishlistOnBackend(wishlist) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/auth/wishlist`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ wishlist })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Update local storage with the wishlist from backend
+            currentUser.wishlist = data.wishlist;
+            setCurrentUser(currentUser);
+            return true;
+        }
+    } catch (error) {
+        console.error('Error updating wishlist on server:', error);
+    }
+    return false;
+}
+
+async function getWishlistFromBackend() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/auth/wishlist`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const wishlist = await response.json();
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                currentUser.wishlist = wishlist;
+                setCurrentUser(currentUser);
+            }
+            return wishlist;
+        }
+    } catch (error) {
+        console.error('Error fetching wishlist from server:', error);
+    }
+    return [];
 }
 
 function isInWishlist(productId) {
@@ -416,6 +465,8 @@ window.isLoggedIn = isLoggedIn;
 window.logout = logout;
 window.addToWishlist = addToWishlist;
 window.removeFromWishlist = removeFromWishlist;
+window.updateWishlistOnBackend = updateWishlistOnBackend;
+window.getWishlistFromBackend = getWishlistFromBackend;
 window.isInWishlist = isInWishlist;
 window.addReview = addReview;
 window.addOrder = addOrder;

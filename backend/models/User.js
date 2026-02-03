@@ -52,7 +52,10 @@ const userSchema = new mongoose.Schema({
   // Account status
   isActive: { type: Boolean, default: true },
   lastLogin: { type: Date },
-  lastActivity: { type: Date }
+  lastActivity: { type: Date },
+  
+  // Wishlist
+  wishlist: [{ type: String }]
 });
 
 module.exports = mongoose.model('User', userSchema);
