@@ -9,6 +9,824 @@
     <link rel="icon" type="image/jpeg" href="Netyark.jfif">
     <link rel="shortcut icon" type="image/jpeg" href="Netyark.jfif">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Modern Profile Styles */
+        :root {
+            --primary-green: #008000;
+            --primary-orange: #FFA500;
+            --primary-dark: #006400;
+            --primary-light: #228B22;
+            --orange-light: #FFB733;
+            --white: #FFFFFF;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #495057;
+            --text-muted: #6c757d;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.16);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        /* Profile Main Section */
+        .profile-main {
+            padding: 2rem 0 4rem;
+            background: linear-gradient(180deg, var(--light-gray) 0%, var(--white) 100%);
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Profile Header Card */
+        .profile-header-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .profile-cover {
+            height: 180px;
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-dark) 50%, var(--primary-orange) 100%);
+            position: relative;
+        }
+
+        .profile-cover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(180deg, transparent, rgba(255,255,255,0.8));
+        }
+
+        .profile-header-content {
+            display: flex;
+            align-items: flex-end;
+            padding: 0 2rem 1.5rem;
+            margin-top: -60px;
+            position: relative;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .profile-avatar-large {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar-large img {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 5px solid var(--white);
+            box-shadow: var(--shadow-md);
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-orange));
+        }
+
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-orange);
+            border: 3px solid var(--white);
+            color: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .edit-avatar-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .profile-header-info {
+            flex: 1;
+            min-width: 200px;
+            padding-top: 60px;
+        }
+
+        .profile-header-info h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark-gray);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .profile-header-info #userEmail {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0 0 1rem 0;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            background: var(--light-gray);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            background: linear-gradient(135deg, rgba(0,128,0,0.1), rgba(255,165,0,0.1));
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-header-actions {
+            margin-left: auto;
+            padding-top: 60px;
+        }
+
+        /* Profile Tabs */
+        .profile-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--white);
+            padding: 0.75rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .profile-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--dark-gray);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .profile-tab i {
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .profile-tab:hover {
+            background: var(--light-gray);
+            color: var(--primary-green);
+        }
+
+        .profile-tab:hover i {
+            color: var(--primary-orange);
+        }
+
+        .profile-tab.active {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-tab.active i {
+            color: var(--white);
+        }
+
+        /* Profile Content Wrapper */
+        .profile-content-wrapper {
+            position: relative;
+        }
+
+        .profile-tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .profile-tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Card */
+        .content-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--medium-gray);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-gray);
+            margin: 0;
+        }
+
+        .card-header h2 i {
+            color: var(--primary-green);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.875rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, rgba(0,128,0,0.1), rgba(0,100,0,0.15));
+            color: var(--primary-green);
+        }
+
+        .badge-info {
+            background: linear-gradient(135deg, rgba(0,123,255,0.1), rgba(0,86,179,0.15));
+            color: #007bff;
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, rgba(255,165,0,0.15), rgba(255,140,0,0.2));
+            color: #e67e00;
+        }
+
+        /* Profile Form */
+        .profile-form {
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group label i {
+            color: var(--primary-green);
+            width: 18px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(0,128,0,0.1);
+        }
+
+        .form-group input[readonly] {
+            background: var(--light-gray);
+            cursor: not-allowed;
+        }
+
+        .form-group small {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            margin-top: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .form-group small i {
+            color: var(--primary-orange);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--medium-gray);
+            margin-top: 1rem;
+        }
+
+        /* Password Input */
+        .password-input {
+            position: relative;
+        }
+
+        .password-input input {
+            padding-right: 3rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .toggle-password:hover {
+            color: var(--primary-green);
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .settings-grid .content-card {
+            height: fit-content;
+        }
+
+        /* Danger Zone */
+        .danger-zone {
+            border: 2px solid #dc3545;
+            background: linear-gradient(135deg, rgba(220,53,69,0.03), rgba(220,53,69,0.08));
+        }
+
+        .danger-zone .card-header {
+            border-bottom-color: rgba(220,53,69,0.2);
+        }
+
+        .danger-zone .card-header h2 i {
+            color: #dc3545;
+        }
+
+        .danger-text {
+            padding: 1.25rem 1.5rem;
+            color: #dc3545;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .danger-text i {
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+        }
+
+        /* Orders List */
+        .orders-list {
+            padding: 1.5rem;
+        }
+
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .orders-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-gray);
+            margin: 0;
+        }
+
+        .orders-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .order-card {
+            background: var(--light-gray);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .order-card:hover {
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        .order-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .order-id {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .order-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .order-card-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .order-items-preview {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark-gray);
+        }
+
+        .order-card-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            padding: 0.375rem 0.875rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,193,7,0.25));
+            color: #d39e00;
+        }
+
+        .status-processing {
+            background: linear-gradient(135deg, rgba(0,123,255,0.15), rgba(0,86,179,0.2));
+            color: #007bff;
+        }
+
+        .status-shipped {
+            background: linear-gradient(135deg, rgba(23,162,184,0.15), rgba(23,162,184,0.2));
+            color: #17a2b8;
+        }
+
+        .status-delivered {
+            background: linear-gradient(135deg, rgba(40,167,69,0.15), rgba(40,167,69,0.2));
+            color: #28a745;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(135deg, rgba(220,53,69,0.15), rgba(220,53,69,0.2));
+            color: #dc3545;
+        }
+
+        .payment-badge {
+            display: inline-flex;
+            padding: 0.375rem 0.875rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .payment-paid {
+            background: linear-gradient(135deg, rgba(40,167,69,0.15), rgba(40,167,69,0.2));
+            color: #28a745;
+        }
+
+        .payment-pending {
+            background: linear-gradient(135deg, rgba(255,165,0,0.15), rgba(255,140,0,0.2));
+            color: #e67e00;
+        }
+
+        .order-card-total {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .total-label {
+            color: var(--text-muted);
+        }
+
+        .total-amount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .order-card-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Wishlist Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        /* Reviews List */
+        .reviews-list {
+            padding: 1.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--medium-gray);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .loading-state i {
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        /* Error State */
+        .error-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #dc3545;
+        }
+
+        .error-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-state h3 {
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-green) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-green);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+
+        .btn-outline-danger:hover {
+            background: #dc3545;
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-main {
+                padding: 1rem 0 3rem;
+            }
+
+            .profile-cover {
+                height: 120px;
+            }
+
+            .profile-header-content {
+                padding: 0 1rem 1rem;
+                margin-top: -40px;
+            }
+
+            .profile-avatar-large img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .profile-header-info {
+                padding-top: 45px;
+            }
+
+            .profile-header-info h1 {
+                font-size: 1.35rem;
+            }
+
+            .profile-stats {
+                gap: 1rem;
+            }
+
+            .stat-item {
+                padding: 0.5rem 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.25rem;
+            }
+
+            .profile-header-actions {
+                width: 100%;
+                padding-top: 0;
+                margin-top: 0.5rem;
+            }
+
+            .profile-header-actions .btn {
+                width: 100%;
+            }
+
+            .profile-tabs {
+                padding: 0.5rem;
+                gap: 0.25rem;
+            }
+
+            .profile-tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .profile-tab span {
+                display: none;
+            }
+
+            .card-header {
+                padding: 1rem;
+            }
+
+            .card-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .order-card-body {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-tab i {
+                margin-right: 0;
+            }
+
+            .stat-item {
+                flex: 1;
+                min-width: 80px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header Section -->
@@ -44,17 +862,13 @@
                         <li class="dropdown">
                             <a href="categories.html" class="nav-link dropdown-toggle">Categories <i class="fas fa-chevron-down"></i></a>
                             <ul class="dropdown-menu">
-                                <li><a href="consumer-electrics.html">Consumer Electrics</a></li>
-                                <li><a href="clothing-apparel.html">Clothing & Apparel</a></li>
-                                <li><a href="home-kitchen.html">Home & Kitchen</a></li>
-                                <li><a href="health-beauty.html">Health & Beauty</a></li>
-                                <li><a href="jewelry-accessories.html">Jewelry & Accessories</a></li>
-                                <li><a href="home-decor.html">Home Decor & Essentials</a></li>
-                                <li><a href="for-men.html">For Men</a></li>
-                                <li><a href="for-women.html">For Women</a></li>
-                                <li><a href="for-kids.html">For Kids</a></li>
-                                <li><a href="office-accessories.html">Office Accessories</a></li>
-                                <li><a href="sports-outdoor.html">Sports & Outdoor</a></li>
+                                <li><a href="kitchen-appliances.html">Kitchen Appliances</a></li>
+                                <li><a href="beauty-personal-care.html">Beauty & Personal Care</a></li>
+                                <li><a href="photography-content-creation-tools.html">Photography & Content Creation Tools</a></li>
+                                <li><a href="nail-supplies.html">Nail Supplies</a></li>
+                                <li><a href="kids-babies.html">Kids & Babies</a></li>
+                                <li><a href="home-essentials.html">Home Essentials</a></li>
+                                <li><a href="lighting-home-decor.html">Lighting & Home Decor</a></li>
                             </ul>
                         </li>
                         <li><a href="about.html" class="nav-link">About Us</a></li>
@@ -287,9 +1101,11 @@
                                 <i class="fas fa-exclamation-circle"></i>
                                 Once you delete your account, there is no going back. Please be certain.
                             </p>
-                            <button class="btn btn-outline-danger" onclick="deleteAccount()">
-                                <i class="fas fa-trash"></i> Delete Account
-                            </button>
+                            <div style="padding: 0 1.5rem 1.5rem;">
+                                <button class="btn btn-outline-danger" onclick="deleteAccount()">
+                                    <i class="fas fa-trash"></i> Delete Account
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
