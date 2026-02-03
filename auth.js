@@ -244,7 +244,6 @@ function updateAuthUI() {
                     <a href="#" class="nav-link dropdown-toggle">${currentUser.name} <i class="fas fa-chevron-down"></i></a>
                     <ul class="dropdown-menu">
                         <li><a href="profile.html">My Profile</a></li>
-                        <li><a href="orders.html">My Orders</a></li>
                         <li><a href="#" onclick="logout()">Logout</a></li>
                     </ul>
                 `;
