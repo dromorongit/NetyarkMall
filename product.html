@@ -423,17 +423,17 @@
                                 ${isWholesale && wholesalePrice ? `
                                     <div class="price-comparison">
                                         <span class="regular-price-label">Regular Price:</span>
-                                        <span class="regular-price">₵${product.price.toLocaleString()}</span>
+                                        <span class="regular-price">₵${product.price.toFixed(2)}</span>
                                         <div class="wholesale-price-section">
                                             <span class="wholesale-price-label">Wholesale Price:</span>
-                                            <span class="wholesale-price">₵${wholesalePrice.toLocaleString()}</span>
+                                            <span class="wholesale-price">₵${wholesalePrice.toFixed(2)}</span>
                                             <span class="wholesale-label">Save ${(Math.round(((product.price - wholesalePrice) / product.price) * 100))}%</span>
                                         </div>
                                     </div>
                                 ` : `
-                                    <span class="current-price">₵${product.price.toLocaleString()}</span>
+                                    <span class="current-price">₵${product.price.toFixed(2)}</span>
                                     ${product.originalPrice > product.price ?
-                                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                                        `<span class="original-price">₵${product.originalPrice.toFixed(2)}</span>` : ''}
                                 `}
                             </div>
                         </div>
@@ -467,23 +467,38 @@
 
                         <div class="product-actions">
                             <div class="primary-actions">
-                                ${!isWholesale ? `
-                                    <div class="quantity-selector">
-                                        <label for="productQuantity">Quantity:</label>
-                                        <div class="quantity-controls">
-                                            <button class="quantity-btn" onclick="changeQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
-                                            <input type="number" id="productQuantity" value="1" min="1" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
-                                            <button class="quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                <!-- Regular Add to Cart - Always shown for all products -->
+                                <div class="quantity-selector">
+                                    <label for="productQuantity">Quantity:</label>
+                                    <div class="quantity-controls">
+                                        <button class="quantity-btn" onclick="changeQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
+                                        <input type="number" id="productQuantity" value="1" min="1" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
+                                        <button class="quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary add-to-cart-btn" data-product-id="${productId}" onclick="handleProductAddToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                                ${isWholesale ? `
+                                    <!-- Wholesale section - Only shown for wholesale products -->
+                                    <div class="wholesale-section">
+                                        <h4><i class="fas fa-boxes"></i> Wholesale Options</h4>
+                                        <div class="wholesale-controls">
+                                            <div class="quantity-selector wholesale-quantity">
+                                                <label for="wholesaleQuantity">Wholesale Quantity:</label>
+                                                <div class="quantity-controls">
+                                                    <button class="quantity-btn" onclick="changeWholesaleQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
+                                                    <input type="number" id="wholesaleQuantity" value="${moq}" min="${moq}" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
+                                                    <button class="quantity-btn" onclick="changeWholesaleQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                                </div>
+                                                <small class="moq-note">Minimum: ${moq} units</small>
+                                            </div>
+                                            <button class="btn btn-secondary wholesale-add-btn" onclick="handleWholesaleAddToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
+                                                <i class="fas fa-cart-plus"></i> Add Wholesale Quantity
+                                            </button>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary add-to-cart-btn" data-product-id="${productId}" ${!inStock ? 'disabled' : ''}>
-                                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                                    </button>
-                                ` : `
-                                    <button class="btn btn-secondary wholesale-btn" onclick="window.location.href='wholesale.html'">
-                                        <i class="fas fa-boxes"></i> View Wholesale Options
-                                    </button>
-                                `}
+                                ` : ''}
                             </div>
                             <div class="secondary-actions">
                                 <button class="btn btn-outline action-btn" onclick="addToCompare('${productId}')">
@@ -532,12 +547,12 @@
                         </div>
                         <div class="spec-item">
                             <span class="spec-label">Price:</span>
-                            <span class="spec-value">₵${product.price.toLocaleString()}</span>
+                            <span class="spec-value">₵${product.price.toFixed(2)}</span>
                         </div>
                         ${isWholesale && wholesalePrice ? `
                             <div class="spec-item">
                                 <span class="spec-label">Wholesale Price:</span>
-                                <span class="spec-value">₵${wholesalePrice.toLocaleString()}</span>
+                                <span class="spec-value">₵${wholesalePrice.toFixed(2)}</span>
                             </div>
                         ` : ''}
                         <div class="spec-item">
@@ -726,6 +741,35 @@
             const maxValue = parseInt(quantityInput.max) || 999;
 
             quantityInput.value = Math.min(newValue, maxValue);
+        }
+
+        // Handle wholesale quantity changes (respects MOQ)
+        function changeWholesaleQuantity(delta) {
+            const quantityInput = document.getElementById('wholesaleQuantity');
+            if (!quantityInput) return;
+
+            const moq = parseInt(quantityInput.min) || 1;
+            const currentValue = parseInt(quantityInput.value) || moq;
+            const maxValue = parseInt(quantityInput.max) || 999;
+            const newValue = Math.max(moq, currentValue + delta);
+
+            quantityInput.value = Math.min(newValue, maxValue);
+        }
+
+        // Handle Add to Cart from product detail page (regular price)
+        async function handleProductAddToCart(productId) {
+            const quantityInput = document.getElementById('productQuantity');
+            const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+            
+            await addToCart(productId, quantity, 'product-detail');
+        }
+
+        // Handle Add Wholesale Quantity to cart (wholesale price)
+        async function handleWholesaleAddToCart(productId) {
+            const quantityInput = document.getElementById('wholesaleQuantity');
+            const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+            
+            await addWholesaleToCart(productId, quantity);
         }
 
         function generateStarRating(rating) {
