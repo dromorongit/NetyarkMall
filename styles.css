@@ -1055,7 +1055,7 @@ a:hover {
     position: relative;
     z-index: 20;
     pointer-events: auto;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 .view-details-btn:hover {
