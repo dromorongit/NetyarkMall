@@ -911,7 +911,9 @@ a:hover {
 .product-image {
     position: relative;
     overflow: hidden;
-    height: 250px;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    width: 100%;
     background: #f5f5f5;
 }
 
