@@ -617,49 +617,49 @@ async function getCategoryData() {
         {
             name: 'Kitchen Appliances',
             id: 'kitchen-appliances',
-            image: 'kitchen.jpg',
+            image: 'kitchen.jpeg',
             productCount: products.filter(p => p.category === 'Kitchen Appliances' || p.category === 'kitchen-appliances' || p.category === 'home').length,
             color: '#008000'
         },
         {
             name: 'Beauty & Personal Care',
             id: 'beauty-personal-care',
-            image: 'beauty.jpg',
+            image: 'beauty.jpeg',
             productCount: products.filter(p => p.category === 'Beauty & Personal Care' || p.category === 'beauty-personal-care' || p.category === 'beauty').length,
             color: '#FFA500'
         },
         {
             name: 'Photography & Content Creation Tools',
             id: 'photography-content-creation-tools',
-            image: 'photography.jpg',
+            image: 'photography.jpeg',
             productCount: products.filter(p => p.category === 'Photography & Content Creation Tools' || p.category === 'photography-content-creation-tools' || p.category === 'electronics').length,
             color: '#008000'
         },
         {
             name: 'Nail Supplies',
             id: 'nail-supplies',
-            image: 'nails.jpg',
+            image: 'nails.jpeg',
             productCount: products.filter(p => p.category === 'Nail Supplies' || p.category === 'nail-supplies').length,
             color: '#FFA500'
         },
         {
             name: 'Kids & Babies',
             id: 'kids-babies',
-            image: 'kids.jpg',
+            image: 'kids.jpeg',
             productCount: products.filter(p => p.category === 'Kids & Babies' || p.category === 'kids-babies').length,
             color: '#008000'
         },
         {
             name: 'Home Essentials',
             id: 'home-essentials',
-            image: 'homeessentials.jpg',
+            image: 'homeessentials.jpeg',
             productCount: products.filter(p => p.category === 'Home Essentials' || p.category === 'home-essentials' || p.category === 'home').length,
             color: '#FFA500'
         },
         {
             name: 'Lighting & Home Decor',
             id: 'lighting-home-decor',
-            image: 'lighting.jpg',
+            image: 'lighting.jpeg',
             productCount: products.filter(p => p.category === 'Lighting & Home Decor' || p.category === 'lighting-home-decor').length,
             color: '#008000'
         }
