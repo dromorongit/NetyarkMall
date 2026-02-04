@@ -591,7 +591,9 @@ async function loadOrders() {
     }
 
     list.innerHTML = orders.map(o => {
-      const customerName = o.user ? o.user.name :
+      const hasUser = o.user && o.user.name;
+      const customerName = hasUser ? 
+        `${o.user.name} (User)` :
         (o.customer && o.customer.firstName && o.customer.lastName) ?
         `${o.customer.firstName} ${o.customer.lastName} (Guest)` :
         'Unknown Customer';
