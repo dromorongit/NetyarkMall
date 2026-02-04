@@ -6,10 +6,23 @@ const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 // Get reviews for a specific product
-router.get('/:productId', async (req, res) => {
+router.get('/product/:productId', async (req, res) => {
   try {
     const reviews = await Review.find({ productId: req.params.productId })
       .populate('userId', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get all reviews by a specific user (authenticated)
+router.get('/user/me', auth, async (req, res) => {
+  try {
+    const reviews = await Review.find({ userId: req.user.id })
+      .populate('productId', 'name image')
       .sort({ createdAt: -1 });
 
     res.json(reviews);

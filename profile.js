@@ -254,13 +254,27 @@ async function updateProfileStats() {
         const wishlistCount = currentUser && currentUser.wishlist ? currentUser.wishlist.length : 0;
         document.getElementById('wishlistCount').textContent = wishlistCount;
         
-        // Get reviews count from user data
-        const reviewsCount = currentUser && currentUser.reviews ? currentUser.reviews.length : 0;
-        document.getElementById('reviewCount').textContent = reviewsCount;
-        
         const wishlistBadge = document.getElementById('wishlistBadge');
         if (wishlistBadge) {
             wishlistBadge.textContent = `${wishlistCount} Items`;
+        }
+        
+        // Get reviews count from API
+        try {
+            const reviewsResponse = await fetch(`${API_BASE}/reviews/user/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (reviewsResponse.ok) {
+                const reviews = await reviewsResponse.json();
+                document.getElementById('reviewCount').textContent = reviews ? reviews.length : 0;
+            } else {
+                document.getElementById('reviewCount').textContent = '0';
+            }
+        } catch (error) {
+            console.error('Error fetching reviews count:', error);
+            document.getElementById('reviewCount').textContent = '0';
         }
     } catch (error) {
         console.error('Error updating profile stats:', error);
@@ -697,33 +711,71 @@ async function loadUserReviews() {
     const reviewsList = document.getElementById('reviewsList');
     if (!reviewsList) return;
 
-    const currentUser = getCurrentUser();
-    const reviews = currentUser && currentUser.reviews ? currentUser.reviews : [];
+    // Show loading state
+    reviewsList.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading your reviews...</p></div>';
 
-    if (reviews.length === 0) {
-        reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><h3>No Reviews Yet</h3><p>You haven\'t written any reviews yet. Your reviews will appear here after you rate products.</p></div>';
-        return;
-    }
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><h3>No Reviews Yet</h3><p>You haven\'t written any reviews yet. Your reviews will appear here after you rate products.</p></div>';
+            return;
+        }
 
-    let reviewsHTML = '';
-    reviews.forEach(review => {
-        const stars = Array(5).fill(0).map((_, i) => 
-            `<i class="fas fa-star ${i < review.rating ? 'filled' : ''}"></i>`
-        ).join('');
+        const response = await fetch(`${API_BASE}/reviews/user/me`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-        reviewsHTML += `
-            <div class="review-card">
-                <div class="review-header">
-                    <div class="review-stars">${stars}</div>
-                    <span class="review-date">${new Date(review.date).toLocaleDateString()}</span>
+        if (!response.ok) {
+            throw new Error('Failed to fetch reviews');
+        }
+
+        const reviews = await response.json();
+
+        if (!reviews || reviews.length === 0) {
+            reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><h3>No Reviews Yet</h3><p>You haven\'t written any reviews yet. Your reviews will appear here after you rate products.</p></div>';
+            updateReviewCount(0);
+            return;
+        }
+
+        let reviewsHTML = '';
+        reviews.forEach(review => {
+            const stars = Array(5).fill(0).map((_, i) => 
+                `<i class="fas fa-star ${i < review.rating ? 'filled' : ''}"></i>`
+            ).join('');
+            
+            // Get product name from populated product or use fallback
+            const productName = review.productId && review.productId.name ? review.productId.name : 'Unknown Product';
+            const productImage = review.productId && review.productId.image ? review.productId.image : '';
+            
+            reviewsHTML += `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-stars">${stars}</div>
+                        <span class="review-date">${new Date(review.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    ${review.title ? `<div class="review-title"><strong>${review.title}</strong></div>` : ''}
+                    <p class="review-comment">${review.review}</p>
+                    <span class="review-product">Product: ${productName}</span>
                 </div>
-                <p class="review-comment">${review.comment}</p>
-                <span class="review-product">Product: ${review.productId || 'Unknown'}</span>
-            </div>
-        `;
-    });
+            `;
+        });
 
-    reviewsList.innerHTML = reviewsHTML;
+        reviewsList.innerHTML = reviewsHTML;
+        updateReviewCount(reviews.length);
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><h3>Error Loading Reviews</h3><p>Unable to load your reviews. Please try again.</p><button class="btn btn-primary" onclick="loadUserReviews()"><i class="fas fa-sync-alt"></i> Try Again</button></div>';
+    }
+}
+
+// Update review count in stats
+function updateReviewCount(count) {
+    const reviewCountEl = document.getElementById('reviewCount');
+    if (reviewCountEl) {
+        reviewCountEl.textContent = count;
+    }
 }
 
 async function deleteAccount() {

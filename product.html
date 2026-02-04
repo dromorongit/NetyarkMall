@@ -950,7 +950,7 @@
         // Function to load and display product reviews
         async function loadProductReviews(productId) {
             try {
-                const response = await fetch(`${API_BASE}/reviews/${productId}`);
+                const response = await fetch(`${API_BASE}/reviews/product/${productId}`);
                 if (response.ok) {
                     const reviews = await response.json();
                     displayProductReviews(reviews);
