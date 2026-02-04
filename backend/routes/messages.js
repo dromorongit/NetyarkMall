@@ -1,8 +1,50 @@
 const express = require('express');
+const nodemailer = require('nodemailer');
 const Message = require('../models/Message');
 const { auth, adminAuth } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Email transporter configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || 'netyarkmall@gmail.com',
+    pass: process.env.EMAIL_PASS || 'your-app-password'
+  }
+});
+
+// Helper function to send email notification
+async function sendEmailNotification(messageData) {
+  const emailContent = `
+    <h2>New Contact Message - Netyark Mall</h2>
+    <p><strong>Name:</strong> ${messageData.senderName}</p>
+    <p><strong>Email:</strong> ${messageData.senderEmail}</p>
+    <p><strong>Phone:</strong> ${messageData.phone || 'Not provided'}</p>
+    <p><strong>Subject:</strong> ${messageData.subject || 'Not specified'}</p>
+    <p><strong>Order Number:</strong> ${messageData.orderNumber || 'Not provided'}</p>
+    <hr>
+    <h3>Message:</h3>
+    <p>${messageData.message}</p>
+    <hr>
+    <p><small>Sent from Netyark Mall Contact Form</small></p>
+  `;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER || 'netyarkmall@gmail.com',
+    to: 'info@netyarkmall.com',
+    subject: `New Contact Message: ${messageData.subject || 'No Subject'} - ${messageData.senderName}`,
+    html: emailContent
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error('Email sending failed:', error);
+    return false;
+  }
+}
 
 // Get all messages (admin)
 router.get('/', auth, adminAuth, async (req, res) => {
@@ -26,24 +68,59 @@ router.get('/conversation/:conversationId', auth, adminAuth, async (req, res) =>
 
 // Send message (user or public)
 router.post('/', async (req, res) => {
-  const { sender, senderId, senderName, senderEmail, message, conversationId } = req.body;
+  const { 
+    sender, 
+    senderId, 
+    senderName, 
+    senderEmail, 
+    subject,
+    phone, 
+    orderNumber,
+    message, 
+    conversationId 
+  } = req.body;
 
   // Generate conversation ID if not provided (new conversation)
   const finalConversationId = conversationId || `conv_${Date.now()}`;
 
   const newMessage = new Message({
     conversationId: finalConversationId,
-    sender,
+    sender: sender || 'guest',
     senderId,
     senderName,
     senderEmail,
+    subject,
+    phone,
+    orderNumber,
     message,
     messageType: sender === 'admin' ? 'admin' : 'user'
   });
 
   try {
     await newMessage.save();
-    res.status(201).json(newMessage);
+    
+    // Send email notification to info@netyarkmall.com
+    const emailSent = await sendEmailNotification({
+      senderName,
+      senderEmail,
+      subject,
+      phone,
+      orderNumber,
+      message
+    });
+    
+    // Update message with email status
+    if (emailSent) {
+      newMessage.emailSent = true;
+      newMessage.emailSentTimestamp = new Date();
+      await newMessage.save();
+    }
+    
+    res.status(201).json({
+      success: true,
+      message: newMessage,
+      emailSent: emailSent
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
