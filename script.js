@@ -571,12 +571,12 @@ function updateCartDisplay() {
                             ${showWholesaleIndicators ? `<small class="wholesale-indicator">Wholesale - MOQ: ${moq}</small>` : ''}
                             ${item.isDeal && item.originalPrice ? `
                                 <div class="deal-price-container">
-                                    <p class="item-price deal-price">₵${item.price.toLocaleString()}</p>
-                                    <p class="original-price">₵${item.originalPrice.toLocaleString()}</p>
+                                    <p class="item-price deal-price">₵${item.price.toFixed(2)}</p>
+                                    <p class="original-price">₵${item.originalPrice.toFixed(2)}</p>
                                     <small class="deal-badge">Deal - ${item.discountPercentage || 0}% OFF</small>
                                 </div>
                             ` : `
-                                <p class="item-price">₵${item.price.toLocaleString()}</p>
+                                <p class="item-price">₵${item.price.toFixed(2)}</p>
                             `}
                         </div>
                         <div class="item-quantity">
@@ -585,7 +585,7 @@ function updateCartDisplay() {
                             <button class="quantity-btn increase" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})" ${isWholesale ? '' : ''}>+</button>
                         </div>
                         <div class="item-total">
-                            ₵${(item.price * item.quantity).toLocaleString()}
+                            ₵${(item.price * item.quantity).toFixed(2)}
                         </div>
                         <button class="remove-item" onclick="removeFromCart('${item.id}')">
                             <i class="fas fa-trash"></i>
@@ -604,9 +604,9 @@ function updateCartDisplay() {
             const subtotal = getCartTotal();
             const total = subtotal; // No shipping cost added
 
-            if (subtotalElement) subtotalElement.textContent = `₵${subtotal.toLocaleString()}`;
+            if (subtotalElement) subtotalElement.textContent = `₵${subtotal.toFixed(2)}`;
             if (taxElement) taxElement.textContent = `₵0.00`;
-            if (totalElement) totalElement.textContent = `₵${total.toLocaleString()}`;
+            if (totalElement) totalElement.textContent = `₵${total.toFixed(2)}`;
 
             // Show shipping calculator
             if (shippingCalculator) {
@@ -1275,9 +1275,9 @@ function createProductCard(product) {
             <div class="product-info">
                 <h3 class="product-title" style="font-size: 0.9rem !important; margin-bottom: 0.5rem !important;">${product.name || 'Unnamed Product'}</h3>
                 <div class="product-price" style="font-size: 0.8rem !important;">
-                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toLocaleString()}</span>
+                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toFixed(2)}</span>
                     ${product.originalPrice > product.price ?
-                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toFixed(2)}</span>` : ''}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
                 <div class="product-card-actions">
@@ -1362,9 +1362,7 @@ function createWholesaleProductCard(product) {
             <div class="product-info">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
                 <div class="product-price">
-                    <span class="current-price">₵${(product.wholesalePrice || 0).toLocaleString()}</span>
-                    ${product.originalPrice > product.price ?
-                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                    <span class="current-price">₵${(product.wholesalePrice || 0).toFixed(2)}</span>
                     <div class="wholesale-savings">
                         <small>Per unit</small>
                     </div>
@@ -1420,9 +1418,9 @@ function createDealCard(product) {
             <div class="product-info">
                 <h3 class="product-title" style="font-size: 0.9rem !important; margin-bottom: 0.5rem !important;">${product.name || 'Unnamed Product'}</h3>
                 <div class="product-price" style="font-size: 0.8rem !important;">
-                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toLocaleString()}</span>
+                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toFixed(2)}</span>
                     ${product.originalPrice > product.price ?
-                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toFixed(2)}</span>` : ''}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
                 <div class="product-card-actions">
@@ -1521,9 +1519,9 @@ async function quickView(productId) {
                     </div>
 
                     <div class="product-price" style="margin-bottom: 1.5rem;">
-                        <span class="current-price">₵${product.price.toLocaleString()}</span>
+                        <span class="current-price">₵${product.price.toFixed(2)}</span>
                         ${product.originalPrice > product.price ?
-                            `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                            `<span class="original-price">₵${product.originalPrice.toFixed(2)}</span>` : ''}
                     </div>
 
                     ${product.variants ? `
@@ -2002,8 +2000,8 @@ async function performLiveSearch(query) {
                     <div class="search-result-info">
                         <h4>${product.name}</h4>
                         <div class="search-result-price">
-                            ₵${product.price.toLocaleString()}
-                            ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                            ₵${product.price.toFixed(2)}
+                            ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toFixed(2)}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -2290,7 +2288,7 @@ function showCompareModal() {
                             <td>Price</td>
                             ${compareList.map(id => {
                                 const product = getProductById(id);
-                                return `<td>₵${product ? product.price.toLocaleString() : 'N/A'}</td>`;
+                                return `<td>₵${product ? product.price.toFixed(2) : 'N/A'}</td>`;
                             }).join('')}
                         </tr>
                         <tr>
@@ -2538,8 +2536,8 @@ async function performMobileLiveSearch(query) {
                     <div class="mobile-search-result-info">
                         <h4>${product.name}</h4>
                         <div class="mobile-search-result-price">
-                            ₵${product.price.toLocaleString()}
-                            ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                            ₵${product.price.toFixed(2)}
+                            ${discount > 0 ? ` <span class="original-price">₵${product.originalPrice.toFixed(2)}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -2739,16 +2737,16 @@ function showCheckoutModal() {
                                 <div class="checkout-item-details">
                                     <h4>${item.name}</h4>
                                     <p>Quantity: ${item.quantity}</p>
-                                    <p>₵${item.price.toLocaleString()} each</p>
+                                    <p>₵${item.price.toFixed(2)} each</p>
                                 </div>
-                                <div class="checkout-item-total">₵${(item.price * item.quantity).toLocaleString()}</div>
+                                <div class="checkout-item-total">₵${(item.price * item.quantity).toFixed(2)}</div>
                             </div>
                         `).join('')}
                     </div>
                     <div class="checkout-totals">
-                        <div class="checkout-row"><span>Subtotal:</span><span>₵${subtotal.toLocaleString()}</span></div>
-                        <div class="checkout-row"><span>Shipping:</span><span>₵${shippingCost.toLocaleString()}</span></div>
-                        <div class="checkout-row total"><span>Total:</span><span>₵${total.toLocaleString()}</span></div>
+                        <div class="checkout-row"><span>Subtotal:</span><span>₵${subtotal.toFixed(2)}</span></div>
+                        <div class="checkout-row"><span>Shipping:</span><span>₵${shippingCost.toFixed(2)}</span></div>
+                        <div class="checkout-row total"><span>Total:</span><span>₵${total.toFixed(2)}</span></div>
                     </div>
                 </div>
 
@@ -2894,9 +2892,9 @@ function loadCheckoutItems() {
                 <div class="checkout-item-details">
                     <h4>${item.name}</h4>
                     <p>Quantity: ${item.quantity}</p>
-                    <p>₵${item.price.toLocaleString()} each</p>
+                    <p>₵${item.price.toFixed(2)} each</p>
                 </div>
-                <div class="checkout-item-total">₵${itemTotal.toLocaleString()}</div>
+                <div class="checkout-item-total">₵${itemTotal.toFixed(2)}</div>
             </div>
         `;
     });
@@ -2904,7 +2902,7 @@ function loadCheckoutItems() {
     checkoutItemsContainer.innerHTML = html;
 
     // Update total (no shipping or tax)
-    document.getElementById('checkoutTotal').textContent = `₵${subtotal.toLocaleString()}`;
+    document.getElementById('checkoutTotal').textContent = `₵${subtotal.toFixed(2)}`;
 }
 
 // Process checkout order submission

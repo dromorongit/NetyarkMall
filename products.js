@@ -689,7 +689,7 @@ async function getSuggestedProducts(currentProductIds = []) {
 
 // Product formatting functions
 function formatPrice(price) {
-    return `₵${price.toLocaleString()}`;
+    return `₵${price.toFixed(2)}`;
 }
 
 function calculateDiscount(originalPrice, currentPrice) {
