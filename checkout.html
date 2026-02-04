@@ -104,7 +104,9 @@
                                 <!-- Items will be populated by JavaScript -->
                             </div>
                             <div class="checkout-totals">
-                                <div class="checkout-row total"><span>Total:</span><span id="checkoutTotal">₵0.00</span></div>
+                                <div class="checkout-row"><span>Subtotal:</span><span id="checkoutSubtotal">₵0.00</span></div>
+                                <div class="checkout-row"><span>Payment Processing Fee (1.95%):</span><span id="checkoutFee">₵0.00</span></div>
+                                <div class="checkout-row total"><span>Total to Pay:</span><span id="checkoutTotal">₵0.00</span></div>
                             </div>
                         </div>
 
@@ -225,7 +227,7 @@
                             <div class="payment-order-summary">
                                 <h4><i class="fas fa-receipt"></i> Order Summary</h4>
                                 <div class="payment-summary-row"><span>Subtotal</span><span id="modalSubtotal">₵0.00</span></div>
-                                <div class="payment-summary-row"><span>Shipping</span><span id="modalShipping">₵0.00</span></div>
+                                <div class="payment-summary-row"><span>Processing Fee (1.95%)</span><span id="modalFee">₵0.00</span></div>
                                 <div class="payment-summary-row total"><span>Total to Pay</span><span id="modalTotal">₵0.00</span></div>
                             </div>
                             <div class="payment-form">
@@ -527,7 +529,16 @@
             });
             
             checkoutItemsContainer.innerHTML = html;
-            document.getElementById('checkoutTotal').textContent = `₵${subtotal.toLocaleString()}`;
+            
+            // Calculate Paystack fee (1.95%)
+            const PAYSTACK_FEE_PERCENTAGE = 1.95;
+            const paystackFee = (subtotal * PAYSTACK_FEE_PERCENTAGE) / 100;
+            const totalWithFee = subtotal + paystackFee;
+            
+            // Update display with fee breakdown
+            document.getElementById('checkoutSubtotal').textContent = `₵${subtotal.toLocaleString()}`;
+            document.getElementById('checkoutFee').textContent = `₵${paystackFee.toFixed(2)}`;
+            document.getElementById('checkoutTotal').textContent = `₵${totalWithFee.toLocaleString()}`;
             
             // Check if cart is empty
             if (cart.length === 0) {
@@ -565,8 +576,11 @@
             
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'card';
             
-            // Calculate total
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            // Calculate total and Paystack fee (1.95%)
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const PAYSTACK_FEE_PERCENTAGE = 1.95; // 1.95% Paystack fee
+            const paystackFee = (subtotal * PAYSTACK_FEE_PERCENTAGE) / 100;
+            const totalWithFee = subtotal + paystackFee;
             
             // Prepare order data (will be used to create order after payment is verified)
             const orderData = {
@@ -574,7 +588,9 @@
                     product: item.id,
                     quantity: item.quantity
                 })),
-                total: total,
+                subtotal: subtotal,
+                paystackFee: paystackFee,
+                total: totalWithFee,
                 customer: {
                     firstName: formData.firstName,
                     lastName: formData.lastName,
@@ -597,7 +613,7 @@
             
             try {
                 // Initialize Paystack payment directly - order will be created AFTER payment verification
-                await initializePaystackPayment(null, formData.email, total, formData, orderData);
+                await initializePaystackPayment(null, formData.email, totalWithFee, formData, orderData, paystackFee);
                 
             } catch (error) {
                 console.error('Error initializing payment:', error);
@@ -607,9 +623,11 @@
         }
         
         // Initialize Paystack payment - order data is passed and will be used during payment verification
-        async function initializePaystackPayment(orderId, email, amount, customerInfo, orderData) {
+        async function initializePaystackPayment(orderId, email, amount, customerInfo, orderData, paystackFee) {
             try {
                 console.log('Initializing Paystack payment');
+                console.log('Amount:', amount);
+                console.log('Paystack fee:', paystackFee);
                 
                 // Use Paystack inline payment directly from frontend
                 // Note: Paystack will generate its own reference, we'll capture it in the callback
@@ -624,7 +642,9 @@
                         metadata: {
                             customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
                             customer_phone: customerInfo.phone,
-                            order_total: amount
+                            order_total: amount,
+                            paystack_fee: paystackFee,
+                            original_subtotal: orderData.subtotal
                         },
                         callback: function(response) {
                             console.log('Paystack callback:', response);
@@ -801,10 +821,16 @@
         function openPaymentModal(orderId, email, amount) {
             const modal = document.getElementById('paymentModal');
             if (modal) {
+                // Calculate fee for display
+                const subtotal = amount;
+                const paystackFee = (subtotal * 1.95) / 100;
+                const totalWithFee = subtotal + paystackFee;
+                
                 document.getElementById('paymentEmail').value = email;
-                document.getElementById('paymentAmount').value = amount;
-                document.getElementById('modalSubtotal').textContent = `₵${amount.toLocaleString()}`;
-                document.getElementById('modalTotal').textContent = `₵${amount.toLocaleString()}`;
+                document.getElementById('paymentAmount').value = totalWithFee.toFixed(2);
+                document.getElementById('modalSubtotal').textContent = `₵${subtotal.toLocaleString()}`;
+                document.getElementById('modalFee').textContent = `₵${paystackFee.toFixed(2)}`;
+                document.getElementById('modalTotal').textContent = `₵${totalWithFee.toLocaleString()}`;
                 modal.classList.add('show');
             }
         }

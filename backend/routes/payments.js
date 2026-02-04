@@ -177,7 +177,7 @@ router.post('/verify', optionalAuth, async (req, res) => {
                     paymentMethod: orderData.paymentMethod || 'card',
                     status: 'confirmed',
                     paymentStatus: 'paid',
-                    paymentReference: reference,
+                    paystackReference: reference,
                     paidAt: new Date()
                 });
 
@@ -196,8 +196,8 @@ router.post('/verify', optionalAuth, async (req, res) => {
                 });
             } else {
                 // Original flow: Find existing order by payment reference and update it
-                console.log('Looking for existing order with paymentReference:', reference);
-                const order = await Order.findOne({ paymentReference: reference });
+                console.log('Looking for existing order with paystackReference:', reference);
+                const order = await Order.findOne({ paystackReference: reference });
 
                 if (!order) {
                     console.log('Order not found for reference:', reference);
@@ -220,6 +220,7 @@ router.post('/verify', optionalAuth, async (req, res) => {
                 order.paymentStatus = 'paid';
                 order.orderStatus = 'confirmed';
                 order.paymentMethod = response.data.channel || 'card';
+                order.paystackReference = reference;
                 order.paidAt = new Date();
                 
                 // Store authorization code for future payments if needed
@@ -283,7 +284,7 @@ router.post('/webhook', async (req, res) => {
         switch (event.event) {
             case 'charge.success':
                 const reference = event.data.reference;
-                const order = await Order.findOne({ paymentReference: reference });
+                const order = await Order.findOne({ paystackReference: reference });
 
                 if (order) {
                     order.paymentStatus = 'paid';
@@ -304,7 +305,7 @@ router.post('/webhook', async (req, res) => {
 
             case 'charge.failure':
                 const failedReference = event.data.reference;
-                const failedOrder = await Order.findOne({ paymentReference: failedReference });
+                const failedOrder = await Order.findOne({ paystackReference: failedReference });
 
                 if (failedOrder) {
                     failedOrder.paymentStatus = 'failed';
