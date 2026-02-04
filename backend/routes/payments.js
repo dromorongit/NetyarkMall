@@ -175,7 +175,7 @@ router.post('/verify', optionalAuth, async (req, res) => {
                     customer: orderData.customer,
                     shipping: orderData.shipping,
                     paymentMethod: orderData.paymentMethod || 'card',
-                    status: 'confirmed',
+                    status: 'processing',
                     paymentStatus: 'paid',
                     paystackReference: reference,
                     paidAt: new Date()
@@ -218,7 +218,7 @@ router.post('/verify', optionalAuth, async (req, res) => {
 
                 // Update order payment status
                 order.paymentStatus = 'paid';
-                order.orderStatus = 'confirmed';
+                order.status = 'processing';
                 order.paymentMethod = response.data.channel || 'card';
                 order.paystackReference = reference;
                 order.paidAt = new Date();
@@ -288,7 +288,7 @@ router.post('/webhook', async (req, res) => {
 
                 if (order) {
                     order.paymentStatus = 'paid';
-                    order.orderStatus = 'confirmed';
+                    order.status = 'processing';
                     order.paymentMethod = event.data.channel || 'card';
                     order.paidAt = new Date();
                     
