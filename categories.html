@@ -6,6 +6,7 @@
     <title>Categories - Netyark Mall | Shop by Category</title>
     <meta name="description" content="Browse all product categories at Netyark Mall - Kitchen Appliances, Beauty & Personal Care, Photography & Content Creation Tools, Nail Supplies, Kids & Babies, Home Essentials, Lighting & Home Decor.">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="category-cards.css">
     <link rel="icon" type="image/jpeg" href="Netyark.jfif">
     <link rel="shortcut icon" type="image/jpeg" href="Netyark.jfif">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -91,109 +92,152 @@
 
             <!-- Categories Grid -->
             <section class="categories-section">
-                <div class="category-filters">
-                    <button class="filter-btn active" data-category="all">All Categories</button>
-                    <button class="filter-btn" data-category="kitchen-appliances">Kitchen Appliances</button>
-                    <button class="filter-btn" data-category="beauty-personal-care">Beauty & Personal Care</button>
-                    <button class="filter-btn" data-category="photography-tools">Photography Tools</button>
-                    <button class="filter-btn" data-category="nail-supplies">Nail Supplies</button>
-                    <button class="filter-btn" data-category="kids-babies">Kids & Babies</button>
-                    <button class="filter-btn" data-category="home-essentials">Home Essentials</button>
-                    <button class="filter-btn" data-category="lighting-home-decor">Lighting & Home Decor</button>
-                </div>
-
-                <div class="categories-grid" id="categoriesGrid">
-                    <!-- Kitchen Appliances Category -->
-                    <div class="category-card" data-category="kitchen-appliances" id="kitchen-appliances">
-                        <div class="category-image">
-                            <img src="kitchen.jpg" alt="Kitchen Appliances">
-                        </div>
-                        <div class="category-content">
-                            <h3>Kitchen Appliances</h3>
-                            <p>Modern appliances for your kitchen needs</p>
-                            <span class="product-count">120+ Products</span>
-                            <a href="kitchen-appliances.html" class="btn btn-outline">Browse</a>
-                        </div>
+                <div class="container">
+                    <div class="category-filters">
+                        <button class="filter-btn active" data-category="all"><span>All Categories</span></button>
+                        <button class="filter-btn" data-category="kitchen-appliances"><span>Kitchen</span></button>
+                        <button class="filter-btn" data-category="beauty-personal-care"><span>Beauty</span></button>
+                        <button class="filter-btn" data-category="photography-tools"><span>Photography</span></button>
+                        <button class="filter-btn" data-category="nail-supplies"><span>Nail Supplies</span></button>
+                        <button class="filter-btn" data-category="kids-babies"><span>Kids & Babies</span></button>
+                        <button class="filter-btn" data-category="home-essentials"><span>Home</span></button>
+                        <button class="filter-btn" data-category="lighting-home-decor"><span>Lighting</span></button>
                     </div>
 
-                    <!-- Beauty & Personal Care Category -->
-                    <div class="category-card" data-category="beauty-personal-care" id="beauty-personal-care">
-                        <div class="category-image">
-                            <img src="beauty.jpg" alt="Beauty & Personal Care">
+                    <div class="categories-grid" id="categoriesGrid">
+                        <!-- Kitchen Appliances Category -->
+                        <div class="category-card" data-category="kitchen-appliances" id="kitchen-appliances">
+                            <div class="category-image">
+                                <img src="kitchen.jpg" alt="Kitchen Appliances">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-blender"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Kitchen Appliances</h3>
+                                <p>Modern appliances for your kitchen needs - blenders, mixers, processors & more</p>
+                                <span class="product-count"><i class="fas fa-box-open"></i> 120+ Products</span>
+                                <a href="kitchen-appliances.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="category-content">
-                            <h3>Beauty & Personal Care</h3>
-                            <p>Premium beauty and wellness products</p>
-                            <span class="product-count">180+ Products</span>
-                            <a href="beauty-personal-care.html" class="btn btn-outline">Browse</a>
-                        </div>
-                    </div>
 
-                    <!-- Photography & Content Creation Tools Category -->
-                    <div class="category-card" data-category="photography-tools" id="photography-tools">
-                        <div class="category-image">
-                            <img src="photography.jpg" alt="Photography & Content Creation Tools">
+                        <!-- Beauty & Personal Care Category -->
+                        <div class="category-card" data-category="beauty-personal-care" id="beauty-personal-care">
+                            <div class="category-image">
+                                <img src="beauty.jpg" alt="Beauty & Personal Care">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-spa"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Beauty & Personal Care</h3>
+                                <p>Premium beauty and wellness products for your self-care routine</p>
+                                <span class="product-count"><i class="fas fa-box-open"></i> 180+ Products</span>
+                                <a href="beauty-personal-care.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="category-content">
-                            <h3>Photography & Content Creation Tools</h3>
-                            <p>Professional tools for creators and photographers</p>
-                            <span class="product-count">150+ Products</span>
-                            <a href="photography-content-creation-tools.html" class="btn btn-outline">Browse</a>
-                        </div>
-                    </div>
 
-                    <!-- Nail Supplies Category -->
-                    <div class="category-card" data-category="nail-supplies" id="nail-supplies">
-                        <div class="category-image">
-                            <img src="nails.jpg" alt="Nail Supplies">
+                        <!-- Photography & Content Creation Tools Category -->
+                        <div class="category-card" data-category="photography-tools" id="photography-tools">
+                            <div class="category-image">
+                                <img src="photography.jpg" alt="Photography & Content Creation Tools">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Photography & Content Creation</h3>
+                                <p>Professional tools for creators, photographers & videographers</p>
+                                <span class="product-count"><i class="fas fa-box-open"></i> 150+ Products</span>
+                                <a href="photography-content-creation-tools.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="category-content">
-                            <h3>Nail Supplies</h3>
-                            <p>Professional nail care and styling products</p>
-                            <span class="product-count">50+ Products</span>
-                            <a href="nail-supplies.html" class="btn btn-outline">Browse</a>
-                        </div>
-                    </div>
 
-                    <!-- Kids & Babies Category -->
-                    <div class="category-card" data-category="kids-babies" id="kids-babies">
-                        <div class="category-image">
-                            <img src="kids.jpg" alt="Kids & Babies">
+                        <!-- Nail Supplies Category -->
+                        <div class="category-card" data-category="nail-supplies" id="nail-supplies">
+                            <div class="category-image">
+                                <img src="nails.jpg" alt="Nail Supplies">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-hand-sparkles"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Nail Supplies</h3>
+                                <p>Professional nail care, art & styling products for salon-quality results</p>
+                                <span class="product-count"><i class="fas fa-box-open"></i> 50+ Products</span>
+                                <a href="nail-supplies.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="category-content">
-                            <h3>Kids & Babies</h3>
-                            <p>Fun and safe products for children and babies</p>
-                            <span class="product-count">85+ Products</span>
-                            <a href="kids-babies.html" class="btn btn-outline">Browse</a>
-                        </div>
-                    </div>
 
-                    <!-- Home Essentials Category -->
-                    <div class="category-card" data-category="home-essentials" id="home-essentials">
-                        <div class="category-image">
-                            <img src="homeessentials.jpg" alt="Home Essentials">
+                        <!-- Kids & Babies Category -->
+                        <div class="category-card" data-category="kids-babies" id="kids-babies">
+                            <div class="category-image">
+                                <img src="kids.jpg" alt="Kids & Babies">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-baby"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Kids & Babies</h3>
+                                <p>Fun, safe & educational products for children and babies</p>
+                                <span class="product-count"><i class="fas fa-box-open"></i> 85+ Products</span>
+                                <a href="kids-babies.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="category-content">
-                            <h3>Home Essentials</h3>
-                            <p>Essential items for your home comfort</p>
-                            <span class="product-count">100+ Products</span>
-                            <a href="home-essentials.html" class="btn btn-outline">Browse</a>
-                        </div>
-                    </div>
 
-                    <!-- Lighting & Home Decor Category -->
-                    <div class="category-card" data-category="lighting-home-decor" id="lighting-home-decor">
-                        <div class="category-image">
-                            <img src="lighting.jpg" alt="Lighting & Home Decor">
+                        <!-- Home Essentials Category -->
+                        <div class="category-card" data-category="home-essentials" id="home-essentials">
+                            <div class="category-image">
+                                <img src="homeessentials.jpg" alt="Home Essentials">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Home Essentials</h3>
+                                <p>Essential household items for comfort & convenience</p>
+                                <span class="product-count"><i class="fas fa-box-open"></i> 100+ Products</span>
+                                <a href="home-essentials.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="category-content">
-                            <h3>Lighting & Home Decor</h3>
-                            <p>Transform your space with beautiful lighting and decor</p>
-                            <span class="product-count">75+ Products</span>
-                            <a href="lighting-home-decor.html" class="btn btn-outline">Browse</a>
+
+                        <!-- Lighting & Home Decor Category -->
+                        <div class="category-card" data-category="lighting-home-decor" id="lighting-home-decor">
+                            <div class="category-image">
+                                <img src="lighting.jpg" alt="Lighting & Home Decor">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Lighting & Home Decor</h3>
+                                <p>Transform your space with beautiful lighting, decor & accessories</p>
+                                <span class="product-count"><i class="fas fa-box-open"></i> 75+ Products</span>
+                                <a href="lighting-home-decor.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
             </section>
         </div>
     </main>
