@@ -5789,7 +5789,25 @@ a:hover {
 .moq-label {
     color: #FF6B35;
     font-weight: 600;
+    font-size: 0.75rem;
+}
+
+/* Wholesale quantity controls - smaller size */
+.wholesale-card .quantity-btn {
+    width: 28px;
+    height: 28px;
     font-size: 0.9rem;
+}
+
+.wholesale-card .quantity {
+    font-size: 0.85rem;
+    min-width: 24px;
+}
+
+.wholesale-card .quantity-selector input {
+    width: 50px;
+    font-size: 0.85rem;
+    padding: 0.35rem;
 }
 
 .wholesale-savings {
