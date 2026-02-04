@@ -468,35 +468,65 @@
                         <div class="product-actions">
                             <div class="primary-actions">
                                 <!-- Regular Add to Cart - Always shown for all products -->
-                                <div class="quantity-selector">
+                                <div class="regular-quantity-selector">
                                     <label for="productQuantity">Quantity:</label>
-                                    <div class="quantity-controls">
-                                        <button class="quantity-btn" onclick="changeQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
-                                        <input type="number" id="productQuantity" value="1" min="1" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
-                                        <button class="quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                    <div class="regular-quantity-controls">
+                                        <button class="regular-quantity-btn" onclick="changeQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
+                                        <input type="number" id="productQuantity" class="regular-quantity-input" value="1" min="1" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
+                                        <button class="regular-quantity-btn" onclick="changeQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
                                     </div>
                                 </div>
-                                <button class="btn btn-primary add-to-cart-btn" data-product-id="${productId}" onclick="handleProductAddToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
+                                <button class="regular-add-to-cart-btn" onclick="handleProductAddToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i> Add to Cart
                                 </button>
                                 ${isWholesale ? `
-                                    <!-- Wholesale section - Only shown for wholesale products -->
-                                    <div class="wholesale-section">
-                                        <h4><i class="fas fa-boxes"></i> Wholesale Options</h4>
-                                        <div class="wholesale-controls">
-                                            <div class="quantity-selector wholesale-quantity">
-                                                <label for="wholesaleQuantity">Wholesale Quantity:</label>
-                                                <div class="quantity-controls">
-                                                    <button class="quantity-btn" onclick="changeWholesaleQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
-                                                    <input type="number" id="wholesaleQuantity" value="${moq}" min="${moq}" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
-                                                    <button class="quantity-btn" onclick="changeWholesaleQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
-                                                </div>
-                                                <small class="moq-note">Minimum: ${moq} units</small>
-                                            </div>
-                                            <button class="btn btn-secondary wholesale-add-btn" onclick="handleWholesaleAddToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
-                                                <i class="fas fa-cart-plus"></i> Add Wholesale Quantity
-                                            </button>
+                                    <!-- Wholesale Options Section - New Enhanced Styling -->
+                                    <div class="wholesale-options-section">
+                                        <div class="wholesale-options-header">
+                                            <i class="fas fa-boxes"></i>
+                                            <h3>View wholesale options</h3>
                                         </div>
+                                        
+                                        <!-- Wholesale Price Display -->
+                                        <div class="wholesale-price-display">
+                                            <span class="price">₵${wholesalePrice.toFixed(2)}</span>
+                                            <span class="unit">/unit</span>
+                                            <span class="original-price">₵${product.price.toFixed(2)}</span>
+                                            <div class="wholesale-savings-badge">
+                                                <i class="fas fa-tag"></i>
+                                                Save ${(Math.round(((product.price - wholesalePrice) / product.price) * 100))}%
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Wholesale Quantity Selector (starts from MOQ) -->
+                                        <div class="wholesale-quantity-selector">
+                                            <label for="wholesaleQuantity">Add wholesale quantity:</label>
+                                            <div class="wholesale-quantity-controls">
+                                                <button class="wholesale-quantity-btn" onclick="changeWholesaleQuantity(-1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
+                                                <input type="number" id="wholesaleQuantity" class="wholesale-quantity-input" value="${moq}" min="${moq}" max="${stockCount}" ${stockCount <= 0 ? 'disabled' : ''}>
+                                                <button class="wholesale-quantity-btn" onclick="changeWholesaleQuantity(1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                            </div>
+                                        </div>
+                                        <div class="moq-display">
+                                            <strong>Minimum Order Quantity:</strong> ${moq} units
+                                        </div>
+                                        
+                                        <!-- Add Wholesale Quantity Button -->
+                                        <button class="add-wholesale-btn" onclick="handleWholesaleAddToCart('${productId}')" ${!inStock ? 'disabled' : ''}>
+                                            <i class="fas fa-cart-plus"></i> Add Wholesale Quantity
+                                        </button>
+                                        
+                                        <!-- Wholesale Tier Info -->
+                                        ${product.wholesaleTiers ? `
+                                            <div class="wholesale-tier-info">
+                                                <h4>Volume Discounts</h4>
+                                                <ul class="tier-list">
+                                                    ${product.wholesaleTiers.map(tier => `
+                                                        <li><span>${tier.minQty}+ units</span> <strong>₵${tier.price.toFixed(2)}/unit</strong></li>
+                                                    `).join('')}
+                                                </ul>
+                                            </div>
+                                        ` : ''}
                                     </div>
                                 ` : ''}
                             </div>
