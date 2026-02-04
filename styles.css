@@ -5749,9 +5749,11 @@ a:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Hide Add to Cart and Compare buttons on wholesale cards */
+/* Hide Add to Cart, Compare, Quick View, and Wishlist buttons on wholesale cards */
 .wholesale-card .add-to-cart-btn,
-.wholesale-card .compare-btn {
+.wholesale-card .compare-btn,
+.wholesale-card .quick-view-btn,
+.wholesale-card .wishlist-btn {
     display: none !important;
 }
 
