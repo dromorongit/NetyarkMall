@@ -865,7 +865,7 @@ a:hover {
 /* Product Card - Mobile App Style */
 .product-card {
     background: var(--card-bg);
-    border-radius: 16px;
+    border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     transition: all 0.3s ease;
