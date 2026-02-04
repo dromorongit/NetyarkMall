@@ -5730,8 +5730,42 @@ a:hover {
 
 /* Wholesale Styles */
 .wholesale-card {
-    border: 2px solid #FF6B35;
+    background: var(--card-bg);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
     position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 2px solid #FF6B35;
+}
+
+.wholesale-card:hover,
+.wholesale-card:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Hide Add to Cart and Compare buttons on wholesale cards */
+.wholesale-card .add-to-cart-btn,
+.wholesale-card .compare-btn {
+    display: none !important;
+}
+
+/* Wholesale card actions - only show View Details */
+.wholesale-card .product-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+/* Hide the product overlay on wholesale cards */
+.wholesale-card .product-overlay {
+    display: none !important;
 }
 
 .wholesale-card .product-badge.wholesale {
