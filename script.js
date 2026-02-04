@@ -1366,7 +1366,7 @@ function createWholesaleProductCard(product) {
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                     <div class="wholesale-savings">
-                        <small>Wholesale pricing</small>
+                        <small>Per unit</small>
                     </div>
                 </div>
                 <div class="product-card-actions">

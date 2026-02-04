@@ -5789,25 +5789,34 @@ a:hover {
 .moq-label {
     color: #FF6B35;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
 }
 
 /* Wholesale quantity controls - smaller size */
 .wholesale-card .quantity-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.9rem;
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
 }
 
 .wholesale-card .quantity {
-    font-size: 0.85rem;
-    min-width: 24px;
+    font-size: 0.75rem;
+    min-width: 20px;
 }
 
 .wholesale-card .quantity-selector input {
-    width: 50px;
-    font-size: 0.85rem;
-    padding: 0.35rem;
+    width: 44px;
+    font-size: 0.75rem;
+    padding: 0.25rem;
+}
+
+/* Change Wholesale label to Per Unit using CSS */
+.wholesale-card .wholesale-price-label::before {
+    content: "Per Unit";
+}
+
+.wholesale-card .wholesale-price-label {
+    font-size: 0.65rem;
 }
 
 .wholesale-savings {
