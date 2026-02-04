@@ -1273,11 +1273,11 @@ function createProductCard(product) {
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
             </div>
             <div class="product-info">
-                <h3 class="product-title" style="font-size: 0.9rem; margin-bottom: 0.5rem;">${product.name || 'Unnamed Product'}</h3>
-                <div class="product-price" style="font-size: 0.85rem;">
-                    <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
+                <h3 class="product-title" style="font-size: 0.9rem !important; margin-bottom: 0.5rem !important;">${product.name || 'Unnamed Product'}</h3>
+                <div class="product-price" style="font-size: 0.8rem !important;">
+                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
-                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
                 <div class="product-card-actions">
@@ -1418,11 +1418,11 @@ function createDealCard(product) {
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
             </div>
             <div class="product-info">
-                <h3 class="product-title" style="font-size: 0.9rem; margin-bottom: 0.5rem;">${product.name || 'Unnamed Product'}</h3>
-                <div class="product-price" style="font-size: 0.85rem;">
-                    <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
+                <h3 class="product-title" style="font-size: 0.9rem !important; margin-bottom: 0.5rem !important;">${product.name || 'Unnamed Product'}</h3>
+                <div class="product-price" style="font-size: 0.8rem !important;">
+                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
-                        `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
+                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
                 <div class="product-card-actions">

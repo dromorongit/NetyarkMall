@@ -973,7 +973,7 @@ a:hover {
 }
 
 .product-title {
-    font-size: 1.1rem;
+    font-size: 0.9rem !important;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--dark-gray);
@@ -1005,6 +1005,19 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 0.8rem !important;
+}
+
+.product-price .current-price {
+    font-size: inherit !important;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.product-price .original-price {
+    font-size: 0.7rem !important;
+    color: var(--medium-gray);
+    text-decoration: line-through;
 }
 
 .product-actions {
@@ -1087,13 +1100,13 @@ a:hover {
 }
 
 .current-price {
-    font-size: 1.2rem;
+    font-size: 1rem !important;
     font-weight: 700;
     color: var(--primary-green);
 }
 
 .original-price {
-    font-size: 1rem;
+    font-size: 0.8rem !important;
     color: var(--medium-gray);
     text-decoration: line-through;
 }
