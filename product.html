@@ -350,6 +350,11 @@
                 loadRelatedProducts(product.category, productId);
                 loadProductReviews(productId);
                 updateBreadcrumb(product);
+                
+                // Initialize rating system and review modal AFTER product details are displayed
+                // This ensures the elements exist before we try to attach event listeners
+                initializeRatingSystem();
+                initializeReviewModal();
             } catch (error) {
                 console.error('Error loading product:', error);
                 showErrorState();
@@ -996,11 +1001,14 @@
             noReviewsMessage.insertAdjacentHTML('beforebegin', reviewsHtml);
         }
 
-        // Initialize rating system when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        // Only initialize rating system and review modal on DOMContentLoaded if NOT on product detail page
+        // On product detail page, these are initialized after product details are loaded
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.get('id')) {
+            // Not on product detail page, safe to initialize now
             initializeRatingSystem();
             initializeReviewModal();
-        });
+        }
 
         // Review Modal Functionality
         function initializeReviewModal() {
