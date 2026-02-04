@@ -1252,17 +1252,13 @@ function createProductCard(product) {
     // Handle API product properties (use _id if id not present, stock if stockCount not present, etc.)
     const productId = product.id || product._id;
     const stockCount = product.stockCount || product.stock || 0;
-    const isNew = product.isNew || product.isNewArrival;
-    const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
-
+    
     const discount = product.originalPrice > product.price ?
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-    const isProductInWishlist = typeof window.isInWishlist === 'function' && window.isInWishlist(productId);
-
     // Check inventory status directly from product data
     const available = product.stockStatus === 'in-stock' && stockCount > 0;
-    const lowStock = available && stockCount <= 5; // Consider low stock if 5 or fewer items
+    const lowStock = available && stockCount <= 5;
 
     const stockStatus = !available ? 'out-of-stock' :
                         lowStock ? 'low-stock' : 'in-stock';
@@ -1275,42 +1271,19 @@ function createProductCard(product) {
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
-                <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="viewProductDetails('${productId}')">Quick View</button>
-                    <button class="add-to-cart-btn" ${!available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> ${!available ? 'Out of Stock' : 'Add to Cart'}
-                    </button>
-                </div>
             </div>
             <div class="product-info">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
-                ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
                 <div class="product-price">
                     <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
-                <div class="quantity-controls" style="display: flex; align-items: center; gap: 8px; margin: 10px 0;">
-                    <button class="quantity-btn decrease" data-product-id="${productId}" data-delta="-1" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
-                    <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount || 999}" ${!available ? 'disabled' : ''} style="width: 50px; text-align: center; padding: 6px; border: 1px solid var(--light-gray); border-radius: 4px;">
-                    <button class="quantity-btn increase" data-product-id="${productId}" data-delta="1" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
-                </div>
                 <div class="product-card-actions">
-                    <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                    </button>
                     <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
                         <i class="fas fa-eye"></i> View Details
                     </button>
-                    <div class="product-actions">
-                        <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
-                            <i class="fas fa-balance-scale"></i>
-                        </button>
-                        <button class="action-btn wishlist-btn ${isProductInWishlist ? 'in-wishlist' : ''}" onclick="toggleWishlist('${productId}')" title="Wishlist">
-                            <i class="fa${isProductInWishlist ? 's' : 'r'} fa-heart"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1429,7 +1402,6 @@ function createDealCard(product) {
     const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
     const productId = product.id || product._id;
     const stockCount = product.stockCount || product.stock || 0;
-    const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
     const available = product.stockStatus === 'in-stock' && stockCount > 0;
     const lowStock = available && stockCount <= 5;
 
@@ -1444,42 +1416,19 @@ function createDealCard(product) {
             ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
-                <div class="product-overlay">
-                    <button class="quick-view-btn" onclick="viewProductDetails('${productId}')">Quick View</button>
-                    <button class="add-to-cart-btn" ${!available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> ${!available ? 'Out of Stock' : 'Add to Cart'}
-                    </button>
-                </div>
             </div>
             <div class="product-info">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
-                ${product.brand ? `<p class="product-brand">Brand: ${product.brand}</p>` : ''}
                 <div class="product-price">
                     <span class="current-price">₵${(product.price || 0).toLocaleString()}</span>
                     ${product.originalPrice > product.price ?
                         `<span class="original-price">₵${product.originalPrice.toLocaleString()}</span>` : ''}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
-                <div class="quantity-controls" style="display: flex; align-items: center; gap: 8px; margin: 10px 0;">
-                    <button class="quantity-btn decrease" onclick="adjustCardQuantity('${productId}', -1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
-                    <input type="number" id="qty-${productId}" value="1" min="1" max="${stockCount || 999}" ${!available ? 'disabled' : ''} style="width: 50px; text-align: center; padding: 6px; border: 1px solid var(--light-gray); border-radius: 4px;">
-                    <button class="quantity-btn increase" onclick="adjustCardQuantity('${productId}', 1)" ${!available ? 'disabled' : ''} style="width: 32px; height: 32px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
-                </div>
                 <div class="product-card-actions">
-                    <button class="btn btn-primary add-to-cart-btn" ${!available ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                    </button>
                     <button class="btn btn-outline view-details-btn" onclick="viewProductDetails('${productId}')">
                         <i class="fas fa-eye"></i> View Details
                     </button>
-                    <div class="product-actions">
-                        <button class="action-btn compare-btn" onclick="addToCompare('${productId}')" title="Compare">
-                            <i class="fas fa-balance-scale"></i>
-                        </button>
-                        <button class="action-btn wishlist-btn" onclick="toggleWishlist('${productId}')" title="Wishlist">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
