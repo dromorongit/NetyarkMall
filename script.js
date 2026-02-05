@@ -1368,16 +1368,8 @@ function createWholesaleProductCard(product) {
                     </div>
                 </div>
                 <div class="product-card-actions">
-                    <div class="wholesale-quantity-controls" style="margin-bottom: 10px;">
-                        <label style="font-size: 12px; color: var(--medium-gray); margin-bottom: 5px; display: block;">Quantity (Min: ${moq}):</label>
-                        <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
-                            <button class="quantity-btn decrease" onclick="console.log('Decrease button clicked for product:', '${productId}'); adjustWholesaleQuantity('${productId}', -1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; z-index: 20; position: relative; pointer-events: auto;">-</button>
-                            <input type="number" id="wholesale-qty-${productId}" value="${moq}" min="${moq}" step="1" style="width: 60px; text-align: center; padding: 5px; border: 1px solid var(--light-gray); border-radius: 4px;">
-                            <button class="quantity-btn increase" onclick="console.log('Increase button clicked for product:', '${productId}'); adjustWholesaleQuantity('${productId}', 1)" style="width: 30px; height: 30px; border: 1px solid var(--light-gray); background: white; border-radius: 4px; cursor: pointer; z-index: 20; position: relative; pointer-events: auto;">+</button>
-                        </div>
-                    </div>
                     <button class="btn btn-primary add-to-cart-btn" style="position: relative; z-index: 20; pointer-events: auto;">
-                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                        <i class="fas fa-shopping-cart"></i> Add to Cart (Min: ${moq})
                     </button>
                     <button class="btn btn-outline view-details-btn" onclick="console.log('View Details button clicked for product:', '${productId}'); viewProductDetails('${productId}')" style="position: relative; z-index: 10;">
                         <i class="fas fa-eye"></i> View Details
