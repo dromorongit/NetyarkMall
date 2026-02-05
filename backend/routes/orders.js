@@ -1,9 +1,30 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const Order = require('../models/Order');
+const User = require('../models/User');
 const { auth, adminAuth } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Optional auth middleware - works for both authenticated and guest users
+const optionalAuth = async (req, res, next) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+        // Guest user - continue without user
+        req.user = null;
+        return next();
+    }
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        req.user = await User.findById(decoded.id);
+        next();
+    } catch (err) {
+        // Invalid token - continue as guest
+        req.user = null;
+        next();
+    }
+};
 
 // Get all orders (admin only)
 router.get('/', auth, adminAuth, async (req, res) => {
@@ -29,11 +50,18 @@ router.get('/:id', auth, adminAuth, async (req, res) => {
   }
 });
 
-// Get user's orders
-router.get('/my', auth, async (req, res) => {
+// Get user's orders (supports both logged-in users and guest orders)
+router.get('/my', optionalAuth, async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).populate('products.product');
-    res.json(orders);
+    // If user is logged in, return their orders
+    if (req.user) {
+      const orders = await Order.find({ user: req.user._id }).populate('products.product');
+      return res.json(orders);
+    }
+    
+    // For guests, check if there's a guest order ID in header or return empty
+    // This can be extended to support guest order lookup
+    res.json([]);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
