@@ -270,9 +270,17 @@ router.put('/:id', auth, adminAuth, upload.fields([
       });
       const mediaUrls = await Promise.all(uploadPromises);
       
-      // Combine new media with existing media (if any)
-      const existingMedia = currentProduct.additionalMedia || [];
-      productData.additionalMedia = [...existingMedia, ...mediaUrls];
+      // Check if we should replace or append additional media
+      const replaceAdditionalMedia = productData.replaceAdditionalMedia === 'true' || productData.replaceAdditionalMedia === true;
+      
+      if (replaceAdditionalMedia) {
+        // Replace all additional media with new ones
+        productData.additionalMedia = mediaUrls;
+      } else {
+        // Combine new media with existing media (default behavior)
+        const existingMedia = currentProduct.additionalMedia || [];
+        productData.additionalMedia = [...existingMedia, ...mediaUrls];
+      }
       
       // Delete local additional media files
       req.files.additionalMedia.forEach(file => {
@@ -318,6 +326,38 @@ router.patch('/:id/stock', auth, adminAuth, async (req, res) => {
     const product = await Product.findByIdAndUpdate(req.params.id, { stock }, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Delete additional media from product
+router.delete('/:id/additional-media', auth, adminAuth, async (req, res) => {
+  try {
+    const { mediaUrl } = req.body;
+    const product = await Product.findById(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Remove the media URL from the additionalMedia array
+    if (product.additionalMedia && product.additionalMedia.includes(mediaUrl)) {
+      product.additionalMedia = product.additionalMedia.filter(url => url !== mediaUrl);
+      await product.save();
+      
+      // Try to delete from Cloudinary if it's a Cloudinary URL
+      try {
+        await deleteFromCloudinary(mediaUrl);
+        console.log('Media deleted from Cloudinary successfully');
+      } catch (error) {
+        console.error('Error deleting media from Cloudinary:', error);
+      }
+      
+      res.json({ message: 'Media deleted successfully', product });
+    } else {
+      res.status(404).json({ message: 'Media not found in product' });
+    }
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

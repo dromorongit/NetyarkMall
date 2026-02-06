@@ -838,12 +838,63 @@ async function editProduct(id) {
       currentImagePreview.innerHTML = '<p style="font-size: 12px; color: #666;">No image currently set</p>';
     }
 
+    // Display additional media
+    const additionalMediaPreview = document.getElementById('current-additional-media-preview');
+    if (product.additionalMedia && product.additionalMedia.length > 0) {
+      additionalMediaPreview.innerHTML = product.additionalMedia.map((media, index) => `
+        <div class="additional-media-item" data-index="${index}" data-url="${media}">
+          <img src="${media}" alt="Additional image ${index + 1}">
+          <button type="button" class="delete-media-btn" onclick="deleteAdditionalMedia('${product._id}', '${media}', this)" title="Delete image">×</button>
+        </div>
+      `).join('');
+    } else {
+      additionalMediaPreview.innerHTML = '<p style="font-size: 12px; color: #666;">No additional images</p>';
+    }
+
+    // Set section checkboxes
+    document.getElementById('edit-product-new-arrival').checked = product.isNewArrival || false;
+    document.getElementById('edit-product-fast-selling').checked = product.isFastSelling || false;
+    document.getElementById('edit-product-shop-category').checked = product.isShopByCategory || false;
+    document.getElementById('edit-product-daily-deal').checked = product.isDailyDeal || false;
+
     document.getElementById('edit-product-image').value = '';
+    document.getElementById('edit-product-additional-media').value = '';
     document.getElementById('edit-product-modal').style.display = 'block';
 
   } catch (err) {
     console.error('Error editing product:', err);
     showNotification('Error editing product: ' + err.message, 'error');
+  }
+}
+
+// Delete additional media
+async function deleteAdditionalMedia(productId, mediaUrl, buttonElement) {
+  if (!confirm('Are you sure you want to delete this image?')) {
+    return;
+  }
+
+  try {
+    const response = await authFetch(`${API_BASE}/products/${productId}/additional-media`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ mediaUrl })
+    });
+
+    if (response && response.ok) {
+      showNotification('Image deleted successfully!', 'success');
+      // Remove the element from the DOM
+      buttonElement.closest('.additional-media-item').remove();
+      // Clear product cache
+      clearProductCacheAcrossTabs();
+    } else {
+      const errorData = await response.json();
+      showNotification('Failed to delete image: ' + (errorData.message || 'Unknown error'), 'error');
+    }
+  } catch (err) {
+    console.error('Error deleting image:', err);
+    showNotification('Error deleting image: ' + err.message, 'error');
   }
 }
 
@@ -881,6 +932,23 @@ if (document.getElementById('edit-product-form')) {
     if (imageFile) {
       formData.append('image', imageFile);
     }
+
+    // Handle additional media uploads
+    const additionalMediaFiles = document.getElementById('edit-product-additional-media').files;
+    const replaceAdditionalMedia = document.getElementById('edit-replace-additional-media').checked;
+    
+    if (additionalMediaFiles.length > 0) {
+      formData.append('replaceAdditionalMedia', replaceAdditionalMedia);
+      for (let i = 0; i < additionalMediaFiles.length; i++) {
+        formData.append('additionalMedia', additionalMediaFiles[i]);
+      }
+    }
+
+    // Add section checkboxes
+    formData.append('isNewArrival', document.getElementById('edit-product-new-arrival').checked);
+    formData.append('isFastSelling', document.getElementById('edit-product-fast-selling').checked);
+    formData.append('isShopByCategory', document.getElementById('edit-product-shop-category').checked);
+    formData.append('isDailyDeal', document.getElementById('edit-product-daily-deal').checked);
 
     try {
       const response = await authFetch(`${API_BASE}/products/${productId}`, {
