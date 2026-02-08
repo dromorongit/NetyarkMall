@@ -358,14 +358,16 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     
     formData.append('price', Math.round(parseFloat(document.getElementById('product-price').value) * 100) / 100);
     
-    const salesPrice = document.getElementById('product-sales-price').value;
-    if (salesPrice) {
-      formData.append('salesPrice', Math.round(parseFloat(salesPrice) * 100) / 100);
+    const salesPriceValue = document.getElementById('product-sales-price').value;
+    const salesPriceNum = parseFloat(salesPriceValue);
+    if (salesPriceValue && !isNaN(salesPriceNum)) {
+      formData.append('salesPrice', Math.round(salesPriceNum * 100) / 100);
     }
     
-    const originalPrice = document.getElementById('product-original-price').value;
-    if (originalPrice) {
-      formData.append('originalPrice', Math.round(parseFloat(originalPrice) * 100) / 100);
+    const originalPriceValue = document.getElementById('product-original-price').value;
+    const originalPriceNum = parseFloat(originalPriceValue);
+    if (originalPriceValue && !isNaN(originalPriceNum)) {
+      formData.append('originalPrice', Math.round(originalPriceNum * 100) / 100);
     }
     
     formData.append('stock', parseInt(document.getElementById('product-stock').value));
@@ -971,18 +973,16 @@ if (document.getElementById('edit-product-form')) {
 
     formData.append('price', Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100);
     
-    const salesPrice = document.getElementById('edit-product-sales-price').value;
-    if (salesPrice) {
-      formData.append('salesPrice', Math.round(parseFloat(salesPrice) * 100) / 100);
-    } else {
-      formData.append('salesPrice', null);
+    const salesPriceValue = document.getElementById('edit-product-sales-price').value;
+    const salesPriceNum = parseFloat(salesPriceValue);
+    if (salesPriceValue && !isNaN(salesPriceNum)) {
+      formData.append('salesPrice', Math.round(salesPriceNum * 100) / 100);
     }
     
-    const originalPrice = document.getElementById('edit-product-original-price').value;
-    if (originalPrice) {
-      formData.append('originalPrice', Math.round(parseFloat(originalPrice) * 100) / 100);
-    } else {
-      formData.append('originalPrice', null);
+    const originalPriceValue = document.getElementById('edit-product-original-price').value;
+    const originalPriceNum = parseFloat(originalPriceValue);
+    if (originalPriceValue && !isNaN(originalPriceNum)) {
+      formData.append('originalPrice', Math.round(originalPriceNum * 100) / 100);
     }
     formData.append('category', document.getElementById('edit-product-category').value);
     formData.append('stockStatus', document.querySelector('input[name="edit-stock-status"]:checked').value);

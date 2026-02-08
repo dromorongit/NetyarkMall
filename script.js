@@ -1275,9 +1275,9 @@ function createProductCard(product) {
     
     // Calculate discount percentage: (Original Price - Sales Price) / Original Price × 100
     let discount = 0;
-    if (hasSalesPrice) {
+    if (hasSalesPrice && product.price && product.price > 0) {
         discount = Math.round(((product.price - product.salesPrice) / product.price) * 100);
-    } else if (hasOriginalPrice) {
+    } else if (hasOriginalPrice && product.originalPrice && product.originalPrice > 0) {
         discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
     }
 
@@ -1428,9 +1428,9 @@ function createDealCard(product) {
     
     // Calculate discount percentage: (Original Price - Sales Price) / Original Price × 100
     let discount = 0;
-    if (hasSalesPrice) {
+    if (hasSalesPrice && product.price && product.price > 0) {
         discount = Math.round(((product.price - product.salesPrice) / product.price) * 100);
-    } else if (hasOriginalPrice) {
+    } else if (hasOriginalPrice && product.originalPrice && product.originalPrice > 0) {
         discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
     }
     

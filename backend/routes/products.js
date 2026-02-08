@@ -307,17 +307,25 @@ router.put('/:id', auth, adminAuth, upload.fields([
       productData.sizes = productData.sizes.split(',').map(s => s.trim()).filter(s => s);
     }
     
-    // Handle originalPrice and salesPrice that might come as empty string
-    if (productData.originalPrice === '') {
+    // Handle originalPrice and salesPrice that might come as empty string or NaN
+    if (productData.originalPrice === '' || productData.originalPrice === null || isNaN(productData.originalPrice)) {
       productData.originalPrice = null;
-    } else if (productData.originalPrice && typeof productData.originalPrice === 'string') {
+    } else if (typeof productData.originalPrice === 'string') {
       productData.originalPrice = parseFloat(productData.originalPrice);
+      // Check if parsing resulted in NaN
+      if (isNaN(productData.originalPrice)) {
+        productData.originalPrice = null;
+      }
     }
     
-    if (productData.salesPrice === '') {
+    if (productData.salesPrice === '' || productData.salesPrice === null || isNaN(productData.salesPrice)) {
       productData.salesPrice = null;
-    } else if (productData.salesPrice && typeof productData.salesPrice === 'string') {
+    } else if (typeof productData.salesPrice === 'string') {
       productData.salesPrice = parseFloat(productData.salesPrice);
+      // Check if parsing resulted in NaN
+      if (isNaN(productData.salesPrice)) {
+        productData.salesPrice = null;
+      }
     }
 
     const product = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });
