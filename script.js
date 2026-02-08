@@ -1077,16 +1077,26 @@ async function loadFeaturedDeals() {
         if (inStockDeals.length === 0) {
             container.innerHTML = '<p>No featured deals currently in stock.</p>';
         } else {
-            // Apply 7% discount to Daily Deals products
+            // For products with salesPrice, show them with the sales price as the current price
+            // For daily deals with originalPrice, apply 7% discount
             const dealsWithDiscounts = inStockDeals.map(product => {
-                // Apply 7% discount to daily deal products
-                const originalPrice = product.price;
-                const discountedPrice = originalPrice * 0.93; // 7% discount
-                return {
-                    ...product,
-                    price: discountedPrice,
-                    originalPrice: originalPrice
-                };
+                if (product.salesPrice && product.salesPrice > 0) {
+                    // Product has a dedicated sales price - use it as the sale price
+                    return {
+                        ...product,
+                        price: product.salesPrice // Show sales price as current price
+                    };
+                } else if (product.isDailyDeal && product.price > 0) {
+                    // Apply 7% discount to daily deal products without salesPrice
+                    const originalPrice = product.price;
+                    const discountedPrice = originalPrice * 0.93; // 7% discount
+                    return {
+                        ...product,
+                        price: discountedPrice,
+                        originalPrice: originalPrice
+                    };
+                }
+                return product;
             });
 
             container.innerHTML = dealsWithDiscounts.map(product => createDealCard(product)).join('');
@@ -1102,13 +1112,12 @@ async function loadAllDeals() {
     if (!container) return;
 
     try {
-        // Get all products with discounts
-        // OR products that don't have originalPrice set (for backward compatibility)
+        // Get all products with salesPrice OR products with originalPrice (for backward compatibility)
         const deals = getAllProducts()
             .filter(product => {
-                const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-                const noOriginalPrice = !product.originalPrice; // Allow products without originalPrice
-                return hasDiscount || noOriginalPrice;
+                const hasSalesPrice = product.salesPrice && product.salesPrice > 0;
+                const hasOriginalPrice = product.originalPrice && product.originalPrice > product.price;
+                return hasSalesPrice || hasOriginalPrice;
             });
 
         // Filter out out-of-stock products
@@ -1117,10 +1126,17 @@ async function loadAllDeals() {
         if (inStockDeals.length === 0) {
             container.innerHTML = '<p>No deals currently in stock.</p>';
         } else {
-            // Apply 7% discount to Daily Deals products
+            // For products with salesPrice, show them with the sales price as the current price
+            // For daily deals with originalPrice, apply 7% discount
             const dealsWithDiscounts = inStockDeals.map(product => {
-                if (product.isDailyDeal) {
-                    // Apply 7% discount to daily deal products
+                if (product.salesPrice && product.salesPrice > 0) {
+                    // Product has a dedicated sales price - use it as the sale price
+                    return {
+                        ...product,
+                        price: product.salesPrice // Show sales price as current price
+                    };
+                } else if (product.isDailyDeal && product.price > 0) {
+                    // Apply 7% discount to daily deal products without salesPrice
                     const originalPrice = product.price;
                     const discountedPrice = originalPrice * 0.93; // 7% discount
                     return {
@@ -1253,8 +1269,14 @@ function createProductCard(product) {
     const productId = product.id || product._id;
     const stockCount = product.stockCount || product.stock || 0;
     
-    const discount = product.originalPrice > product.price ?
-        Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+    // Check for salesPrice first (new field for sales/discounts), then fall back to originalPrice for deals
+    const hasSalesPrice = product.salesPrice && product.salesPrice > 0;
+    const hasOriginalPrice = product.originalPrice && product.originalPrice > product.price;
+    
+    // Use salesPrice if available, otherwise use originalPrice for discount calculation
+    const discountPrice = hasSalesPrice ? product.salesPrice : product.originalPrice;
+    const discount = (discountPrice && discountPrice > product.price) ?
+        Math.round(((discountPrice - product.price) / discountPrice) * 100) : 0;
 
     // Check inventory status directly from product data
     const available = product.stockStatus === 'in-stock' && stockCount > 0;
@@ -1275,9 +1297,14 @@ function createProductCard(product) {
             <div class="product-info">
                 <h3 class="product-title" style="font-size: 0.9rem !important; margin-bottom: 0.5rem !important;">${product.name || 'Unnamed Product'}</h3>
                 <div class="product-price" style="font-size: 0.8rem !important;">
-                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toFixed(2)}</span>
-                    ${product.originalPrice > product.price ?
-                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toFixed(2)}</span>` : ''}
+                    ${hasSalesPrice ? `
+                        <span class="current-price" style="font-size: inherit !important;">₵${product.salesPrice.toFixed(2)}</span>
+                        <span class="original-price" style="font-size: 0.7rem !important; text-decoration: line-through; color: #999;">₵${product.price.toFixed(2)}</span>
+                    ` : `
+                        <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toFixed(2)}</span>
+                        ${hasOriginalPrice ?
+                            `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toFixed(2)}</span>` : ''}
+                    `}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
                 <div class="product-card-actions">
@@ -1389,7 +1416,15 @@ function createWholesaleProductCard(product) {
 }
 
 function createDealCard(product) {
-    const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    // Check for salesPrice first (new field for sales/discounts), then fall back to originalPrice for deals
+    const hasSalesPrice = product.salesPrice && product.salesPrice > 0;
+    const hasOriginalPrice = product.originalPrice && product.originalPrice > product.price;
+    
+    // Use salesPrice if available, otherwise use originalPrice for discount calculation
+    const discountPrice = hasSalesPrice ? product.salesPrice : product.originalPrice;
+    const discount = (discountPrice && discountPrice > product.price) ?
+        Math.round(((discountPrice - product.price) / discountPrice) * 100) : 0;
+    
     const productId = product.id || product._id;
     const stockCount = product.stockCount || product.stock || 0;
     const available = product.stockStatus === 'in-stock' && stockCount > 0;
@@ -1410,9 +1445,14 @@ function createDealCard(product) {
             <div class="product-info">
                 <h3 class="product-title" style="font-size: 0.9rem !important; margin-bottom: 0.5rem !important;">${product.name || 'Unnamed Product'}</h3>
                 <div class="product-price" style="font-size: 0.8rem !important;">
-                    <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toFixed(2)}</span>
-                    ${product.originalPrice > product.price ?
-                        `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toFixed(2)}</span>` : ''}
+                    ${hasSalesPrice ? `
+                        <span class="current-price" style="font-size: inherit !important;">₵${product.salesPrice.toFixed(2)}</span>
+                        <span class="original-price" style="font-size: 0.7rem !important; text-decoration: line-through; color: #999;">₵${product.price.toFixed(2)}</span>
+                    ` : `
+                        <span class="current-price" style="font-size: inherit !important;">₵${(product.price || 0).toFixed(2)}</span>
+                        ${hasOriginalPrice ?
+                            `<span class="original-price" style="font-size: 0.7rem !important;">₵${product.originalPrice.toFixed(2)}</span>` : ''}
+                    `}
                 </div>
                 ${stockText ? `<p class="stock-status">${stockText}</p>` : ''}
                 <div class="product-card-actions">

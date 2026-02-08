@@ -516,7 +516,7 @@ function renderProducts(products) {
       ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
       ${p.colors && p.colors.length ? `<p><strong>Colors:</strong> ${p.colors.join(', ')}</p>` : ''}
       ${p.sizes && p.sizes.length ? `<p><strong>Sizes:</strong> ${p.sizes.join(', ')}</p>` : ''}
-      <p><strong>Price:</strong> <span style="${p.salesPrice ? 'text-decoration: line-through; color: #999;' : ''}">GHS ${p.price}</span>${p.salesPrice ? ` <strong style="color: var(--primary-color);">SALE: GHS ${p.salesPrice}</strong>` : ''}</p>
+      <p><strong>Original Price:</strong> <span style="${p.salesPrice ? 'text-decoration: line-through; color: #999;' : ''}">GHS ${p.price}</span>${p.salesPrice ? ` <strong style="color: var(--primary-color);">SALE: GHS ${p.salesPrice}</strong>` : ''}</p>
       ${p.originalPrice ? `<p><strong>Deals Price:</strong> GHS ${p.originalPrice}</p>` : ''}
       <p><strong>Stock:</strong> ${p.stock}</p>
       <p><strong>Category:</strong> ${p.category}</p>
@@ -583,7 +583,7 @@ async function loadDailyDeals() {
         <h3>${p.name}</h3>
         <p><strong>Short Desc:</strong> ${p.shortDescription}</p>
         ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
-        <p><strong>Price:</strong> <span style="${p.salesPrice ? 'text-decoration: line-through; color: #999;' : ''}">GHS ${p.price}</span>${p.salesPrice ? ` <strong style="color: var(--primary-color);">SALE: GHS ${p.salesPrice}</strong>` : ''}</p>
+        <p><strong>Original Price:</strong> <span style="${p.salesPrice ? 'text-decoration: line-through; color: #999;' : ''}">GHS ${p.price}</span>${p.salesPrice ? ` <strong style="color: var(--primary-color);">SALE: GHS ${p.salesPrice}</strong>` : ''}</p>
         ${p.originalPrice ? `<p><strong>Deals Price:</strong> GHS ${p.originalPrice}</p>` : ''}
         <p><strong>Stock:</strong> ${p.stock}</p>
         <p><strong>Category:</strong> ${p.category}</p>
