@@ -257,6 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Setup other event listeners
   setupEventListeners();
+  
+  // Initialize product search
+  initProductSearch();
 });
 
 // Setup other event listeners
@@ -471,47 +474,83 @@ async function loadDashboard() {
 }
 
 // Load products
+let allProducts = [];
+
 async function loadProducts() {
   try {
     const res = await authFetch(`${API_BASE}/products`);
     if (!res) return;
 
-    const products = await res.json();
-    const list = document.getElementById('products-list');
-    
-    if (!products || products.length === 0) {
-      list.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-state-icon">📦</div>
-          <h3>No Products Yet</h3>
-          <p>Add your first product to get started.</p>
-        </div>
-      `;
-      return;
-    }
-    
-    list.innerHTML = products.map(p => `
-      <div class="product-item">
-        <h3>${p.name}</h3>
-        <p><strong>Short Desc:</strong> ${p.shortDescription}</p>
-        ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
-        ${p.colors && p.colors.length ? `<p><strong>Colors:</strong> ${p.colors.join(', ')}</p>` : ''}
-        ${p.sizes && p.sizes.length ? `<p><strong>Sizes:</strong> ${p.sizes.join(', ')}</p>` : ''}
-        <p><strong>Price:</strong> GHS ${p.price}</p>
-        <p><strong>Stock:</strong> ${p.stock}</p>
-        <p><strong>Category:</strong> ${p.category}</p>
-        <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
-        <div class="product-actions">
-          <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
-          <button onclick="editProduct('${p._id}')">Edit</button>
-          <button class="delete-btn" onclick="deleteProduct('${p._id}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
+    allProducts = await res.json();
+    renderProducts(allProducts);
   } catch (err) {
     console.error(err);
     showNotification('Error loading products', 'error');
   }
+}
+
+// Render products to the list
+function renderProducts(products) {
+  const list = document.getElementById('products-list');
+  
+  if (!products || products.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📦</div>
+        <h3>No Products Found</h3>
+        <p>${allProducts.length === 0 ? 'Add your first product to get started.' : 'No products match your search.'}</p>
+      </div>
+    `;
+    return;
+  }
+  
+  list.innerHTML = products.map(p => `
+    <div class="product-item">
+      <h3>${p.name}</h3>
+      <p><strong>Short Desc:</strong> ${p.shortDescription}</p>
+      ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
+      ${p.colors && p.colors.length ? `<p><strong>Colors:</strong> ${p.colors.join(', ')}</p>` : ''}
+      ${p.sizes && p.sizes.length ? `<p><strong>Sizes:</strong> ${p.sizes.join(', ')}</p>` : ''}
+      <p><strong>Price:</strong> GHS ${p.price}</p>
+      ${p.originalPrice ? `<p><strong>Original:</strong> GHS ${p.originalPrice}</p>` : ''}
+      <p><strong>Stock:</strong> ${p.stock}</p>
+      <p><strong>Category:</strong> ${p.category}</p>
+      <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
+      <div class="product-actions">
+        <button onclick="updateStock('${p._id}', ${p.stock})">Update Stock</button>
+        <button onclick="editProduct('${p._id}')">Edit</button>
+        <button class="delete-btn" onclick="deleteProduct('${p._id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Search products
+function initProductSearch() {
+  const searchInput = document.getElementById('product-search');
+  if (!searchInput) return;
+  
+  searchInput.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    
+    if (searchTerm === '') {
+      renderProducts(allProducts);
+      return;
+    }
+    
+    const filteredProducts = allProducts.filter(product => {
+      return (
+        product.name.toLowerCase().includes(searchTerm) ||
+        (product.shortDescription && product.shortDescription.toLowerCase().includes(searchTerm)) ||
+        (product.brand && product.brand.toLowerCase().includes(searchTerm)) ||
+        (product.category && product.category.toLowerCase().includes(searchTerm)) ||
+        (product.colors && product.colors.some(color => color.toLowerCase().includes(searchTerm))) ||
+        (product.sizes && product.sizes.some(size => size.toLowerCase().includes(searchTerm)))
+      );
+    });
+    
+    renderProducts(filteredProducts);
+  });
 }
 
 // Load daily deals
