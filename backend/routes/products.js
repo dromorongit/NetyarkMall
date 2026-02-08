@@ -200,6 +200,17 @@ router.post('/', auth, adminAuth, upload.fields([
       productData.isNewArrival = true;
     }
     
+    // Convert string prices to numbers for newly created products
+    if (productData.price && typeof productData.price === 'string') {
+      productData.price = parseFloat(productData.price);
+    }
+    if (productData.salesPrice && typeof productData.salesPrice === 'string') {
+      productData.salesPrice = parseFloat(productData.salesPrice);
+    }
+    if (productData.originalPrice && typeof productData.originalPrice === 'string') {
+      productData.originalPrice = parseFloat(productData.originalPrice);
+    }
+    
     const product = new Product(productData);
     await product.save();
     console.log('[PRODUCTS] Product saved successfully:', { id: product._id, name: product.name, category: product.category });
@@ -296,11 +307,17 @@ router.put('/:id', auth, adminAuth, upload.fields([
       productData.sizes = productData.sizes.split(',').map(s => s.trim()).filter(s => s);
     }
     
-    // Handle originalPrice that might come as empty string
+    // Handle originalPrice and salesPrice that might come as empty string
     if (productData.originalPrice === '') {
       productData.originalPrice = null;
     } else if (productData.originalPrice && typeof productData.originalPrice === 'string') {
       productData.originalPrice = parseFloat(productData.originalPrice);
+    }
+    
+    if (productData.salesPrice === '') {
+      productData.salesPrice = null;
+    } else if (productData.salesPrice && typeof productData.salesPrice === 'string') {
+      productData.salesPrice = parseFloat(productData.salesPrice);
     }
 
     const product = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });

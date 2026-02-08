@@ -358,6 +358,11 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     
     formData.append('price', Math.round(parseFloat(document.getElementById('product-price').value) * 100) / 100);
     
+    const salesPrice = document.getElementById('product-sales-price').value;
+    if (salesPrice) {
+      formData.append('salesPrice', Math.round(parseFloat(salesPrice) * 100) / 100);
+    }
+    
     const originalPrice = document.getElementById('product-original-price').value;
     if (originalPrice) {
       formData.append('originalPrice', Math.round(parseFloat(originalPrice) * 100) / 100);
@@ -511,8 +516,8 @@ function renderProducts(products) {
       ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
       ${p.colors && p.colors.length ? `<p><strong>Colors:</strong> ${p.colors.join(', ')}</p>` : ''}
       ${p.sizes && p.sizes.length ? `<p><strong>Sizes:</strong> ${p.sizes.join(', ')}</p>` : ''}
-      <p><strong>Price:</strong> GHS ${p.price}</p>
-      ${p.originalPrice ? `<p><strong>Original:</strong> GHS ${p.originalPrice}</p>` : ''}
+      <p><strong>Price:</strong> <span style="${p.salesPrice ? 'text-decoration: line-through; color: #999;' : ''}">GHS ${p.price}</span>${p.salesPrice ? ` <strong style="color: var(--primary-color);">SALE: GHS ${p.salesPrice}</strong>` : ''}</p>
+      ${p.originalPrice ? `<p><strong>Deals Price:</strong> GHS ${p.originalPrice}</p>` : ''}
       <p><strong>Stock:</strong> ${p.stock}</p>
       <p><strong>Category:</strong> ${p.category}</p>
       <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
@@ -578,8 +583,8 @@ async function loadDailyDeals() {
         <h3>${p.name}</h3>
         <p><strong>Short Desc:</strong> ${p.shortDescription}</p>
         ${p.brand ? `<p><strong>Brand:</strong> ${p.brand}</p>` : ''}
-        <p><strong>Price:</strong> GHS ${p.price}</p>
-        ${p.originalPrice ? `<p><strong>Original:</strong> GHS ${p.originalPrice}</p>` : ''}
+        <p><strong>Price:</strong> <span style="${p.salesPrice ? 'text-decoration: line-through; color: #999;' : ''}">GHS ${p.price}</span>${p.salesPrice ? ` <strong style="color: var(--primary-color);">SALE: GHS ${p.salesPrice}</strong>` : ''}</p>
+        ${p.originalPrice ? `<p><strong>Deals Price:</strong> GHS ${p.originalPrice}</p>` : ''}
         <p><strong>Stock:</strong> ${p.stock}</p>
         <p><strong>Category:</strong> ${p.category}</p>
         <p><strong>Stock Status:</strong> ${p.stockStatus || 'in-stock'}</p>
@@ -856,6 +861,7 @@ async function editProduct(id) {
     document.getElementById('edit-product-colors').value = product.colors ? product.colors.join(', ') : '';
     document.getElementById('edit-product-sizes').value = product.sizes ? product.sizes.join(', ') : '';
     document.getElementById('edit-product-price').value = product.price;
+    document.getElementById('edit-product-sales-price').value = product.salesPrice || '';
     document.getElementById('edit-product-original-price').value = product.originalPrice || '';
     document.getElementById('edit-product-stock').value = product.stock;
     document.getElementById('edit-product-category').value = product.category;
@@ -965,12 +971,19 @@ if (document.getElementById('edit-product-form')) {
 
     formData.append('price', Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100);
     
+    const salesPrice = document.getElementById('edit-product-sales-price').value;
+    if (salesPrice) {
+      formData.append('salesPrice', Math.round(parseFloat(salesPrice) * 100) / 100);
+    } else {
+      formData.append('salesPrice', null);
+    }
+    
     const originalPrice = document.getElementById('edit-product-original-price').value;
     if (originalPrice) {
       formData.append('originalPrice', Math.round(parseFloat(originalPrice) * 100) / 100);
+    } else {
+      formData.append('originalPrice', null);
     }
-    
-    formData.append('stock', parseInt(document.getElementById('edit-product-stock').value));
     formData.append('category', document.getElementById('edit-product-category').value);
     formData.append('stockStatus', document.querySelector('input[name="edit-stock-status"]:checked').value);
 

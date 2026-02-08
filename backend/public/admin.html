@@ -138,7 +138,11 @@
                   <input type="number" id="product-price" placeholder="0.00" step="0.01" required>
                 </div>
                 <div class="form-group">
-                  <label for="product-original-price">Original Price (GHS)</label>
+                  <label for="product-sales-price">Sales Price (GHS)</label>
+                  <input type="number" id="product-sales-price" placeholder="Discounted price" step="0.01">
+                </div>
+                <div class="form-group">
+                  <label for="product-original-price">Deals Price (GHS)</label>
                   <input type="number" id="product-original-price" placeholder="For daily deals" step="0.01">
                 </div>
                 <div class="form-group">
@@ -718,8 +722,12 @@
             <input type="number" id="edit-product-price" step="0.01" required>
           </div>
           <div class="form-group">
-            <label for="edit-product-original-price">Original/Sale Price (GHS)</label>
-            <input type="number" id="edit-product-original-price" placeholder="For sales/discounts" step="0.01">
+            <label for="edit-product-sales-price">Sales Price (GHS)</label>
+            <input type="number" id="edit-product-sales-price" placeholder="Discounted price" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="edit-product-original-price">Deals Price (GHS)</label>
+            <input type="number" id="edit-product-original-price" placeholder="For daily deals" step="0.01">
           </div>
           <div class="form-group">
             <label for="edit-product-stock">Stock *</label>
