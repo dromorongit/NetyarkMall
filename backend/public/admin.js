@@ -817,6 +817,7 @@ async function editProduct(id) {
     document.getElementById('edit-product-colors').value = product.colors ? product.colors.join(', ') : '';
     document.getElementById('edit-product-sizes').value = product.sizes ? product.sizes.join(', ') : '';
     document.getElementById('edit-product-price').value = product.price;
+    document.getElementById('edit-product-original-price').value = product.originalPrice || '';
     document.getElementById('edit-product-stock').value = product.stock;
     document.getElementById('edit-product-category').value = product.category;
 
@@ -924,6 +925,12 @@ if (document.getElementById('edit-product-form')) {
     sizes.forEach(size => formData.append('sizes', size));
 
     formData.append('price', Math.round(parseFloat(document.getElementById('edit-product-price').value) * 100) / 100);
+    
+    const originalPrice = document.getElementById('edit-product-original-price').value;
+    if (originalPrice) {
+      formData.append('originalPrice', Math.round(parseFloat(originalPrice) * 100) / 100);
+    }
+    
     formData.append('stock', parseInt(document.getElementById('edit-product-stock').value));
     formData.append('category', document.getElementById('edit-product-category').value);
     formData.append('stockStatus', document.querySelector('input[name="edit-stock-status"]:checked').value);

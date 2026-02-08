@@ -295,6 +295,13 @@ router.put('/:id', auth, adminAuth, upload.fields([
     if (productData.sizes && typeof productData.sizes === 'string') {
       productData.sizes = productData.sizes.split(',').map(s => s.trim()).filter(s => s);
     }
+    
+    // Handle originalPrice that might come as empty string
+    if (productData.originalPrice === '') {
+      productData.originalPrice = null;
+    } else if (productData.originalPrice && typeof productData.originalPrice === 'string') {
+      productData.originalPrice = parseFloat(productData.originalPrice);
+    }
 
     const product = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
