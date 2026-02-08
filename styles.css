@@ -908,6 +908,10 @@ a:hover {
     background: var(--error);
 }
 
+.product-badge.sale {
+    background: linear-gradient(135deg, #FF6B35 0%, #ff5722 100%);
+}
+
 .product-image {
     position: relative;
     overflow: hidden;
