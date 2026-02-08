@@ -46,7 +46,6 @@ function initializeCategoryPage() {
 
     // Initialize filters
     initializeFilters();
-    updateProductCount();
 }
 
 async function loadCategoryProducts(category, containerId) {
@@ -67,6 +66,9 @@ async function loadCategoryProducts(category, containerId) {
     // Display products
     displayProducts(products, container);
     console.log('Products displayed in container');
+    
+    // Update product count after products are displayed
+    updateProductCount(products.length);
 }
 
 function initializeFilters() {
