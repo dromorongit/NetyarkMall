@@ -1273,10 +1273,13 @@ function createProductCard(product) {
     const hasSalesPrice = product.salesPrice && product.salesPrice > 0;
     const hasOriginalPrice = product.originalPrice && product.originalPrice > product.price;
     
-    // Use salesPrice if available, otherwise use originalPrice for discount calculation
-    const discountPrice = hasSalesPrice ? product.salesPrice : product.originalPrice;
-    const discount = (discountPrice && discountPrice > product.price) ?
-        Math.round(((discountPrice - product.price) / discountPrice) * 100) : 0;
+    // Calculate discount percentage: (Original Price - Sales Price) / Original Price × 100
+    let discount = 0;
+    if (hasSalesPrice) {
+        discount = Math.round(((product.price - product.salesPrice) / product.price) * 100);
+    } else if (hasOriginalPrice) {
+        discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    }
 
     // Check inventory status directly from product data
     const available = product.stockStatus === 'in-stock' && stockCount > 0;
@@ -1423,10 +1426,13 @@ function createDealCard(product) {
     const hasSalesPrice = product.salesPrice && product.salesPrice > 0;
     const hasOriginalPrice = product.originalPrice && product.originalPrice > product.price;
     
-    // Use salesPrice if available, otherwise use originalPrice for discount calculation
-    const discountPrice = hasSalesPrice ? product.salesPrice : product.originalPrice;
-    const discount = (discountPrice && discountPrice > product.price) ?
-        Math.round(((discountPrice - product.price) / discountPrice) * 100) : 0;
+    // Calculate discount percentage: (Original Price - Sales Price) / Original Price × 100
+    let discount = 0;
+    if (hasSalesPrice) {
+        discount = Math.round(((product.price - product.salesPrice) / product.price) * 100);
+    } else if (hasOriginalPrice) {
+        discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    }
     
     const productId = product.id || product._id;
     const stockCount = product.stockCount || product.stock || 0;
