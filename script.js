@@ -236,8 +236,13 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
 
         // For deals, apply the discounted price (7% off)
         let finalPrice = product.price;
-        if (isDealPurchase) {
-            // Apply 7% discount for products added from deals page
+        
+        // First priority: Use salesPrice if available (direct sale price from admin)
+        if (product.salesPrice && product.salesPrice > 0) {
+            finalPrice = product.salesPrice;
+            console.log('DEBUG: Using salesPrice:', finalPrice);
+        } else if (isDealPurchase) {
+            // Apply 7% discount for products added from deals page (only if no salesPrice)
             finalPrice = product.price * 0.93;
             console.log('DEBUG: Applying deal discount - original:', product.price, 'discounted:', finalPrice);
         } else if (isWholesalePurchase && product.wholesalePrice) {
@@ -249,13 +254,13 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             id: productId,
             name: product.name,
             price: finalPrice,
-            originalPrice: isDealPurchase ? product.price : product.originalPrice, // Store original price for reference
+            originalPrice: product.salesPrice ? product.price : (isDealPurchase ? product.price : product.originalPrice),
             image: product.image,
             quantity: quantity,
             isWholesale: isWholesalePurchase,
-            isDeal: isDealPurchase, // Track if this is a deal item
-            sourcePage: sourcePage, // Track where this item was added from
-            discountPercentage: isDealPurchase ? 7 : 0 // 7% discount for deals
+            isDeal: isDealPurchase,
+            sourcePage: sourcePage,
+            discountPercentage: isDealPurchase ? 7 : (product.salesPrice ? Math.round(((product.price - product.salesPrice) / product.price) * 100) : 0)
         };
 
         // Only add MOQ for items treated as wholesale purchases
@@ -274,7 +279,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             sourcePage: cartItem.sourcePage,
             originalPrice: cartItem.originalPrice,
             finalPrice: cartItem.price,
-            discountApplied: isDealPurchase ? (product.originalPrice - finalPrice) : 0
+            salesPriceUsed: !!product.salesPrice,
+            discountApplied: cartItem.discountPercentage
         });
 
         cart.push(cartItem);
@@ -558,7 +564,7 @@ function updateCartDisplay() {
                     currentPrice: item.price,
                     originalPrice: item.originalPrice,
                     showWholesaleIndicators: showWholesaleIndicators,
-                    willShowDealPrice: item.isDeal && item.originalPrice
+                    willShowDealPrice: item.originalPrice && item.originalPrice > item.price
                 });
 
                 cartHTML += `
@@ -569,11 +575,11 @@ function updateCartDisplay() {
                         <div class="item-details">
                             <h3>${item.name}</h3>
                             ${showWholesaleIndicators ? `<small class="wholesale-indicator">Wholesale - MOQ: ${moq}</small>` : ''}
-                            ${item.isDeal && item.originalPrice ? `
+                            ${item.originalPrice && item.originalPrice > item.price ? `
                                 <div class="deal-price-container">
                                     <p class="item-price deal-price">₵${item.price.toFixed(2)}</p>
                                     <p class="original-price">₵${item.originalPrice.toFixed(2)}</p>
-                                    <small class="deal-badge">Deal - ${item.discountPercentage || 0}% OFF</small>
+                                    <small class="deal-badge">Sale</small>
                                 </div>
                             ` : `
                                 <p class="item-price">₵${item.price.toFixed(2)}</p>
