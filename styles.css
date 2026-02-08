@@ -8239,84 +8239,89 @@ a:hover {
 /* Mobile Video Hero Styles */
 @media (max-width: 768px) {
     .video-hero {
-        height: 400px;
+        height: 100vh;
+        min-height: 500px;
+        max-height: 600px;
     }
 
     .hero-content {
-        padding: 1rem;
-        width: 95%;
+        padding: 1.5rem;
+        width: 92%;
     }
 
     .tagline-badge {
-        padding: 0.4rem 1rem;
-        font-size: 0.75rem;
+        padding: 0.5rem 1.25rem;
+        font-size: 0.8rem;
     }
 
     .hero-tagline h2 {
-        font-size: 2.2rem;
+        font-size: 2.5rem;
     }
 
     .main-tagline {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
     }
 
     .sub-tagline {
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
 
     .hero-cta {
         gap: 0.75rem;
+        margin-bottom: 1.5rem;
     }
 
     .btn-large {
         padding: 0.875rem 2rem;
-        font-size: 0.95rem;
-    }
-
-    .hero-features {
-        gap: 1rem;
-    }
-
-    .hero-features .feature-item {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-    }
-
-    .hero-features .feature-item i {
         font-size: 1rem;
     }
 
+    .hero-features {
+        gap: 0.75rem;
+    }
+
+    .hero-features .feature-item {
+        padding: 0.6rem 1.25rem;
+        font-size: 0.85rem;
+    }
+
+    .hero-features .feature-item i {
+        font-size: 1.1rem;
+    }
+
     .hero-features .feature-item span {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
 }
 
 @media (max-width: 480px) {
     .video-hero {
-        height: 350px;
+        height: 100vh;
+        min-height: 450px;
+        max-height: 550px;
     }
 
     .hero-tagline h2 {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
 
     .main-tagline {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
     .sub-tagline {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .hero-features {
         flex-direction: column;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
     }
 
     .hero-features .feature-item {
         width: 100%;
-        max-width: 250px;
+        max-width: 280px;
         justify-content: center;
     }
 }
@@ -8369,37 +8374,41 @@ a:hover {
 /* Mobile Secondary Video Hero */
 @media (max-width: 768px) {
     .video-hero-secondary {
-        height: 380px;
+        height: 100vh;
+        min-height: 480px;
+        max-height: 580px;
     }
 
     .video-hero-secondary .hero-tagline h2 {
-        font-size: 2rem;
+        font-size: 2.3rem;
     }
 
     .video-hero-secondary .main-tagline {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
     }
 
     .video-hero-secondary .sub-tagline {
-        font-size: 1rem;
+        font-size: 1.05rem;
     }
 }
 
 @media (max-width: 480px) {
     .video-hero-secondary {
-        height: 320px;
-        margin: 1.5rem 0;
+        height: 100vh;
+        min-height: 430px;
+        max-height: 520px;
+        margin: 1rem 0;
     }
 
     .video-hero-secondary .hero-tagline h2 {
-        font-size: 1.6rem;
+        font-size: 1.8rem;
     }
 
     .video-hero-secondary .main-tagline {
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
 
     .video-hero-secondary .sub-tagline {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
     }
 }
