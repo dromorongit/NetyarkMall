@@ -392,7 +392,9 @@ async function getProductsByCategory(category) {
         'nail-supplies': 'Nail Supplies',
         'kids-babies': 'Kids & Babies',
         'home-essentials': 'Home Essentials',
-        'lighting-home-decor': 'Lighting & Home Decor'
+        'lighting-home-decor': 'Lighting & Home Decor',
+        'travel-essentials': 'Travel Essentials',
+        'gym-wellness': 'Gym & Wellness'
     };
 
     const apiCategory = categoryMap[category] || category;
@@ -662,6 +664,20 @@ async function getCategoryData() {
             image: 'lighting.jpeg',
             productCount: products.filter(p => p.category === 'Lighting & Home Decor' || p.category === 'lighting-home-decor').length,
             color: '#008000'
+        },
+        {
+            name: 'Travel Essentials',
+            id: 'travel-essentials',
+            image: 'travelessentials.jpg',
+            productCount: products.filter(p => p.category === 'Travel Essentials' || p.category === 'travel-essentials').length,
+            color: '#008000'
+        },
+        {
+            name: 'Gym & Wellness',
+            id: 'gym-wellness',
+            image: 'gymwellness.jpg',
+            productCount: products.filter(p => p.category === 'Gym & Wellness' || p.category === 'gym-wellness').length,
+            color: '#FFA500'
         }
     ];
 }
