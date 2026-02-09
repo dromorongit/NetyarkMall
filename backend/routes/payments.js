@@ -172,6 +172,8 @@ router.post('/verify', optionalAuth, async (req, res) => {
                     user: userId,
                     products: orderData.products,
                     total: orderData.total,
+                    subtotal: orderData.subtotal || orderData.total, // Original subtotal before discounts/fees
+                    paystackFee: orderData.paystackFee || 0, // Paystack processing fee
                     customer: orderData.customer,
                     shipping: orderData.shipping,
                     paymentMethod: orderData.paymentMethod || 'card',

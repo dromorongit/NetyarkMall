@@ -4,9 +4,13 @@ const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional for guest checkout
   products: [{
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    quantity: { type: Number, required: true }
+    quantity: { type: Number, required: true },
+    price: { type: Number, required: true }, // Price at time of purchase (sales price if applicable)
+    originalPrice: { type: Number } // Original price before discount (for reference)
   }],
   total: { type: Number, required: true },
+  subtotal: { type: Number }, // Original subtotal before discounts
+  paystackFee: { type: Number }, // Paystack processing fee
   status: { type: String, enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
   customer: {
     firstName: { type: String, required: true },

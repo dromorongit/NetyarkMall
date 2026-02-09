@@ -511,13 +511,16 @@
                 const itemTotal = item.price * item.quantity;
                 subtotal += itemTotal;
                 
+                // Show original price if different from current price
+                const showOriginalPrice = item.originalPrice && item.originalPrice > item.price;
+                
                 html += `
                     <div class="checkout-item">
                         <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(item.image) : item.image}" alt="${item.name}">
                         <div class="checkout-item-details">
                             <h4>${item.name}</h4>
                             <p>Quantity: ${item.quantity}</p>
-                            <p>₵${item.price.toLocaleString()} each</p>
+                            <p>₵${item.price.toLocaleString()} each${showOriginalPrice ? ` <span style="text-decoration: line-through; color: #999;">₵${item.originalPrice.toLocaleString()}</span>` : ''}</p>
                         </div>
                         <div class="checkout-item-total">₵${itemTotal.toLocaleString()}</div>
                     </div>
@@ -580,7 +583,9 @@
             const orderData = {
                 products: cart.map(item => ({
                     product: item.id,
-                    quantity: item.quantity
+                    quantity: item.quantity,
+                    price: item.price,
+                    originalPrice: item.originalPrice || item.price
                 })),
                 subtotal: subtotal,
                 paystackFee: paystackFee,

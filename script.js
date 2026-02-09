@@ -254,7 +254,7 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             id: productId,
             name: product.name,
             price: finalPrice,
-            originalPrice: product.salesPrice ? product.price : (isDealPurchase ? product.price : product.originalPrice),
+            originalPrice: product.price, // Store the original price (product.price) for reference
             image: product.image,
             quantity: quantity,
             isWholesale: isWholesalePurchase,
@@ -2991,7 +2991,9 @@ async function processCheckoutOrder(form) {
         const orderData = {
             products: cart.map(item => ({
                 product: item.id,
-                quantity: item.quantity
+                quantity: item.quantity,
+                price: item.price,
+                originalPrice: item.originalPrice || item.price
             })),
             total: total,
             customer: {
