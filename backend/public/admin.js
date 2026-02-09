@@ -1302,8 +1302,8 @@ async function printOrder(orderId) {
               <tr>
                 <td>${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</td>
                 <td>${item.quantity || 0}</td>
-                <td>₵${(item.product && typeof item.product === 'object' ? item.product.price : 0).toLocaleString()}</td>
-                <td>₵${((item.product && typeof item.product === 'object' ? item.product.price : 0) * (item.quantity || 0)).toLocaleString()}</td>
+                <td>₵${(item.price || 0).toLocaleString()}${item.originalPrice && item.originalPrice > item.price ? ` <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">(₵${(item.originalPrice || 0).toLocaleString()})</span>` : ''}</td>
+                <td>₵${((item.price || 0) * (item.quantity || 0)).toLocaleString()}</td>
               </tr>
             `).join('') : '<tr><td colspan="4" style="text-align: center;">No items found</td></tr>'}
           </tbody>
@@ -1395,11 +1395,11 @@ async function viewOrderDetails(orderId) {
               <div class="order-item-detail">
                 <div class="item-header">
                   <span class="item-name">${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</span>
-                  <span class="item-price">₵${((item.product && typeof item.product === 'object' ? item.product.price : 0) * (item.quantity || 0)).toLocaleString()}</span>
+                  <span class="item-price">₵${((item.price || 0) * (item.quantity || 0)).toLocaleString()}</span>
                 </div>
                 <div class="item-details">
                   <span><strong>Qty:</strong> ${item.quantity || 0}</span>
-                  <span><strong>Unit Price:</strong> ₵${(item.product && typeof item.product === 'object' ? item.product.price : 0).toLocaleString()}</span>
+                  <span><strong>Unit Price:</strong> ₵${(item.price || 0).toLocaleString()}${item.originalPrice && item.originalPrice > item.price ? ` <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">(₵${(item.originalPrice || 0).toLocaleString()})</span>` : ''}</span>
                 </div>
               </div>
             `).join('') : '<p>No items found</p>'}
