@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categories - Netyark Mall | Shop by Category</title>
-    <meta name="description" content="Browse all product categories at Netyark Mall - Kitchen Appliances, Beauty & Personal Care, Photography & Content Creation Tools, Nail Supplies, Kids & Babies, Home Essentials, Lighting & Home Decor.">
+    <meta name="description" content="Browse all product categories at Netyark Mall - Kitchen Appliances, Beauty & Personal Care, Photography & Content Creation Tools, Nail Supplies, Kids & Babies, Home Essentials, Lighting & Home Decor, Travel Essentials, Gym & Wellness.">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="category-cards.css">
     <link rel="icon" type="image/jpeg" href="Netyark.jfif">
@@ -52,6 +52,8 @@
                                 <li><a href="#kids-babies">Kids & Babies</a></li>
                                 <li><a href="#home-essentials">Home Essentials</a></li>
                                 <li><a href="#lighting-home-decor">Lighting & Home Decor</a></li>
+                                <li><a href="#travel-essentials">Travel Essentials</a></li>
+                                <li><a href="#gym-wellness">Gym & Wellness</a></li>
                             </ul>
                         </li>
                         <li><a href="wholesale.html" class="nav-link">Wholesale</a></li>
@@ -103,6 +105,8 @@
                             <button class="filter-btn" data-category="kids-babies"><span>Kids & Babies</span></button>
                             <button class="filter-btn" data-category="home-essentials"><span>Home</span></button>
                             <button class="filter-btn" data-category="lighting-home-decor"><span>Lighting</span></button>
+                            <button class="filter-btn" data-category="travel-essentials"><span>Travel</span></button>
+                            <button class="filter-btn" data-category="gym-wellness"><span>Gym & Wellness</span></button>
                         </div>
                     </div>
 
@@ -234,6 +238,44 @@
                                 <p>Transform your space with beautiful lighting, decor & accessories</p>
                                 <span class="product-count" id="count-lighting-home-decor"><i class="fas fa-box-open"></i> Loading...</span>
                                 <a href="lighting-home-decor.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+
+                        <!-- Travel Essentials Category -->
+                        <div class="category-card" data-category="travel-essentials" id="travel-essentials">
+                            <div class="category-image">
+                                <img src="travel.jpg" alt="Travel Essentials">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-suitcase"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Travel Essentials</h3>
+                                <p>Luggage, travel accessories and packing solutions for your next adventure</p>
+                                <span class="product-count" id="count-travel-essentials"><i class="fas fa-box-open"></i> Loading...</span>
+                                <a href="travel-essentials.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
+                            </div>
+                            <div class="category-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+
+                        <!-- Gym & Wellness Category -->
+                        <div class="category-card" data-category="gym-wellness" id="gym-wellness">
+                            <div class="category-image">
+                                <img src="gym.jpg" alt="Gym & Wellness">
+                            </div>
+                            <div class="category-icon-overlay">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            <div class="category-content">
+                                <h3>Gym & Wellness</h3>
+                                <p>Fitness equipment and wellness products for a healthy lifestyle</p>
+                                <span class="product-count" id="count-gym-wellness"><i class="fas fa-box-open"></i> Loading...</span>
+                                <a href="gym-wellness.html" class="btn btn-outline"><span>Browse Collection <i class="fas fa-arrow-right"></i></span></a>
                             </div>
                             <div class="category-arrow">
                                 <i class="fas fa-arrow-right"></i>
@@ -394,7 +436,9 @@
             'nail-supplies': 'Nail Supplies',
             'kids-babies': 'Kids & Babies',
             'home-essentials': 'Home Essentials',
-            'lighting-home-decor': 'Lighting & Home Decor'
+            'lighting-home-decor': 'Lighting & Home Decor',
+            'travel-essentials': 'Travel Essentials',
+            'gym-wellness': 'Gym & Wellness'
         };
         
         // Function to fetch product count for a category

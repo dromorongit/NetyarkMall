@@ -38,6 +38,12 @@ function initializeCategoryPage() {
     } else if (pageName.includes('lighting-home-decor')) {
         category = 'lighting-home-decor';
         containerId = 'decorProducts';
+    } else if (pageName.includes('travel-essentials')) {
+        category = 'travel-essentials';
+        containerId = 'travelProducts';
+    } else if (pageName.includes('gym-wellness')) {
+        category = 'gym-wellness';
+        containerId = 'gymProducts';
     }
 
     if (category && containerId) {
