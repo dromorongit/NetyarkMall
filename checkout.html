@@ -530,12 +530,10 @@
             
             checkoutItemsContainer.innerHTML = html;
             
-            // Calculate Paystack fee (1.95%)
-            const PAYSTACK_FEE_PERCENTAGE = 1.95;
-            const paystackFee = (subtotal * PAYSTACK_FEE_PERCENTAGE) / 100;
-            const totalWithFee = subtotal + paystackFee;
+            // Total (no processing fee)
+            const totalWithFee = subtotal;
             
-            // Update display with total (including fee)
+            // Update display with total (no fee)
             document.getElementById('checkoutTotal').textContent = `₵${totalWithFee.toLocaleString()}`;
             
             // Check if cart is empty
@@ -574,11 +572,9 @@
             
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'card';
             
-            // Calculate total and Paystack fee (1.95%)
+            // Calculate total (no processing fee)
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const PAYSTACK_FEE_PERCENTAGE = 1.95; // 1.95% Paystack fee
-            const paystackFee = (subtotal * PAYSTACK_FEE_PERCENTAGE) / 100;
-            const totalWithFee = subtotal + paystackFee;
+            const totalWithFee = subtotal;
             
             // Prepare order data (will be used to create order after payment is verified)
             const orderData = {
@@ -589,7 +585,7 @@
                     originalPrice: item.originalPrice || item.price
                 })),
                 subtotal: subtotal,
-                paystackFee: paystackFee,
+                paystackFee: 0,
                 total: totalWithFee,
                 customer: {
                     firstName: formData.firstName,
@@ -613,7 +609,7 @@
             
             try {
                 // Initialize Paystack payment directly - order will be created AFTER payment verification
-                await initializePaystackPayment(null, formData.email, totalWithFee, formData, orderData, paystackFee);
+                await initializePaystackPayment(null, formData.email, totalWithFee, formData, orderData);
                 
             } catch (error) {
                 console.error('Error initializing payment:', error);
@@ -623,11 +619,10 @@
         }
         
         // Initialize Paystack payment - order data is passed and will be used during payment verification
-        async function initializePaystackPayment(orderId, email, amount, customerInfo, orderData, paystackFee) {
+        async function initializePaystackPayment(orderId, email, amount, customerInfo, orderData) {
             try {
                 console.log('Initializing Paystack payment');
                 console.log('Amount:', amount);
-                console.log('Paystack fee:', paystackFee);
                 
                 // Use Paystack inline payment directly from frontend
                 // Note: Paystack will generate its own reference, we'll capture it in the callback
@@ -643,7 +638,6 @@
                             customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
                             customer_phone: customerInfo.phone,
                             order_total: amount,
-                            paystack_fee: paystackFee,
                             original_subtotal: orderData.subtotal
                         },
                         callback: function(response) {
