@@ -949,22 +949,9 @@ async function loadNewArrivals(forceRefresh = false) {
 }
 
 // Filter products to only show in-stock items
+// NOTE: We no longer filter out out-of-stock products - they are displayed with an "Out of Stock" badge
 function filterInStockProducts(products) {
-    return products.filter(product => {
-        // Check if product has stock information
-        const stockCount = product.stockCount || product.stock || 0;
-
-        // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
-        if (product.stockStatus) {
-            return product.stockStatus === 'in-stock' && stockCount > 0;
-        }
-
-        // Handle legacy format (inStock: boolean)
-        const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
-
-        // Check inventory status directly from product data
-        return product.stockStatus === 'in-stock' && stockCount > 0;
-    });
+    return products; // Return all products, including out-of-stock ones
 }
 
 async function loadFastSellingItems(forceRefresh = false) {
@@ -1289,20 +1276,36 @@ function createProductCard(product) {
 
     // Check inventory status directly from product data
     const available = product.stockStatus === 'in-stock' && stockCount > 0;
+    const isOutOfStock = !available;
     const lowStock = available && stockCount <= 5;
 
-    const stockStatus = !available ? 'out-of-stock' :
+    const stockStatus = isOutOfStock ? 'out-of-stock' :
                         lowStock ? 'low-stock' : 'in-stock';
 
-    const stockText = !available ? 'Out of Stock' :
+    const stockText = isOutOfStock ? 'Out of Stock' :
                       (lowStock && stockCount > 0) ? `Only ${stockCount} left` : '';
+
+    // Generate badges - Out of Stock badge takes precedence over all other badges
+    let badgesHTML = '';
+    
+    if (isOutOfStock) {
+        // Only show "Out of Stock" badge - no other badges should interfere
+        badgesHTML = `<div class="product-badge out-of-stock">Out of Stock</div>`;
+    } else {
+        // For in-stock products, show normal badges
+        if (hasSalesPrice) {
+            badgesHTML = `
+                <div class="product-badge discount" style="left: 10px; right: auto;">-${discount}%</div>
+                <div class="product-badge sale" style="right: 10px; left: auto;">SALE</div>
+            `;
+        } else if (discount > 0) {
+            badgesHTML = `<div class="product-badge discount">-${discount}%</div>`;
+        }
+    }
 
     return `
         <div class="product-card ${stockStatus}" data-product-id="${productId}">
-            ${hasSalesPrice ? `
-                <div class="product-badge discount" style="left: 10px; right: auto;">-${discount}%</div>
-                <div class="product-badge sale" style="right: 10px; left: auto;">SALE</div>
-            ` : ''}
+            ${badgesHTML}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
             </div>
@@ -1442,7 +1445,10 @@ function createDealCard(product) {
     
     const productId = product.id || product._id;
     const stockCount = product.stockCount || product.stock || 0;
+    
+    // Check inventory status directly from product data
     const available = product.stockStatus === 'in-stock' && stockCount > 0;
+    const isOutOfStock = !available;
     const lowStock = available && stockCount <= 5;
 
     const stockStatus = !available ? 'out-of-stock' :
@@ -1451,14 +1457,27 @@ function createDealCard(product) {
     const stockText = !available ? 'Out of Stock' :
                     (lowStock && stockCount > 0) ? `Only ${stockCount} left` : '';
 
-    return `
-        <div class="product-card deal-card ${stockStatus}" data-product-id="${productId}">
-            ${hasSalesPrice ? `
+    // Generate badges - Out of Stock badge takes precedence over all other badges
+    let badgesHTML = '';
+    
+    if (isOutOfStock) {
+        // Only show "Out of Stock" badge - no other badges should interfere
+        badgesHTML = `<div class="product-badge out-of-stock">Out of Stock</div>`;
+    } else {
+        // For in-stock products, show normal badges
+        if (hasSalesPrice) {
+            badgesHTML = `
                 <div class="product-badge discount" style="left: 10px; right: auto;">-${discount}%</div>
                 <div class="product-badge sale" style="right: 10px; left: auto;">SALE</div>
-            ` : `
-                ${discount > 0 ? `<div class="product-badge discount">-${discount}%</div>` : ''}
-            `}
+            `;
+        } else if (discount > 0) {
+            badgesHTML = `<div class="product-badge discount">-${discount}%</div>`;
+        }
+    }
+
+    return `
+        <div class="product-card deal-card ${stockStatus}" data-product-id="${productId}">
+            ${badgesHTML}
             <div class="product-image">
                 <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}" loading="lazy">
             </div>

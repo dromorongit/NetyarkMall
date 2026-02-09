@@ -912,6 +912,20 @@ a:hover {
     background: linear-gradient(135deg, #FF6B35 0%, #ff5722 100%);
 }
 
+/* Out of Stock Badge - takes precedence over all other badges */
+.product-badge.out-of-stock {
+    background: var(--error);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 100; /* Higher z-index to ensure it appears on top of all other badges */
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+}
+
 .product-image {
     position: relative;
     overflow: hidden;
