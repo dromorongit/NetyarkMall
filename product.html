@@ -375,8 +375,8 @@
             const isWholesale = product.isWholesale;
             const wholesalePrice = product.wholesalePrice;
 
-            const discount = product.originalPrice > product.price ?
-                Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+            const discount = product.salesPrice && product.salesPrice < product.price ?
+                Math.round(((product.price - product.salesPrice) / product.price) * 100) : 0;
 
             const stockStatus = !inStock ? 'out-of-stock' :
                               stockCount <= 5 ? 'low-stock' : 'in-stock';
@@ -431,9 +431,13 @@
                                         </div>
                                     </div>
                                 ` : `
-                                    <span class="current-price">₵${product.price.toFixed(2)}</span>
-                                    ${product.originalPrice > product.price ?
-                                        `<span class="original-price">₵${product.originalPrice.toFixed(2)}</span>` : ''}
+                                    ${product.salesPrice ? `
+                                        <span class="sales-price-label">Sale Price:</span>
+                                        <span class="current-price">₵${product.salesPrice.toFixed(2)}</span>
+                                        <span class="original-price">₵${product.price.toFixed(2)}</span>
+                                    ` : `
+                                        <span class="current-price">₵${product.price.toFixed(2)}</span>
+                                    `}
                                 `}
                             </div>
                         </div>

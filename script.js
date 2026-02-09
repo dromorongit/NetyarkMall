@@ -1590,9 +1590,15 @@ async function quickView(productId) {
                     </div>
 
                     <div class="product-price" style="margin-bottom: 1.5rem;">
-                        <span class="current-price">₵${product.price.toFixed(2)}</span>
-                        ${product.originalPrice > product.price ?
-                            `<span class="original-price">₵${product.originalPrice.toFixed(2)}</span>` : ''}
+                        ${product.salesPrice ? `
+                            <span class="sale-price-label" style="display: block; font-size: 0.8rem; color: #008000; margin-bottom: 0.25rem;">Sale Price:</span>
+                            <span class="current-price" style="font-size: 1.2rem; color: #e74c3c; font-weight: bold;">₵${product.salesPrice.toFixed(2)}</span>
+                            <span class="original-price" style="font-size: 0.9rem; text-decoration: line-through; color: #999; margin-left: 0.5rem;">₵${product.price.toFixed(2)}</span>
+                        ` : `
+                            <span class="current-price">₵${product.price.toFixed(2)}</span>
+                            ${product.originalPrice && product.originalPrice > product.price ?
+                                `<span class="original-price">₵${product.originalPrice.toFixed(2)}</span>` : ''}
+                        `}
                     </div>
 
                     ${product.variants ? `
