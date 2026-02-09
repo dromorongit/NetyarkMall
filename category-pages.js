@@ -221,39 +221,15 @@ function displayProducts(products, container) {
         return;
     }
 
-    // Filter out out-of-stock products
-    const inStockProducts = filterInStockProducts(products);
-
-    if (inStockProducts.length === 0) {
-        container.innerHTML = `
-            <div class="no-products">
-                <p>No products are currently available in stock.</p>
-                <button class="btn btn-outline" onclick="clearFilters()">Clear Filters</button>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = inStockProducts.map(product => createProductCard(product)).join('');
+    // Display ALL products including out-of-stock ones
+    // The createProductCard function will show "Out of Stock" badge for unavailable products
+    container.innerHTML = products.map(product => createProductCard(product)).join('');
 }
 
-// Filter products to only show in-stock items
+// Filter function - kept for compatibility but no longer filters out out-of-stock products
+// Out-of-stock products are now displayed with an "Out of Stock" badge instead of being hidden
 function filterInStockProducts(products) {
-    return products.filter(product => {
-        // Check if product has stock information
-        const stockCount = product.stockCount || product.stock || 0;
-
-        // Handle backend API format (stockStatus: 'in-stock'/'out-of-stock')
-        if (product.stockStatus) {
-            return product.stockStatus === 'in-stock' && stockCount > 0;
-        }
-
-        // Handle legacy format (inStock: boolean)
-        const inStock = product.inStock !== undefined ? product.inStock : stockCount > 0;
-
-        // Check inventory status directly from product data
-        return product.stockStatus === 'in-stock' && stockCount > 0;
-    });
+    return products; // Return all products including out-of-stock ones
 }
 
 function updateProductCount(count = null) {
@@ -333,9 +309,8 @@ async function searchInCategory(query) {
         );
     }
 
-    // Filter out out-of-stock products
-    products = filterInStockProducts(products);
-
+    // Display ALL products including out-of-stock ones
+    // The createProductCard function will show "Out of Stock" badge for unavailable products
     const container = document.getElementById(containerId);
     if (container) {
         displayProducts(products, container);
