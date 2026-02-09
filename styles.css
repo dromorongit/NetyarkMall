@@ -2112,7 +2112,335 @@ a:hover {
     gap: 1rem;
 }
 
-/* Developer Credits Styling - Professional and Legible */
+/* Valentine's Day Sales Promo Banner */
+.valentines-promo {
+    position: relative;
+    background: linear-gradient(135deg, #ff6b9d 0%, #c44569 25%, #8b2252 50%, #c44569 75%, #ff6b9d 100%);
+    padding: 4rem 2rem;
+    overflow: hidden;
+    margin-top: 80px;
+}
+
+.valentines-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.heart {
+    position: absolute;
+    font-size: 2rem;
+    animation: floatHeart 6s ease-in-out infinite;
+    opacity: 0.7;
+}
+
+.heart-1 { top: 10%; left: 5%; animation-delay: 0s; font-size: 1.5rem; }
+.heart-2 { top: 20%; left: 15%; animation-delay: 0.5s; font-size: 2rem; }
+.heart-3 { top: 15%; left: 30%; animation-delay: 1s; font-size: 1.8rem; }
+.heart-4 { top: 25%; left: 50%; animation-delay: 1.5s; font-size: 2.2rem; }
+.heart-5 { top: 10%; left: 70%; animation-delay: 2s; font-size: 1.6rem; }
+.heart-6 { top: 30%; left: 85%; animation-delay: 2.5s; font-size: 2rem; }
+.heart-7 { top: 20%; left: 90%; animation-delay: 3s; font-size: 1.4rem; }
+.heart-8 { top: 15%; left: 75%; animation-delay: 3.5s; font-size: 1.8rem; }
+
+@keyframes floatHeart {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-15px) rotate(5deg);
+    }
+    50% {
+        transform: translateY(-25px) rotate(-5deg);
+    }
+    75% {
+        transform: translateY(-15px) rotate(3deg);
+    }
+}
+
+.valentines-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.valentines-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.95);
+    color: #c44569;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: pulseBadge 2s ease-in-out infinite;
+}
+
+@keyframes pulseBadge {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.valentines-title {
+    margin-bottom: 1rem;
+}
+
+.title-line1 {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    animation: fadeInUp 1s ease-out;
+}
+
+.title-line2 {
+    display: block;
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.valentines-subtitle {
+    margin-bottom: 2rem;
+}
+
+.dates {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+    animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.valentines-discount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.discount-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.discount-percent {
+    font-size: 5rem;
+    font-weight: 800;
+    color: #ffd700;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+    animation: discountPulse 1s ease-in-out infinite;
+}
+
+@keyframes discountPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.valentines-offer {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 0.8s both;
+}
+
+.highlight {
+    background: #ffd700;
+    color: #c44569;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.valentines-cta {
+    margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 1s both;
+}
+
+.btn-valentines {
+    background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
+    color: #c44569;
+    border: none;
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-valentines:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%);
+    color: #c44569;
+}
+
+.btn-valentines i {
+    color: #ff6b9d;
+}
+
+.valentines-features {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    animation: fadeInUp 1s ease-out 1.2s both;
+}
+
+.valentines-features .feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.valentines-features .feature i {
+    font-size: 1.2rem;
+    color: #ffd700;
+}
+
+/* Mobile Responsive for Valentine's Day Banner */
+@media (max-width: 768px) {
+    .valentines-promo {
+        padding: 3rem 1rem;
+        margin-top: 70px;
+    }
+
+    .heart {
+        font-size: 1.2rem;
+    }
+
+    .heart-1 { top: 5%; left: 3%; }
+    .heart-2 { top: 15%; left: 20%; }
+    .heart-3 { top: 10%; left: 40%; }
+    .heart-4 { top: 20%; left: 60%; }
+    .heart-5 { top: 8%; left: 80%; }
+    .heart-6 { top: 25%; left: 90%; }
+    .heart-7 { top: 12%; left: 10%; }
+    .heart-8 { top: 18%; left: 85%; }
+
+    .title-line1 {
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+
+    .title-line2 {
+        font-size: 2.2rem;
+    }
+
+    .dates {
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .valentines-discount {
+        gap: 0.5rem;
+    }
+
+    .discount-text {
+        font-size: 1.2rem;
+    }
+
+    .discount-percent {
+        font-size: 3.5rem;
+    }
+
+    .valentines-offer {
+        font-size: 0.95rem;
+    }
+
+    .btn-valentines {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+    }
+
+    .valentines-features {
+        gap: 1.5rem;
+    }
+
+    .valentines-features .feature {
+        font-size: 0.85rem;
+    }
+
+    .valentines-features .feature i {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .valentines-promo {
+        padding: 2rem 0.75rem;
+    }
+
+    .title-line1 {
+        font-size: 1rem;
+        letter-spacing: 1px;
+    }
+
+    .title-line2 {
+        font-size: 1.8rem;
+    }
+
+    .discount-percent {
+        font-size: 2.8rem;
+    }
+
+    .btn-valentines {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .valentines-features {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
 .developer-credits {
     display: flex;
     align-items: center;
