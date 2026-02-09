@@ -478,6 +478,9 @@ async function loadDashboard() {
   loadUsers();
   loadProfile();
   loadDailyDeals();
+  
+  // Initialize order notification polling
+  initOrderNotificationPolling();
 }
 
 // Load products
@@ -623,6 +626,9 @@ async function loadOrders() {
     const orders = await res.json();
     console.log('Orders received:', orders);
 
+    // Update the order badge with pending orders count
+    updateOrderBadge(orders);
+
     const list = document.getElementById('orders-list');
 
     if (!orders || orders.length === 0) {
@@ -695,6 +701,56 @@ async function loadOrders() {
   } catch (err) {
     console.error('Error loading orders:', err);
     showNotification('Error loading orders', 'error');
+  }
+}
+
+// Update order badge with count of pending/new orders
+function updateOrderBadge(orders) {
+  const badge = document.getElementById('order-badge');
+  if (!badge) return;
+  
+  // Count pending orders (new orders)
+  const pendingCount = orders.filter(order => 
+    order.status === 'pending' || order.status === 'processing'
+  ).length;
+  
+  // Store the count for polling
+  localStorage.setItem('lastOrderCount', pendingCount.toString());
+  
+  // Update badge display
+  badge.setAttribute('data-count', pendingCount);
+  badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+  
+  // Show/hide badge based on count
+  if (pendingCount > 0) {
+    badge.style.display = 'flex';
+    badge.style.animation = 'pulse 2s infinite';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// Initialize order notification polling
+function initOrderNotificationPolling() {
+  // Check for new orders immediately
+  checkNewOrders();
+  
+  // Poll every 30 seconds for new orders
+  setInterval(() => {
+    checkNewOrders();
+  }, 30000);
+}
+
+// Check for new orders and update badge
+async function checkNewOrders() {
+  try {
+    const res = await authFetch(`${API_BASE}/orders`);
+    if (!res) return;
+
+    const orders = await res.json();
+    updateOrderBadge(orders);
+  } catch (err) {
+    console.error('Error checking new orders:', err);
   }
 }
 
