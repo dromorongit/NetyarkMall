@@ -634,6 +634,9 @@ async function loadOrders() {
     // Store all orders for filtering
     allOrders = orders;
 
+    // Reset order notifications when viewing orders tab
+    resetOrderNotifications();
+
     // Update the order badge with pending orders count
     updateOrderBadge(orders);
 
@@ -774,25 +777,55 @@ function updateOrderBadge(orders) {
   const badge = document.getElementById('order-badge');
   if (!badge) return;
   
-  // Count pending orders (new orders)
-  const pendingCount = orders.filter(order => 
-    order.status === 'pending' || order.status === 'processing'
-  ).length;
+  // Get the last viewed timestamp - only count orders created after this time as "new"
+  const lastViewedOrders = localStorage.getItem('lastViewedOrders');
+  const lastViewedTime = lastViewedOrders ? new Date(lastViewedOrders) : null;
+  
+  // Count new orders (pending/processing AND created after last viewed time)
+  let newOrderCount = 0;
+  orders.forEach(order => {
+    const orderTime = order.createdAt ? new Date(order.createdAt) : new Date(0);
+    const isNewStatus = order.status === 'pending' || order.status === 'processing';
+    const isNewOrder = !lastViewedTime || orderTime > lastViewedTime;
+    
+    if (isNewStatus && isNewOrder) {
+      newOrderCount++;
+    }
+  });
   
   // Store the count for polling
-  localStorage.setItem('lastOrderCount', pendingCount.toString());
+  localStorage.setItem('lastOrderCount', newOrderCount.toString());
   
   // Update badge display
-  badge.setAttribute('data-count', pendingCount);
-  badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+  badge.setAttribute('data-count', newOrderCount);
+  badge.textContent = newOrderCount > 99 ? '99+' : newOrderCount;
   
   // Show/hide badge based on count
-  if (pendingCount > 0) {
+  if (newOrderCount > 0) {
     badge.style.display = 'flex';
     badge.style.animation = 'pulse 2s infinite';
   } else {
     badge.style.display = 'none';
   }
+}
+
+// Reset order notification when viewing orders
+function resetOrderNotifications() {
+  // Update the last viewed timestamp to now
+  localStorage.setItem('lastViewedOrders', new Date().toISOString());
+  
+  // Immediately update the badge to show 0 (since we've seen all orders)
+  const badge = document.getElementById('order-badge');
+  if (badge) {
+    badge.setAttribute('data-count', '0');
+    badge.textContent = '0';
+    badge.style.display = 'none';
+  }
+  
+  // Clear any stored count
+  localStorage.setItem('lastOrderCount', '0');
+  
+  console.log('Order notifications reset at:', new Date().toISOString());
 }
 
 // Initialize order notification polling
