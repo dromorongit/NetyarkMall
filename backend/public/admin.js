@@ -260,6 +260,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize product search
   initProductSearch();
+  
+  // Initialize order search
+  initOrderSearch();
 });
 
 // Setup other event listeners
@@ -613,6 +616,8 @@ document.getElementById('refresh-daily-deals-btn').addEventListener('click', () 
 });
 
 // Load orders
+let allOrders = [];
+
 async function loadOrders() {
   try {
     console.log('Loading orders...');
@@ -625,6 +630,9 @@ async function loadOrders() {
 
     const orders = await res.json();
     console.log('Orders received:', orders);
+    
+    // Store all orders for filtering
+    allOrders = orders;
 
     // Update the order badge with pending orders count
     updateOrderBadge(orders);
@@ -642,66 +650,123 @@ async function loadOrders() {
       return;
     }
 
-    list.innerHTML = orders.map(o => {
-      const hasUser = o.user && o.user.name;
-      const customerName = hasUser ? 
-        `${o.user.name} (User)` :
-        (o.customer && o.customer.firstName && o.customer.lastName) ?
-        `${o.customer.firstName} ${o.customer.lastName} (Guest)` :
-        'Unknown Customer';
-
-      const customerEmail = (o.customer && o.customer.email) ? o.customer.email : 'N/A';
-      const customerPhone = (o.customer && o.customer.phone) ? o.customer.phone : 'N/A';
-      const orderTotal = o.total ? o.total.toLocaleString() : '0';
-      const orderStatus = o.status || 'pending';
-      const itemCount = o.products ? o.products.length : 0;
-      const orderDate = o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'Unknown';
-      const orderId = o._id || '';
-
-      return `
-        <div class="order-item" data-order-id="${orderId}">
-          <div class="order-header">
-            <h3>Order #${orderId.substring(0, 8)}</h3>
-            <div class="order-actions">
-              <button onclick="printOrder('${orderId}')" class="btn-print" title="Print Order">
-                <i class="fas fa-print"></i> Print
-              </button>
-              <button onclick="deleteOrder('${orderId}')" class="btn-delete" title="Delete Order">
-                <i class="fas fa-trash"></i> Delete
-              </button>
-            </div>
-          </div>
-          <div class="order-details">
-            <p><strong>Customer:</strong> ${customerName}</p>
-            <p><strong>Email:</strong> ${customerEmail}</p>
-            <p><strong>Phone:</strong> ${customerPhone}</p>
-            <p><strong>Total:</strong> ₵${orderTotal}</p>
-            <p><strong>Status:</strong> 
-              <span class="status-badge status-${orderStatus}">${orderStatus}</span>
-            </p>
-            <p><strong>Items:</strong> ${itemCount} item(s)</p>
-            <p><strong>Date:</strong> ${orderDate}</p>
-          </div>
-          <div class="order-status-update">
-            <label>Update Status:</label>
-            <select onchange="updateOrderStatus('${orderId}', this.value)">
-              <option value="pending" ${orderStatus === 'pending' ? 'selected' : ''}>Pending</option>
-              <option value="processing" ${orderStatus === 'processing' ? 'selected' : ''}>Processing</option>
-              <option value="shipped" ${orderStatus === 'shipped' ? 'selected' : ''}>Shipped</option>
-              <option value="delivered" ${orderStatus === 'delivered' ? 'selected' : ''}>Delivered</option>
-              <option value="cancelled" ${orderStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>
-            <button onclick="viewOrderDetails('${orderId}')" class="btn-view-details">
-              <i class="fas fa-eye"></i> View Details
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
+    renderOrders(orders);
   } catch (err) {
     console.error('Error loading orders:', err);
     showNotification('Error loading orders', 'error');
   }
+}
+
+// Render orders to the list
+function renderOrders(orders) {
+  const list = document.getElementById('orders-list');
+  
+  if (!orders || orders.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h3>No Orders Found</h3>
+        <p>${allOrders.length === 0 ? 'Customer orders will appear here.' : 'No orders match your search.'}</p>
+      </div>
+    `;
+    return;
+  }
+  
+  list.innerHTML = orders.map(o => {
+    const hasUser = o.user && o.user.name;
+    const customerName = hasUser ? 
+      `${o.user.name} (User)` :
+      (o.customer && o.customer.firstName && o.customer.lastName) ?
+      `${o.customer.firstName} ${o.customer.lastName} (Guest)` :
+      'Unknown Customer';
+
+    const customerEmail = (o.customer && o.customer.email) ? o.customer.email : 'N/A';
+    const customerPhone = (o.customer && o.customer.phone) ? o.customer.phone : 'N/A';
+    const orderTotal = o.total ? o.total.toLocaleString() : '0';
+    const orderStatus = o.status || 'pending';
+    const itemCount = o.products ? o.products.length : 0;
+    const orderDate = o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'Unknown';
+    const orderId = o._id || '';
+
+    return `
+      <div class="order-item" data-order-id="${orderId}">
+        <div class="order-header">
+          <h3>Order #${orderId.substring(0, 8)}</h3>
+          <div class="order-actions">
+            <button onclick="printOrder('${orderId}')" class="btn-print" title="Print Order">
+              <i class="fas fa-print"></i> Print
+            </button>
+            <button onclick="deleteOrder('${orderId}')" class="btn-delete" title="Delete Order">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+        <div class="order-details">
+          <p><strong>Customer:</strong> ${customerName}</p>
+          <p><strong>Email:</strong> ${customerEmail}</p>
+          <p><strong>Phone:</strong> ${customerPhone}</p>
+          <p><strong>Total:</strong> ₵${orderTotal}</p>
+          <p><strong>Status:</strong> 
+            <span class="status-badge status-${orderStatus}">${orderStatus}</span>
+          </p>
+          <p><strong>Items:</strong> ${itemCount} item(s)</p>
+          <p><strong>Date:</strong> ${orderDate}</p>
+        </div>
+        <div class="order-status-update">
+          <label>Update Status:</label>
+          <select onchange="updateOrderStatus('${orderId}', this.value)">
+            <option value="pending" ${orderStatus === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="processing" ${orderStatus === 'processing' ? 'selected' : ''}>Processing</option>
+            <option value="shipped" ${orderStatus === 'shipped' ? 'selected' : ''}>Shipped</option>
+            <option value="delivered" ${orderStatus === 'delivered' ? 'selected' : ''}>Delivered</option>
+            <option value="cancelled" ${orderStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+          <button onclick="viewOrderDetails('${orderId}')" class="btn-view-details">
+            <i class="fas fa-eye"></i> View Details
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Initialize order search
+function initOrderSearch() {
+  const searchInput = document.getElementById('order-search');
+  if (!searchInput) return;
+  
+  searchInput.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    
+    if (searchTerm === '') {
+      renderOrders(allOrders);
+      return;
+    }
+    
+    const filteredOrders = allOrders.filter(order => {
+      // Search by customer name (firstName + lastName or user name)
+      let customerName = '';
+      if (order.user && order.user.name) {
+        customerName = order.user.name.toLowerCase();
+      } else if (order.customer) {
+        customerName = `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.toLowerCase();
+      }
+      
+      // Search by email
+      const customerEmail = (order.customer && order.customer.email) ? order.customer.email.toLowerCase() : '';
+      
+      // Search by phone
+      const customerPhone = (order.customer && order.customer.phone) ? order.customer.phone.toLowerCase() : '';
+      
+      return (
+        customerName.includes(searchTerm) ||
+        customerEmail.includes(searchTerm) ||
+        customerPhone.includes(searchTerm)
+      );
+    });
+    
+    renderOrders(filteredOrders);
+  });
 }
 
 // Update order badge with count of pending/new orders

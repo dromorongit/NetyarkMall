@@ -682,6 +682,31 @@ body {
   color: var(--text-muted);
 }
 
+/* Orders Search */
+.orders-search-container {
+  margin-bottom: 20px;
+}
+
+.order-search-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1em;
+  transition: all var(--transition-speed) ease;
+  background: var(--surface-color);
+}
+
+.order-search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(40,167,69,0.1);
+}
+
+.order-search-input::placeholder {
+  color: var(--text-muted);
+}
+
 .product-item {
   background: var(--surface-color);
   border-radius: var(--radius-lg);
