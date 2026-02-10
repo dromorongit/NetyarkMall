@@ -2103,9 +2103,8 @@ async function performLiveSearch(query) {
 }
 
 function viewProduct(productId) {
-    // For now, redirect to categories page with product filter
-    // In a real implementation, this would go to a product detail page
-    window.location.href = `categories.html?product=${productId}`;
+    // Redirect directly to product details page
+    viewProductDetails(productId);
 }
 
 function viewProductDetails(productId) {

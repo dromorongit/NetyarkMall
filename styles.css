@@ -5749,6 +5749,7 @@ a:hover {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 999;
         overflow: hidden;
+        max-height: 80vh;
     }
 
     .mobile-search-container.active {
@@ -5830,7 +5831,11 @@ a:hover {
     .mobile-search-results {
         max-height: 320px;
         overflow-y: auto;
+        overflow-x: hidden;
         background: var(--app-bg);
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
     }
 
     .mobile-search-result-item {
