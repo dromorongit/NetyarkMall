@@ -5427,23 +5427,9 @@ a:hover {
 
 
 
-/* Lighting & Home Decor */
-.category-lighting .category-header {
-    background: linear-gradient(135deg, #ab47bc 0%, #ba68c8 30%, #ce93d8 70%, #9c27b0 100%);
-}
 
-.category-lighting .category-header::before {
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="lighting" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="20" r="3" fill="rgba(255,255,255,0.25)"/><path d="M50 23 L50 80" stroke="rgba(255,255,255,0.2)" stroke-width="2"/><circle cx="35" cy="35" r="1" fill="rgba(255,255,255,0.15)"/><circle cx="65" cy="45" r="1" fill="rgba(255,255,255,0.15)"/></pattern></defs><rect width="100" height="100" fill="url(%23lighting)"/></svg>');
-}
 
-/* Nail Supplies */
-.category-nail .category-header {
-    background: linear-gradient(135deg, #ec407a 0%, #f06292 30%, #f8bbd9 70%, #e91e63 100%);
-}
 
-.category-nail .category-header::before {
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="nail" width="100" height="100" patternUnits="userSpaceOnUse"><ellipse cx="50" cy="50" rx="8" ry="3" fill="rgba(255,255,255,0.2)"/><circle cx="30" cy="30" r="1.5" fill="rgba(255,255,255,0.15)"/><circle cx="70" cy="70" r="1.5" fill="rgba(255,255,255,0.15)"/></pattern></defs><rect width="100" height="100" fill="url(%23nail)"/></svg>');
-}
 
 
 
