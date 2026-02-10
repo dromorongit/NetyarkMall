@@ -2070,7 +2070,7 @@ async function performLiveSearch(query) {
                 Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
             html += `
-                <div class="search-result-item" onclick="viewProduct('${product.id}')">
+                <div class="search-result-item" onclick="viewProduct('${product.id || product._id}')">
                     <div class="search-result-image">
                         <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}">
                     </div>
@@ -2607,7 +2607,7 @@ async function performMobileLiveSearch(query) {
                 Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
             html += `
-                <div class="mobile-search-result-item" onclick="viewProduct('${product.id}')">
+                <div class="mobile-search-result-item" onclick="viewProduct('${product.id || product._id}')">
                     <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(product.image) : product.image}" alt="${product.name}">
                     <div class="mobile-search-result-info">
                         <h4>${product.name}</h4>
