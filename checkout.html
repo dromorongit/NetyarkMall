@@ -527,6 +527,8 @@
                         <img src="${typeof getFullImageUrl === 'function' ? getFullImageUrl(item.image) : item.image}" alt="${item.name}">
                         <div class="checkout-item-details">
                             <h4>${item.name}</h4>
+                            ${item.color ? `<p><strong>Color:</strong> ${item.color}</p>` : ''}
+                            ${item.size ? `<p><strong>Size:</strong> ${item.size}</p>` : ''}
                             <p>Quantity: ${item.quantity}</p>
                             <p>₵${item.price.toLocaleString()} each${showOriginalPrice ? ` <span style="text-decoration: line-through; color: #999;">₵${item.originalPrice.toLocaleString()}</span>` : ''}</p>
                         </div>
@@ -589,7 +591,9 @@
                     product: item.id,
                     quantity: item.quantity,
                     price: item.price,
-                    originalPrice: item.originalPrice || item.price
+                    originalPrice: item.originalPrice || item.price,
+                    color: item.color || null,
+                    size: item.size || null
                 })),
                 subtotal: subtotal,
                 paystackFee: 0,
