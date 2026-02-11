@@ -159,8 +159,8 @@ function initializeCart() {
     logCartState('initializeCart - end');
 }
 
-async function addToCart(productId, quantity = 1, sourcePage = null) {
-    console.log('DIAGNOSIS: addToCart called with:', { productId, quantity, sourcePage });
+async function addToCart(productId, quantity = 1, sourcePage = null, selectedColor = null) {
+    console.log('DIAGNOSIS: addToCart called with:', { productId, quantity, sourcePage, selectedColor });
     console.log('DIAGNOSIS: Current cart before add:', cart.length, 'items');
 
     // Add debug logging to see if we can fetch the product
@@ -187,7 +187,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
         category: product.category,
         isNewArrival: product.isNewArrival,
         isFastSelling: product.isFastSelling,
-        sourcePage: sourcePage
+        sourcePage: sourcePage,
+        colors: product.colors
     });
 
     // Check inventory
@@ -215,6 +216,10 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             return;
         }
         existingItem.quantity = newQuantity;
+        // Update color if it was previously not selected
+        if (selectedColor && !existingItem.color) {
+            existingItem.color = selectedColor;
+        }
     } else {
         console.log('DEBUG: Creating new cart item');
         // Determine if this should be treated as a wholesale purchase based on source page
@@ -260,7 +265,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             isWholesale: isWholesalePurchase,
             isDeal: isDealPurchase,
             sourcePage: sourcePage,
-            discountPercentage: isDealPurchase ? 7 : (product.salesPrice ? Math.round(((product.price - product.salesPrice) / product.price) * 100) : 0)
+            discountPercentage: isDealPurchase ? 7 : (product.salesPrice ? Math.round(((product.price - product.salesPrice) / product.price) * 100) : 0),
+            color: selectedColor // Store selected color
         };
 
         // Only add MOQ for items treated as wholesale purchases
@@ -280,7 +286,8 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
             originalPrice: cartItem.originalPrice,
             finalPrice: cartItem.price,
             salesPriceUsed: !!product.salesPrice,
-            discountApplied: cartItem.discountPercentage
+            discountApplied: cartItem.discountPercentage,
+            color: cartItem.color
         });
 
         cart.push(cartItem);
@@ -291,13 +298,13 @@ async function addToCart(productId, quantity = 1, sourcePage = null) {
     updateCartCount();
     updateCartDisplay(); // Update cart display to show shipping
     console.log('DIAGNOSIS: addToCart completed, cart now has', cart.length, 'items');
-    console.log('DIAGNOSIS: Final cart contents:', cart.map(item => ({id: item.id, name: item.name, quantity: item.quantity})));
+    console.log('DIAGNOSIS: Final cart contents:', cart.map(item => ({id: item.id, name: item.name, quantity: item.quantity, color: item.color})));
     showNotification(`${product.name} added to cart!`, 'success');
 }
 
-async function addWholesaleToCart(productId, quantity = null) {
+async function addWholesaleToCart(productId, quantity = null, selectedColor = null) {
     try {
-        console.log('addWholesaleToCart called with:', { productId, quantity });
+        console.log('addWholesaleToCart called with:', { productId, quantity, selectedColor });
 
         const product = await getProductById(productId);
         if (!product || !product.isWholesale) {
@@ -337,6 +344,10 @@ async function addWholesaleToCart(productId, quantity = null) {
             }
 
             existingItem.quantity = newQuantity;
+            // Update color if it was previously not selected
+            if (selectedColor && !existingItem.color) {
+                existingItem.color = selectedColor;
+            }
             showNotification(`Added ${addQuantity} more ${product.name} to cart!`, 'success');
         } else {
             // First time adding wholesale item
@@ -360,7 +371,8 @@ async function addWholesaleToCart(productId, quantity = null) {
                 quantity: addQuantity,
                 isWholesale: true,
                 moq: moq,
-                sourcePage: 'wholesale' // Track that this item was added from wholesale page
+                sourcePage: 'wholesale', // Track that this item was added from wholesale page
+                color: selectedColor // Store selected color
             });
 
             showNotification(`${product.name} added to cart with quantity ${addQuantity}!`, 'success');
@@ -575,6 +587,7 @@ function updateCartDisplay() {
                         <div class="item-details">
                             <h3>${item.name}</h3>
                             ${showWholesaleIndicators ? `<small class="wholesale-indicator">Wholesale - MOQ: ${moq}</small>` : ''}
+                            ${item.color ? `<small class="item-color">Color: ${item.color}</small>` : ''}
                             ${item.originalPrice && item.originalPrice > item.price ? `
                                 <div class="deal-price-container">
                                     <p class="item-price deal-price">₵${item.price.toFixed(2)}</p>
@@ -2998,7 +3011,8 @@ async function processCheckoutOrder(form) {
                 product: item.id,
                 quantity: item.quantity,
                 price: item.price,
-                originalPrice: item.originalPrice || item.price
+                originalPrice: item.originalPrice || item.price,
+                color: item.color || null
             })),
             total: total,
             customer: {

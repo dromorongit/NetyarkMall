@@ -1454,12 +1454,12 @@ async function printOrder(orderId) {
           <tbody>
             ${(order.products && order.products.length > 0) ? order.products.map(item => `
               <tr>
-                <td>${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}</td>
+                <td>${item.product && typeof item.product === 'object' ? item.product.name : item.product || 'N/A'}${item.color || item.size ? `<br><small style="color: #666;">${item.color ? `Color: ${item.color}` : ''}${item.color && item.size ? ' | ' : ''}${item.size ? `Size: ${item.size}` : ''}</small>` : ''}</td>
                 <td>${item.quantity || 0}</td>
                 <td>₵${(item.price || 0).toLocaleString()}${item.originalPrice && item.originalPrice > item.price ? ` <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">(₵${(item.originalPrice || 0).toLocaleString()})</span>` : ''}</td>
                 <td>₵${((item.price || 0) * (item.quantity || 0)).toLocaleString()}</td>
               </tr>
-            `).join('') : '<tr><td colspan="4" style="text-align: center;">No items found</td></tr>'}
+            `).join('') : '<tr><td colspan="4" style="text-align: center;">No items found</td></tr>'}}
           </tbody>
         </table>
         
@@ -1554,6 +1554,8 @@ async function viewOrderDetails(orderId) {
                 <div class="item-details">
                   <span><strong>Qty:</strong> ${item.quantity || 0}</span>
                   <span><strong>Unit Price:</strong> ₵${(item.price || 0).toLocaleString()}${item.originalPrice && item.originalPrice > item.price ? ` <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">(₵${(item.originalPrice || 0).toLocaleString()})</span>` : ''}</span>
+                  ${item.color ? `<span><strong>Color:</strong> ${item.color}</span>` : ''}
+                  ${item.size ? `<span><strong>Size:</strong> ${item.size}</span>` : ''}
                 </div>
               </div>
             `).join('') : '<p>No items found</p>'}

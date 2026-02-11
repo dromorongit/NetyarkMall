@@ -450,11 +450,18 @@
                         ${product.colors && product.colors.length > 0 ? `
                             <div class="product-variants">
                                 <h4>Available Colors</h4>
-                                <div class="color-options">
+                                <div class="color-options" id="colorOptions">
                                     ${product.colors.map(color =>
-                                        `<span class="color-option" style="background-color: ${color.toLowerCase()};" title="${color}"></span>`
+                                        `<span class="color-option ${color.toLowerCase()}" 
+                                              data-color="${color}" 
+                                              title="${color}"
+                                              onclick="selectColor('${color}', this)"
+                                              style="background-color: ${getColorHex(color)};">
+                                            <span class="color-name">${color}</span>
+                                        </span>`
                                     ).join('')}
                                 </div>
+                                <input type="hidden" id="selectedColor" value="">
                             </div>
                         ` : ''}
 
@@ -733,6 +740,86 @@
             }
         }
 
+        // Color selection function
+        function getColorHex(colorName) {
+            const colorMap = {
+                'red': '#e74c3c',
+                'blue': '#3498db',
+                'green': '#2ecc71',
+                'yellow': '#f1c40f',
+                'orange': '#e67e22',
+                'purple': '#9b59b6',
+                'pink': '#ff6b9d',
+                'black': '#2d3436',
+                'white': '#ffffff',
+                'gray': '#95a5a6',
+                'grey': '#95a5a6',
+                'brown': '#8e44ad',
+                'navy': '#2c3e50',
+                'teal': '#1abc9c',
+                'maroon': '#800000',
+                'cream': '#f5f5dc',
+                'beige': '#f5f5dc',
+                'silver': '#c0c0c0',
+                'gold': '#ffd700',
+                'burgundy': '#800020',
+                'olive': '#808000',
+                'lime': '#32cd32',
+                'coral': '#ff7f50',
+                'sky blue': '#87ceeb',
+                'mint': '#98ff98',
+                'lavender': '#e6e6fa',
+                'peach': '#ffe5b4',
+                'ivory': '#fffff0',
+                'tan': '#d2b48c',
+                'charcoal': '#36454f',
+                'indigo': '#4b0082',
+                'magenta': '#ff00ff',
+                'cyan': '#00ffff',
+                'aqua': '#00ffff',
+                'bronze': '#cd7f32',
+                'copper': '#b87333',
+                'steel': '#b0c4de',
+                'rust': '#b7410e',
+                'forest': '#228b22',
+                'desert': '#edc9af',
+                'ocean': '#4169e1',
+                'sunset': '#fd5e53',
+                'rainbow': 'linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)'
+            };
+            
+            const lowerColor = colorName.toLowerCase().trim();
+            return colorMap[lowerColor] || lowerColor;
+        }
+
+        // Select color function
+        function selectColor(color, element) {
+            const colorOptions = document.querySelectorAll('.color-option');
+            colorOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            element.classList.add('selected');
+            
+            // Update hidden input
+            const selectedColorInput = document.getElementById('selectedColor');
+            if (selectedColorInput) {
+                selectedColorInput.value = color;
+            }
+            
+            // Show selected color in UI
+            console.log('Selected color:', color);
+        }
+
+        // Validate color selection before adding to cart
+        function validateColorSelection(product) {
+            if (product.colors && product.colors.length > 0) {
+                const selectedColor = document.getElementById('selectedColor');
+                if (selectedColor && !selectedColor.value) {
+                    return { valid: false, message: 'Please select a color before adding to cart.' };
+                }
+            }
+            return { valid: true };
+        }
+
         async function loadRelatedProducts(category, excludeProductId) {
             try {
                 const relatedProducts = await getProductsByCategory(category);
@@ -792,18 +879,50 @@
 
         // Handle Add to Cart from product detail page (regular price)
         async function handleProductAddToCart(productId) {
+            // Get the product details
+            const product = await getProductById(productId);
+            if (!product) {
+                showNotification('Product not found.', 'error');
+                return;
+            }
+            
+            // Validate color selection if product has colors
+            const colorValidation = validateColorSelection(product);
+            if (!colorValidation.valid) {
+                showNotification(colorValidation.message, 'error');
+                return;
+            }
+            
             const quantityInput = document.getElementById('productQuantity');
             const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
             
-            await addToCart(productId, quantity, 'product-detail');
+            const selectedColor = document.getElementById('selectedColor')?.value || null;
+            
+            await addToCart(productId, quantity, 'product-detail', selectedColor);
         }
 
         // Handle Add Wholesale Quantity to cart (wholesale price)
         async function handleWholesaleAddToCart(productId) {
+            // Get the product details
+            const product = await getProductById(productId);
+            if (!product) {
+                showNotification('Product not found.', 'error');
+                return;
+            }
+            
+            // Validate color selection if product has colors
+            const colorValidation = validateColorSelection(product);
+            if (!colorValidation.valid) {
+                showNotification(colorValidation.message, 'error');
+                return;
+            }
+            
             const quantityInput = document.getElementById('wholesaleQuantity');
             const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
             
-            await addWholesaleToCart(productId, quantity);
+            const selectedColor = document.getElementById('selectedColor')?.value || null;
+            
+            await addWholesaleToCart(productId, quantity, selectedColor);
         }
 
         function generateStarRating(rating) {

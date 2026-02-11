@@ -6,7 +6,9 @@ const orderSchema = new mongoose.Schema({
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
     quantity: { type: Number, required: true },
     price: { type: Number, required: true }, // Price at time of purchase (sales price if applicable)
-    originalPrice: { type: Number } // Original price before discount (for reference)
+    originalPrice: { type: Number }, // Original price before discount (for reference)
+    color: { type: String }, // Selected color (if applicable)
+    size: { type: String } // Selected size (if applicable)
   }],
   total: { type: Number, required: true },
   subtotal: { type: Number }, // Original subtotal before discounts
