@@ -202,10 +202,11 @@ async function addToCart(productId, quantity = 1, sourcePage = null, selectedCol
         return;
     }
 
-    const existingItem = cart.find(item => item.id === productId);
+    // Find existing item by productId AND color (to allow same product with different colors)
+    const existingItem = cart.find(item => item.id === productId && item.color === selectedColor);
 
     if (existingItem) {
-        console.log('DEBUG: Found existing cart item, updating quantity');
+        console.log('DEBUG: Found existing cart item with same color, updating quantity');
         const newQuantity = existingItem.quantity + quantity;
         // Check if new total exceeds available stock
         const stockCheck = typeof checkInventory === 'function' ?
@@ -221,7 +222,7 @@ async function addToCart(productId, quantity = 1, sourcePage = null, selectedCol
             existingItem.color = selectedColor;
         }
     } else {
-        console.log('DEBUG: Creating new cart item');
+        console.log('DEBUG: Creating new cart item (different product or different color)');
         // Determine if this should be treated as a wholesale purchase based on source page
         // If added from wholesale page, use wholesale attributes; otherwise treat as regular
         const isWholesalePurchase = sourcePage === 'wholesale';
@@ -326,7 +327,8 @@ async function addWholesaleToCart(productId, quantity = null, selectedColor = nu
             return;
         }
 
-        const existingItem = cart.find(item => item.id === productId);
+        // Find existing item by productId AND color (to allow same product with different colors)
+        const existingItem = cart.find(item => item.id === productId && item.color === selectedColor);
 
         if (existingItem) {
             // For wholesale, add the specified quantity
