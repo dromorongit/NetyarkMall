@@ -6,6 +6,7 @@
     <title>Netyark Mall - Product Details</title>
     <meta name="description" content="View detailed product information at Netyark Mall">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="multi-color-quantity.css">
     <link rel="icon" type="image/jpeg" href="Netyark.jfif">
     <link rel="shortcut icon" type="image/jpeg" href="Netyark.jfif">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -314,6 +315,7 @@
     </div>
     <script src="products.js"></script>
     <script src="script.js"></script>
+    <script src="multi-color-quantity.js"></script>
     <script src="auth.js"></script>
     <script>
 
@@ -449,19 +451,26 @@
 
                         ${product.colors && product.colors.length > 0 ? `
                             <div class="product-variants">
-                                <h4>Available Colors</h4>
-                                <div class="color-options" id="colorOptions">
-                                    ${product.colors.map(color =>
-                                        `<span class="color-option ${color.toLowerCase()}" 
-                                              data-color="${color}" 
-                                              title="${color}"
-                                              onclick="selectColor('${color}', this)"
-                                              style="background-color: ${getColorHex(color)};">
-                                            <span class="color-name">${color}</span>
-                                        </span>`
-                                    ).join('')}
+                                <h4>Select Quantities for Each Color</h4>
+                                <div class="multi-color-quantity" id="multiColorQuantity">
+                                    ${product.colors.map(color => `
+                                        <div class="color-quantity-row" data-color="${color}">
+                                            <div class="color-info">
+                                                <span class="color-swatch" style="background-color: ${getColorHex(color)};"></span>
+                                                <span class="color-name">${color}</span>
+                                            </div>
+                                            <div class="color-quantity-controls">
+                                                <button class="qty-btn" onclick="changeColorQuantity('${color}', -1)" ${stockCount <= 0 ? 'disabled' : ''}>-</button>
+                                                <input type="number" class="qty-input" id="qty-${color.replace(/\s+/g, '-')}" value="0" min="0" max="${stockCount}" readonly>
+                                                <button class="qty-btn" onclick="changeColorQuantity('${color}', 1)" ${stockCount <= 0 ? 'disabled' : ''}>+</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                                <input type="hidden" id="selectedColor" value="">
+                                <input type="hidden" id="selectedColorQuantities" value="{}">
+                                <button class="multi-color-add-btn" id="multiAddToCartBtn" onclick="handleMultiColorAddToCart('${productId}')" disabled>
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
                             </div>
                         ` : ''}
 
@@ -809,6 +818,69 @@
             console.log('Selected color:', color);
         }
 
+        // Multi-color quantity selection functions
+        function changeColorQuantity(color, delta) {
+            const colorKey = color.replace(/\s+/g, '-');
+            const qtyInput = document.getElementById(`qty-${colorKey}`);
+            if (!qtyInput) return;
+            
+            const stockCount = parseInt(qtyInput.max) || 999;
+            const currentValue = parseInt(qtyInput.value) || 0;
+            const newValue = Math.max(0, Math.min(currentValue + delta, stockCount));
+            
+            qtyInput.value = newValue;
+            updateColorQuantities();
+            updateAddToCartButton();
+        }
+        
+        function updateColorQuantities() {
+            const quantities = {};
+            const colorRows = document.querySelectorAll('.color-quantity-row');
+            colorRows.forEach(row => {
+                const color = row.dataset.color;
+                const colorKey = color.replace(/\s+/g, '-');
+                const qtyInput = document.getElementById(`qty-${colorKey}`);
+                if (qtyInput && parseInt(qtyInput.value) > 0) {
+                    quantities[color] = parseInt(qtyInput.value);
+                }
+            });
+            
+            document.getElementById('selectedColorQuantities').value = JSON.stringify(quantities);
+        }
+        
+        function updateAddToCartButton() {
+            const quantities = JSON.parse(document.getElementById('selectedColorQuantities').value || '{}');
+            const totalQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
+            const btn = document.getElementById('multiAddToCartBtn');
+            if (btn) {
+                if (totalQty > 0) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-shopping-cart"></i> Add ${totalQty} to Cart`;
+                } else {
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="fas fa-shopping-cart"></i> Add to Cart`;
+                }
+            }
+        }
+        
+        // Handle multi-color add to cart
+        async function handleMultiColorAddToCart(productId) {
+            const quantities = JSON.parse(document.getElementById('selectedColorQuantities').value || '{}');
+            const totalQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
+            
+            if (totalQty === 0) {
+                showNotification('Please select at least one color with quantity', 'error');
+                return;
+            }
+            
+            // Add each color quantity to cart
+            for (const [color, quantity] of Object.entries(quantities)) {
+                await addToCart(productId, quantity, 'product-detail', color);
+            }
+            
+            showNotification(`Added ${totalQty} items to cart!`, 'success');
+        }
+        
         // Validate color selection before adding to cart
         function validateColorSelection(product) {
             if (product.colors && product.colors.length > 0) {
