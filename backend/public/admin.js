@@ -736,40 +736,60 @@ function renderOrders(orders) {
 // Initialize order search
 function initOrderSearch() {
   const searchInput = document.getElementById('order-search');
+  const statusFilter = document.getElementById('order-status-filter');
+  
   if (!searchInput) return;
   
-  searchInput.addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase().trim();
+  // Function to filter and render orders
+  function filterAndRenderOrders() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const statusValue = statusFilter ? statusFilter.value : 'all';
     
-    if (searchTerm === '') {
-      renderOrders(allOrders);
-      return;
+    let filteredOrders = allOrders;
+    
+    // Apply status filter
+    if (statusValue !== 'all') {
+      filteredOrders = filteredOrders.filter(order => {
+        const orderStatus = (order.status || 'pending').toLowerCase();
+        return orderStatus === statusValue;
+      });
     }
     
-    const filteredOrders = allOrders.filter(order => {
-      // Search by customer name (firstName + lastName or user name)
-      let customerName = '';
-      if (order.user && order.user.name) {
-        customerName = order.user.name.toLowerCase();
-      } else if (order.customer) {
-        customerName = `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.toLowerCase();
-      }
-      
-      // Search by email
-      const customerEmail = (order.customer && order.customer.email) ? order.customer.email.toLowerCase() : '';
-      
-      // Search by phone
-      const customerPhone = (order.customer && order.customer.phone) ? order.customer.phone.toLowerCase() : '';
-      
-      return (
-        customerName.includes(searchTerm) ||
-        customerEmail.includes(searchTerm) ||
-        customerPhone.includes(searchTerm)
-      );
-    });
+    // Apply search filter
+    if (searchTerm !== '') {
+      filteredOrders = filteredOrders.filter(order => {
+        // Search by customer name (firstName + lastName or user name)
+        let customerName = '';
+        if (order.user && order.user.name) {
+          customerName = order.user.name.toLowerCase();
+        } else if (order.customer) {
+          customerName = `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.toLowerCase();
+        }
+        
+        // Search by email
+        const customerEmail = (order.customer && order.customer.email) ? order.customer.email.toLowerCase() : '';
+        
+        // Search by phone
+        const customerPhone = (order.customer && order.customer.phone) ? order.customer.phone.toLowerCase() : '';
+        
+        return (
+          customerName.includes(searchTerm) ||
+          customerEmail.includes(searchTerm) ||
+          customerPhone.includes(searchTerm)
+        );
+      });
+    }
     
     renderOrders(filteredOrders);
-  });
+  }
+  
+  // Search input event
+  searchInput.addEventListener('input', filterAndRenderOrders);
+  
+  // Status filter event
+  if (statusFilter) {
+    statusFilter.addEventListener('change', filterAndRenderOrders);
+  }
 }
 
 // Update order badge with count of pending/new orders
