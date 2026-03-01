@@ -10,6 +10,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+console.log("Cloudinary Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
+
 // Function to upload file to Cloudinary
 const uploadToCloudinary = (file, folder = 'netyarkmall/products') => {
   return new Promise((resolve, reject) => {
