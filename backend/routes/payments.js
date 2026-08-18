@@ -4,6 +4,15 @@ const Paystack = require('paystack');
 const Order = require('../models/Order');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { fulfillOrder } = require('../utils/orderFulfillment');
+
+function safeParse(str) {
+    try {
+        return JSON.parse(str);
+    } catch (e) {
+        return null;
+    }
+}
 
 // Initialize Paystack with secret key from environment variables
 const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
@@ -92,6 +101,7 @@ router.post('/initialize', optionalAuth, async (req, res) => {
             metadata: {
                 orderId: orderId.toString(),
                 userId: req.user ? req.user._id.toString() : 'guest',
+                orderData: req.body.orderData || null,
                 ...metadata
             },
             callback_url: `${process.env.FRONTEND_URL}/payment-callback`
@@ -99,7 +109,7 @@ router.post('/initialize', optionalAuth, async (req, res) => {
 
         if (response.status) {
             // Update order with payment reference
-            order.paymentReference = response.data.reference;
+            order.paystackReference = response.data.reference;
             order.paymentStatus = 'pending';
             await order.save();
 
@@ -151,97 +161,69 @@ router.post('/verify', optionalAuth, async (req, res) => {
         if (response.status && response.data.status === 'success') {
             // Payment was successful on Paystack side
             console.log('Paystack payment successful, amount:', response.data.amount / 100);
-            
-            // Check if this is a new order creation after payment
-            if (orderData && orderData.products && orderData.total) {
-                // Create the order only after payment is verified
-                let userId = null;
-                
-                // Check if user is authenticated
+
+            // Idempotency: the webhook may have already created the order for this reference.
+            const existingOrder = await Order.findOne({ paystackReference: reference });
+            if (existingOrder) {
+                console.log('Verify: order already exists for reference (likely created by webhook):', existingOrder._id);
+                return res.json({
+                    success: true,
+                    message: 'Payment verified successfully',
+                    data: {
+                        orderId: existingOrder._id,
+                        paymentStatus: existingOrder.paymentStatus,
+                        amount: response.data.amount / 100
+                    }
+                });
+            }
+
+            // No order yet — create it (and decrement stock) via the shared, idempotent fulfillment path.
+            if (orderData && orderData.products && typeof orderData.total !== 'undefined') {
+                // Attach the authenticated user to the order data if present
                 if (req.user) {
-                    userId = req.user._id;
+                    orderData.user = req.user._id;
                 }
 
-                console.log('Creating new order with data:', {
+                console.log('Verify: creating new order with data:', {
                     products: orderData.products.length,
                     total: orderData.total,
                     customer: orderData.customer
                 });
 
-                const order = new Order({
-                    user: userId,
-                    products: orderData.products,
-                    total: orderData.total,
-                    subtotal: orderData.subtotal || orderData.total, // Original subtotal before discounts/fees
-                    paystackFee: orderData.paystackFee || 0, // Paystack processing fee
-                    customer: orderData.customer,
-                    shipping: orderData.shipping,
-                    paymentMethod: orderData.paymentMethod || 'card',
-                    status: 'processing',
-                    paymentStatus: 'paid',
-                    paystackReference: reference,
-                    paidAt: new Date()
-                });
-
-                await order.save();
-
-                console.log('Order created successfully:', order._id);
-
-                res.json({
-                    success: true,
-                    message: 'Payment verified and order created successfully',
-                    data: {
-                        orderId: order._id,
-                        paymentStatus: order.paymentStatus,
-                        amount: response.data.amount / 100
+                try {
+                    const result = await fulfillOrder(orderData, reference);
+                    if (result.invalid) {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'Payment verified on Paystack, but order data was invalid. Please contact support with your payment reference.',
+                            data: { paymentVerified: true, reference, orderId: null }
+                        });
                     }
-                });
-            } else {
-                // Original flow: Find existing order by payment reference and update it
-                console.log('Looking for existing order with paystackReference:', reference);
-                const order = await Order.findOne({ paystackReference: reference });
-
-                if (!order) {
-                    console.log('Order not found for reference:', reference);
-                    
-                    // Even though order not found, payment was successful on Paystack
-                    // Return success but with a warning
-                    return res.status(200).json({
+                    console.log('Verify: order created successfully:', result.order._id);
+                    return res.json({
                         success: true,
-                        message: 'Payment verified successfully on Paystack, but order record not found. Please contact support with your payment reference.',
+                        message: 'Payment verified and order created successfully',
                         data: {
-                            paymentVerified: true,
-                            reference: reference,
-                            amount: response.data.amount / 100,
-                            orderId: null
+                            orderId: result.order._id,
+                            paymentStatus: result.order.paymentStatus,
+                            amount: response.data.amount / 100
                         }
                     });
+                } catch (err) {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Payment verified on Paystack, but order creation failed. Please contact support with your payment reference.',
+                        data: { paymentVerified: true, reference, orderId: null }
+                    });
                 }
-
-                // Update order payment status
-                order.paymentStatus = 'paid';
-                order.status = 'processing';
-                order.paymentMethod = response.data.channel || 'card';
-                order.paystackReference = reference;
-                order.paidAt = new Date();
-                
-                // Store authorization code for future payments if needed
-                if (response.data.authorization) {
-                    order.authorizationCode = response.data.authorization.authorization_code;
-                }
-
-                await order.save();
-
-                console.log('Order updated successfully:', order._id);
-
-                res.json({
-                    success: true,
-                    message: 'Payment verified successfully',
-                    data: {
-                        orderId: order._id,
-                        paymentStatus: order.paymentStatus,
-                        amount: response.data.amount / 100
-                    }
+            } else {
+                // Payment succeeded on Paystack but we have neither a pre-existing order
+                // nor valid order data to create one. Return an honest error, not a false success.
+                console.log('Verify: payment successful but no order data and no existing order for reference:', reference);
+                return res.status(400).json({
+                    success: false,
+                    message: 'Payment verified on Paystack, but no order record could be created. Please contact support with your payment reference.',
+                    data: { paymentVerified: true, reference, orderId: null }
                 });
             }
         } else {
@@ -284,26 +266,31 @@ router.post('/webhook', async (req, res) => {
         const event = req.body;
 
         switch (event.event) {
-            case 'charge.success':
+            case 'charge.success': {
                 const reference = event.data.reference;
-                const order = await Order.findOne({ paystackReference: reference });
+                // orderData may be carried via Paystack metadata (inline/init flow)
+                const meta = event.data.metadata || {};
+                const orderData = meta.orderData
+                    ? (typeof meta.orderData === 'string' ? safeParse(meta.orderData) : meta.orderData)
+                    : null;
 
-                if (order) {
-                    order.paymentStatus = 'paid';
-                    order.status = 'processing';
-                    order.paymentMethod = event.data.channel || 'card';
-                    order.paidAt = new Date();
-                    
-                    if (event.data.authorization) {
-                        order.authorizationCode = event.data.authorization.authorization_code;
+                try {
+                    const result = await fulfillOrder(orderData, reference);
+                    if (result.invalid) {
+                        // Logged as CRITICAL inside fulfillOrder; return 200 so Paystack doesn't retry an unrecoverable payload
+                        break;
                     }
-
-                    await order.save();
-                    console.log(`Payment webhook: Order ${order._id} marked as paid`);
-                } else {
-                    console.log(`Payment webhook: No order found for reference: ${reference}`);
+                    if (result.created) {
+                        console.log(`Payment webhook: Order ${result.order._id} created for reference ${reference}`);
+                    } else {
+                        console.log(`Payment webhook: Order already exists for reference ${reference}, no action taken`);
+                    }
+                } catch (err) {
+                    // fulfillment threw after a DB failure; still acknowledge Paystack to avoid duplicate retries
+                    console.error('Payment webhook: fulfillment error (logged CRITICAL above):', err.message);
                 }
                 break;
+            }
 
             case 'charge.failure':
                 const failedReference = event.data.reference;
@@ -365,7 +352,7 @@ router.get('/:orderId', optionalAuth, async (req, res) => {
             data: {
                 orderId: order._id,
                 paymentStatus: order.paymentStatus,
-                paymentReference: order.paymentReference,
+                paystackReference: order.paystackReference,
                 amount: order.totalAmount,
                 paidAt: order.paidAt
             }

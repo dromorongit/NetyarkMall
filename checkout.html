@@ -649,7 +649,8 @@
                             customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
                             customer_phone: customerInfo.phone,
                             order_total: amount,
-                            original_subtotal: orderData.subtotal
+                            original_subtotal: orderData.subtotal,
+                            orderData: orderData
                         },
                         callback: function(response) {
                             console.log('Paystack callback:', response);
