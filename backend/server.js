@@ -23,7 +23,13 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'backend/uploads')));
 
-mongoose.connect('mongodb://mongo:xRWSeCCyiBjRyKUUKjzQrBGuQAjdzuuL@mongodb.railway.internal:27017').then(() => console.log('MongoDB connected'))
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('FATAL: MONGODB_URI environment variable is not defined. Set it in backend/.env');
+  process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI).then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
 const authRoutes = require('./routes/auth');
