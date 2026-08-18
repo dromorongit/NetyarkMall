@@ -191,7 +191,7 @@ router.post('/verify', optionalAuth, async (req, res) => {
                 });
 
                 try {
-                    const result = await fulfillOrder(orderData, reference);
+                    const result = await fulfillOrder(orderData, reference, response.data.channel);
                     if (result.invalid) {
                         return res.status(400).json({
                             success: false,
@@ -275,7 +275,7 @@ router.post('/webhook', async (req, res) => {
                     : null;
 
                 try {
-                    const result = await fulfillOrder(orderData, reference);
+                    const result = await fulfillOrder(orderData, reference, event.data.channel);
                     if (result.invalid) {
                         // Logged as CRITICAL inside fulfillOrder; return 200 so Paystack doesn't retry an unrecoverable payload
                         break;

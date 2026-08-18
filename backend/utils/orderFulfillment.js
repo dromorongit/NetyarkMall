@@ -65,7 +65,7 @@ async function decrementStockForOrder(order) {
  * - Otherwise creates the order and decrements stock exactly once.
  * Returns { order, created: boolean }.
  */
-async function fulfillOrder(orderData, reference, eventMeta = {}) {
+async function fulfillOrder(orderData, reference, paymentMethodOverride = null) {
     const existing = await Order.findOne({ paystackReference: reference });
     if (existing) {
         console.log(`fulfillOrder: order already exists for reference ${reference}, skipping creation`);
@@ -76,6 +76,12 @@ async function fulfillOrder(orderData, reference, eventMeta = {}) {
     if (!order) {
         console.error('CRITICAL: order creation skipped — invalid/missing orderData', { reference, orderData });
         return { order: null, created: false, invalid: true };
+    }
+
+    // Use Paystack's confirmed channel when provided (webhook path),
+    // overriding the pre-payment guess that may have come from orderData.
+    if (paymentMethodOverride) {
+        order.paymentMethod = paymentMethodOverride;
     }
 
     try {
@@ -89,10 +95,23 @@ async function fulfillOrder(orderData, reference, eventMeta = {}) {
         throw err;
     }
 
-    await decrementStockForOrder(order);
+    // Stock decrement is isolated: if it fails AFTER a successful order.save(),
+    // the order is still valid and must be reported as created. Log a distinct
+    // CRITICAL for manual stock correction but do NOT re-throw.
+    let stockDecrementFailed = false;
+    try {
+        await decrementStockForOrder(order);
+    } catch (err) {
+        stockDecrementFailed = true;
+        console.error('CRITICAL: order created but stock decrement failed — manual stock correction required', {
+            orderId: order._id,
+            reference,
+            error: err.message
+        });
+    }
 
-    console.log(`fulfillOrder: order ${order._id} created and stock decremented for reference ${reference}`);
-    return { order, created: true };
+    console.log(`fulfillOrder: order ${order._id} created for reference ${reference}${stockDecrementFailed ? ' (stock decrement FAILED)' : ' and stock decremented'}`);
+    return { order, created: true, stockDecrementFailed };
 }
 
 module.exports = { buildOrderFromOrderData, decrementStockForOrder, fulfillOrder };
