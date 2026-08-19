@@ -3307,7 +3307,7 @@ function startResponsePolling(conversationId) {
         } catch (error) {
             console.error('Error polling for responses:', error);
         }
-    }, 10000); // Poll every 10 seconds
+    }, 20000); // Poll every 20 seconds
 }
 
 // Function to stop all polling

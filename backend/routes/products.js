@@ -23,10 +23,23 @@ const upload = multer({ storage: storage });
 
 const router = express.Router();
 
+// Read ?page= and ?limit= from the request for bounded responses.
+// Default (no limit param) returns the full list to preserve existing storefront behavior;
+// callers may opt in to pagination via ?limit= and ?page=.
+function paginateFind(req, query) {
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limitParam = parseInt(req.query.limit, 10);
+  const limit = (!limitParam || isNaN(limitParam)) ? 0 : Math.min(Math.max(limitParam, 1), 200);
+  if (limit > 0) {
+    query = query.skip((page - 1) * limit).limit(limit);
+  }
+  return query;
+}
+
 // Get all products (public)
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await paginateFind(req, Product.find());
     console.log(`[PRODUCTS] GET / - Found ${products.length} products in database`);
     console.log('Products:', products.map(p => ({ id: p._id, name: p.name, category: p.category })));
     res.json(products);
@@ -39,7 +52,7 @@ router.get('/', async (req, res) => {
 // Get new arrivals (public)
 router.get('/new-arrivals', async (req, res) => {
   try {
-    const products = await Product.find({ isNewArrival: true });
+    const products = await paginateFind(req, Product.find({ isNewArrival: true }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -49,7 +62,7 @@ router.get('/new-arrivals', async (req, res) => {
 // Get fast-selling items (public)
 router.get('/fast-selling', async (req, res) => {
   try {
-    const products = await Product.find({ isFastSelling: true });
+    const products = await paginateFind(req, Product.find({ isFastSelling: true }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -59,7 +72,7 @@ router.get('/fast-selling', async (req, res) => {
 // Get shop by category items (public)
 router.get('/shop-by-category', async (req, res) => {
   try {
-    const products = await Product.find({ isShopByCategory: true });
+    const products = await paginateFind(req, Product.find({ isShopByCategory: true }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -69,7 +82,7 @@ router.get('/shop-by-category', async (req, res) => {
 // Get in-stock products (public)
 router.get('/in-stock', async (req, res) => {
   try {
-    const products = await Product.find({ stockStatus: 'in-stock' });
+    const products = await paginateFind(req, Product.find({ stockStatus: 'in-stock' }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -79,7 +92,7 @@ router.get('/in-stock', async (req, res) => {
 // Get out-of-stock products (public)
 router.get('/out-of-stock', async (req, res) => {
   try {
-    const products = await Product.find({ stockStatus: 'out-of-stock' });
+    const products = await paginateFind(req, Product.find({ stockStatus: 'out-of-stock' }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -89,7 +102,7 @@ router.get('/out-of-stock', async (req, res) => {
 // Get wholesale products (public)
 router.get('/wholesale', async (req, res) => {
   try {
-    const products = await Product.find({ isWholesale: true });
+    const products = await paginateFind(req, Product.find({ isWholesale: true }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -99,7 +112,7 @@ router.get('/wholesale', async (req, res) => {
 // Get daily deals products (public)
 router.get('/daily-deals', async (req, res) => {
   try {
-    const products = await Product.find({ isDailyDeal: true });
+    const products = await paginateFind(req, Product.find({ isDailyDeal: true }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -125,9 +138,9 @@ router.get('/category/:category', async (req, res) => {
   try {
     const category = req.params.category;
     // Use case-insensitive partial match to find categories
-    const products = await Product.find({ 
+    const products = await paginateFind(req, Product.find({ 
       category: { $regex: category, $options: 'i' }
-    });
+    }));
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -167,7 +180,7 @@ router.post('/', auth, adminAuth, upload.fields([
         // Delete the local file after uploading to Cloudinary
         fs.unlinkSync(req.files.image[0].path);
       } catch (error) {
-        console.error('Cloudinary upload failed, using local file:', error.message);
+        console.error('CRITICAL: Cloudinary upload failed after retries, falling back to local Railway disk storage (counts as egress):', { filename: req.files.image[0].filename, error: error.message });
         productData.image = `/uploads/${req.files.image[0].filename}`;
       }
     }
@@ -179,13 +192,13 @@ router.post('/', auth, adminAuth, upload.fields([
           const mediaUrl = await uploadToCloudinary(file, 'netyarkmall/products/additional');
           console.log('Cloudinary additional media upload successful:', mediaUrl);
           return mediaUrl;
-        } catch (error) {
-          console.error('Cloudinary additional media upload failed:', error.message);
-          return `/uploads/${file.filename}`;
-        }
-      });
-      const mediaUrls = await Promise.all(uploadPromises);
-      productData.additionalMedia = mediaUrls;
+          } catch (error) {
+            console.error('CRITICAL: Cloudinary additional media upload failed after retries, falling back to local Railway disk storage (counts as egress):', { filename: file.filename, error: error.message });
+            return `/uploads/${file.filename}`;
+          }
+        });
+        const mediaUrls = await Promise.all(uploadPromises);
+        productData.additionalMedia = mediaUrls;
       
       // Delete local additional media files
       req.files.additionalMedia.forEach(file => {
@@ -260,7 +273,7 @@ router.put('/:id', auth, adminAuth, upload.fields([
         // Delete the local file after uploading to Cloudinary
         fs.unlinkSync(req.files.image[0].path);
       } catch (error) {
-        console.error('Cloudinary upload failed, using local file:', error.message);
+        console.error('CRITICAL: Cloudinary upload failed after retries, falling back to local Railway disk storage (counts as egress):', { filename: req.files.image[0].filename, error: error.message });
         productData.image = `/uploads/${req.files.image[0].filename}`;
       }
     } else {
@@ -274,14 +287,14 @@ router.put('/:id', auth, adminAuth, upload.fields([
           const mediaUrl = await uploadToCloudinary(file, 'netyarkmall/products/additional');
           console.log('Cloudinary additional media upload successful:', mediaUrl);
           return mediaUrl;
-        } catch (error) {
-          console.error('Cloudinary additional media upload failed:', error.message);
-          return `/uploads/${file.filename}`;
-        }
-      });
-      const mediaUrls = await Promise.all(uploadPromises);
-      
-      // Check if we should replace or append additional media
+          } catch (error) {
+            console.error('CRITICAL: Cloudinary additional media upload failed after retries, falling back to local Railway disk storage (counts as egress):', { filename: file.filename, error: error.message });
+            return `/uploads/${file.filename}`;
+          }
+        });
+        const mediaUrls = await Promise.all(uploadPromises);
+        
+        // Check if we should replace or append additional media
       const replaceAdditionalMedia = productData.replaceAdditionalMedia === 'true' || productData.replaceAdditionalMedia === true;
       
       if (replaceAdditionalMedia) {

@@ -628,9 +628,10 @@ async function loadOrders() {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     }
 
-    const orders = await res.json();
-    console.log('Orders received:', orders);
-    
+    const data = await res.json();
+    const orders = Array.isArray(data) ? data : (data.orders || []);
+    console.log('Orders received:', orders.length, 'of', data.totalCount);
+
     // Store all orders for filtering
     allOrders = orders;
 
@@ -793,9 +794,26 @@ function initOrderSearch() {
 }
 
 // Update order badge with count of pending/new orders
-function updateOrderBadge(orders) {
+function updateOrderBadge(orders, delta = false) {
   const badge = document.getElementById('order-badge');
   if (!badge) return;
+
+  // Delta mode: orders is a lightweight list of orders created since the last check.
+  // Every item is genuinely new, so increment the stored count instead of recomputing.
+  if (delta) {
+    const prevCount = parseInt(localStorage.getItem('lastOrderCount') || '0', 10);
+    const newOrderCount = prevCount + (orders ? orders.length : 0);
+    localStorage.setItem('lastOrderCount', newOrderCount.toString());
+    badge.setAttribute('data-count', newOrderCount);
+    badge.textContent = newOrderCount > 99 ? '99+' : newOrderCount;
+    if (newOrderCount > 0) {
+      badge.style.display = 'flex';
+      badge.style.animation = 'pulse 2s infinite';
+    } else {
+      badge.style.display = 'none';
+    }
+    return;
+  }
   
   // Get the last viewed timestamp - only count orders created after this time as "new"
   const lastViewedOrders = localStorage.getItem('lastViewedOrders');
@@ -853,20 +871,27 @@ function initOrderNotificationPolling() {
   // Check for new orders immediately
   checkNewOrders();
   
-  // Poll every 30 seconds for new orders
+  // Poll every 60 seconds for new orders (lightweight delta since last check)
   setInterval(() => {
     checkNewOrders();
-  }, 30000);
+  }, 60000);
 }
 
 // Check for new orders and update badge
 async function checkNewOrders() {
   try {
-    const res = await authFetch(`${API_BASE}/orders`);
+    // Only fetch orders created since the last check (lightweight delta) instead of the full list
+    const lastOrderCheck = localStorage.getItem('lastOrderCheck');
+    const query = lastOrderCheck ? `?since=${encodeURIComponent(lastOrderCheck)}` : '';
+    const res = await authFetch(`${API_BASE}/orders${query}`);
     if (!res) return;
 
-    const orders = await res.json();
-    updateOrderBadge(orders);
+    const data = await res.json();
+    const orders = Array.isArray(data) ? data : (data.orders || []);
+    updateOrderBadge(orders, true);
+
+    // Advance the delta cursor so the next poll only returns orders newer than now
+    localStorage.setItem('lastOrderCheck', new Date().toISOString());
   } catch (err) {
     console.error('Error checking new orders:', err);
   }

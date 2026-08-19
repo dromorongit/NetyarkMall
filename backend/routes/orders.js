@@ -26,13 +26,39 @@ const optionalAuth = async (req, res, next) => {
     }
 };
 
-// Get all orders (admin only)
+// Get all orders (admin only) — paginated; supports optional `since` timestamp for lightweight delta polling.
+// Default (no limit param) returns the full list to preserve the admin order-management view; callers may opt in via ?limit=&page=.
 router.get('/', auth, adminAuth, async (req, res) => {
   try {
     console.log('Fetching orders for admin:', req.user._id, req.user.role);
-    const orders = await Order.find().populate('user').populate('products.product');
-    console.log('Orders found:', orders.length);
-    res.json(orders);
+
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limitParam = parseInt(req.query.limit, 10);
+    const limit = (!limitParam || isNaN(limitParam)) ? 0 : Math.min(Math.max(limitParam, 1), 100);
+    const since = req.query.since ? new Date(req.query.since) : null;
+
+    const filter = {};
+    if (since && !isNaN(since.getTime())) {
+      filter.createdAt = { $gt: since };
+    }
+
+    const totalCount = await Order.countDocuments(filter);
+    let query = Order.find(filter).sort({ createdAt: -1 });
+    if (limit > 0) {
+      query = query.skip((page - 1) * limit).limit(limit);
+    }
+    const orders = await query
+      .populate('user')
+      .populate('products.product');
+
+    console.log('Orders found:', orders.length, 'of', totalCount);
+    res.json({
+      orders,
+      totalCount,
+      totalPages: limit ? Math.ceil(totalCount / limit) : 1,
+      currentPage: page,
+      limit
+    });
   } catch (err) {
     console.error('Error fetching orders:', err);
     res.status(500).json({ message: err.message });

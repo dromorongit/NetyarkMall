@@ -53,13 +53,13 @@ async function initializeProfile() {
 
 // Start polling for order updates
 function startOrderPolling() {
-    // Refresh orders every 5 seconds when on orders tab
+    // Refresh orders every 30 seconds when on orders tab (sufficient for own-order status changes)
     orderPollingInterval = setInterval(async () => {
         const activeTab = document.querySelector('.profile-tab.active');
         if (activeTab && activeTab.getAttribute('data-tab') === 'orders') {
             await loadUserOrders();
         }
-    }, 5000);
+    }, 30000);
 }
 
 // Stop polling when leaving orders tab

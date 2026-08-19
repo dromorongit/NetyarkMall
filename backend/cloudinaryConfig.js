@@ -12,25 +12,33 @@ cloudinary.config({
 
 console.log("Cloudinary Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
 
-// Function to upload file to Cloudinary
-const uploadToCloudinary = (file, folder = 'netyarkmall/products') => {
+// Function to upload file to Cloudinary (retries once before rejecting)
+const uploadToCloudinary = (file, folder = 'netyarkmall/products', maxAttempts = 2) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(file.path, 
-      { 
-        folder: folder,
-        resource_type: 'auto',
-        overwrite: true 
-      },
-      (error, result) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          reject(error);
-        } else {
+    let attempt = 0;
+    const tryUpload = () => {
+      attempt++;
+      cloudinary.uploader.upload(file.path,
+        {
+          folder: folder,
+          resource_type: 'auto',
+          overwrite: true
+        },
+        (error, result) => {
+          if (error) {
+            console.error(`Cloudinary upload attempt ${attempt} failed:`, error.message || error);
+            if (attempt < maxAttempts) {
+              return tryUpload();
+            }
+            reject(error);
+            return;
+          }
           console.log('Cloudinary upload success:', result.secure_url);
           resolve(result.secure_url);
         }
-      }
-    );
+      );
+    };
+    tryUpload();
   });
 };
 
